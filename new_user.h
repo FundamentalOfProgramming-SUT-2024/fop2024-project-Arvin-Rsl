@@ -35,7 +35,7 @@ int already_a_username(const char* username){
         return 0;
     }
 
-    char saved_username[1000];
+    char saved_username[MAX_SIZE];
     // loop over all usernames
     while (fscanf(users_fptr, "%s\n", saved_username) == 1){
         // if the username is already a saved username
@@ -268,7 +268,7 @@ void create_user(){
             break;
         } 
         else{
-            mvprintw(LINES / 2 + 1, COLS / 2 - 15, "Invalid email format! Try again:");
+            mvprintw(LINES / 2 + 1, COLS / 2 - 15, "Invalid email format! Try again");
             refresh();
             getch();
         }
@@ -311,7 +311,12 @@ void create_user(){
                 valid_pass = 1;
                 break;
             } else {
-                mvprintw(LINES / 2 + 3, COLS / 2 - 20, "Invalid!\nYour password must satisfy these conditions:\n- Have at least 7 characters\n- Include at least one lowercase English letter\n- Include at least one uppercase English letter\n- Include at least one number");
+                mvprintw(LINES / 2 + 3, COLS / 2 - 20, "Invalid Password!");
+                mvprintw(LINES / 2 + 5, COLS / 2 - 20, "Your password must satisfy these conditions:");
+                mvprintw(LINES / 2 + 6, COLS / 2 - 20, "- Have at least 7 characters");
+                mvprintw(LINES / 2 + 7, COLS / 2 - 20, "- Include at least one lowercase English letter");
+                mvprintw(LINES / 2 + 8, COLS / 2 - 20, "- Include at least one uppercase English letter");
+                mvprintw(LINES / 2 + 9, COLS / 2 - 20, "- Include at least one number");
                 refresh();
                 getch();
             }
@@ -321,13 +326,13 @@ void create_user(){
     if (valid_user && valid_pass && valid_email) {
         clear();
         mvprintw(LINES / 2, COLS / 2 - 15, "New user successfully created!");
+        mvprintw(LINES / 2 + 2, COLS / 2 - 15, "Press any key to proceed");
         append_username(username);
         make_user_directory(username);
         create_user_data_file(username, email, password);
         refresh();
         getch();
     }
-
     endwin();
 }
 // checked :)
