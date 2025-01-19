@@ -65,13 +65,18 @@ int can_corridor_pass();
 int number_of_rooms();
 int room_valid();
 position closest_door();
+room closest_room_except_previous();
+int find_min_y();
+void sort_rooms();
 
 // function to add the doors and windows to room 
-void add_door_and_window(room* Room){
+void add_door_and_window(room* Room , int n_rooms){
     srand(time(NULL));
-    int n_doors_max = 2;
-    int n_doors_min = 1;
-    int n_doors = rand() % ((n_doors_max - n_doors_min)+1) + n_doors_min;
+    // int n_doors_max = 3;
+    // int n_doors_min = 2;
+    // int n_doors = rand() % ((n_doors_max - n_doors_min)+1) + n_doors_min;
+    int n_doors = 2;
+    if (Room->room_number == 1 || Room->room_number == n_rooms){ n_doors = 1;}
     Room->number_of_doors = n_doors;
     int n_windows_max = 2;
     int n_windows_min = 0;
@@ -81,6 +86,42 @@ void add_door_and_window(room* Room){
     int x_south = Room->corner.x + Room->length - 1;
     int y_west = Room->corner.y;
     int y_east = Room->corner.y + Room->width - 1;
+
+    // adding (x,y) values for windows
+    for (int i = 0 ; i < n_windows ; i++){
+        int random_wall = rand() % 4;   // 0 : northern wall
+                                        // 1 : southern wall
+                                        // 2 : western wall
+                                        // 3 : eastern wall
+        if(random_wall == 0){
+            int y_max = y_east - 1;
+            int y_min = y_west + 1;
+            int y = rand() % ((y_max - y_min)+1) + y_min;
+            Room->windows_x[i] = x_north;
+            Room->windows_y[i] = y;
+        }
+        else if (random_wall == 1){
+            int y_max = y_east - 1;
+            int y_min = y_west + 1;
+            int y = rand() % ((y_max - y_min)+1) + y_min;
+            Room->windows_x[i] = x_south;
+            Room->windows_y[i] = y;
+        }        
+        else if (random_wall == 2){
+            int x_max = x_south - 1;
+            int x_min = x_north + 1;
+            int x = rand() % ((x_max - x_min)+1) + x_min;
+            Room->windows_x[i] = x;
+            Room->windows_y[i] = y_west;
+        }        
+        else if (random_wall == 3){
+            int x_max = x_south - 1;
+            int x_min = x_north + 1;
+            int x = rand() % ((x_max - x_min)+1) + x_min;
+            Room->windows_x[i] = x;
+            Room->windows_y[i] = y_east;
+        }
+    }
 
     // adding (x,y) values for doors
     for (int i = 0 ; i < n_doors ; i++){
@@ -117,41 +158,7 @@ void add_door_and_window(room* Room){
             Room->doors_y[i] = y_east;
         }
     }
-    // adding (x,y) values for windows
-    for (int i = 0 ; i < n_windows ; i++){
-        int random_wall = rand() % 4;   // 0 : northern wall
-                                        // 1 : southern wall
-                                        // 2 : western wall
-                                        // 3 : eastern wall
-        if(random_wall == 0){
-            int y_max = y_east - 1;
-            int y_min = y_west + 1;
-            int y = rand() % ((y_max - y_min)+1) + y_min;
-            Room->windows_x[i] = x_north;
-            Room->windows_y[i] = y;
-        }
-        else if (random_wall == 1){
-            int y_max = y_east - 1;
-            int y_min = y_west + 1;
-            int y = rand() % ((y_max - y_min)+1) + y_min;
-            Room->windows_x[i] = x_south;
-            Room->windows_y[i] = y;
-        }        
-        else if (random_wall == 2){
-            int x_max = x_south - 1;
-            int x_min = x_north + 1;
-            int x = rand() % ((x_max - x_min)+1) + x_min;
-            Room->windows_x[i] = x;
-            Room->windows_y[i] = y_west;
-        }        
-        else if (random_wall == 3){
-            int x_max = x_south - 1;
-            int x_min = x_north + 1;
-            int x = rand() % ((x_max - x_min)+1) + x_min;
-            Room->windows_x[i] = x;
-            Room->windows_y[i] = y_east;
-        }
-    }
+    
 }
 // checked
 
@@ -247,16 +254,16 @@ void make_corridor(position door1 ,
     if(door1.x == room1.corner.x) dir1 = 0;
     else if(door1.x == room1.corner.x + room1.length - 1) dir1 = 1;
     else if(door1.y == room1.corner.y) dir1 = 3;
-    else dir1 = 2;
+    else if(door1.y == room1.corner.y + room1.width - 1) dir1 = 2;
     if(door2.x == room2.corner.x) dir2 = 0;
     else if(door2.x == room2.corner.x + room2.length - 1) dir2 = 1;
     else if(door2.y == room2.corner.y) dir2 = 3;
-    else dir2 = 2;
+    else if(door2.y == room2.corner.y + room2.width - 1) dir2 = 2;
 
     int x_moves[8] = {-1 , +1 , 0 , 0 , -1 , -1 , +1 , +1}; // up , down , right , left , up-right , up-left , down-right , down-left
     int y_moves[8] = {0 , 0 , +1 , -1 , +1 , -1 , +1 , -1};
 
-    position current;
+    position current = {0,0};
 
     int corr_length = 0;
     //// 1
@@ -272,17 +279,17 @@ void make_corridor(position door1 ,
     (*corridors_of_all_levels)[level_num - 1] = temp1;
     (*corridors_of_all_levels)[level_num - 1][*current_n_of_corr_characters_on_this_level + corr_length - 1] = current;
     //// 2
-    current.x += x_moves[dir2];
-    current.y += y_moves[dir2];
-    corr_length++;
-    position* temp2 = realloc((*corridors_of_all_levels)[level_num - 1], 
-                                     (*current_n_of_corr_characters_on_this_level + corr_length) * sizeof(position));
-    if (temp2 == NULL) {
-        mvprintw(LINES/2 , COLS/2 , "Memory allocation FAILED!");
-        return;
-    }
-    (*corridors_of_all_levels)[level_num - 1] = temp2;
-    (*corridors_of_all_levels)[level_num - 1][*current_n_of_corr_characters_on_this_level + corr_length - 1] = current;
+    // current.x += x_moves[dir2];
+    // current.y += y_moves[dir2];
+    // corr_length++;
+    // position* temp2 = realloc((*corridors_of_all_levels)[level_num - 1], 
+    //                                  (*current_n_of_corr_characters_on_this_level + corr_length) * sizeof(position));
+    // if (temp2 == NULL) {
+    //     mvprintw(LINES/2 , COLS/2 , "Memory allocation FAILED!");
+    //     return;
+    // }
+    // (*corridors_of_all_levels)[level_num - 1] = temp2;
+    // (*corridors_of_all_levels)[level_num - 1][*current_n_of_corr_characters_on_this_level + corr_length - 1] = current;
     position destination = current;
     //// 3
     current.x = door1.x + x_moves[dir1];
@@ -296,22 +303,22 @@ void make_corridor(position door1 ,
     }
     (*corridors_of_all_levels)[level_num - 1] = temp3;
     (*corridors_of_all_levels)[level_num - 1][*current_n_of_corr_characters_on_this_level + corr_length - 1] = current;
-    //// 4
-    current.x += x_moves[dir1];
-    current.y += y_moves[dir1];
-    corr_length++;
-    position* temp4 = realloc((*corridors_of_all_levels)[level_num - 1], 
-                                     (*current_n_of_corr_characters_on_this_level + corr_length) * sizeof(position));
-    if (temp4 == NULL) {
-        mvprintw(LINES/2 , COLS/2 , "Memory allocation FAILED!");
-        return;
-    }
-    (*corridors_of_all_levels)[level_num - 1] = temp4;
-    (*corridors_of_all_levels)[level_num - 1][*current_n_of_corr_characters_on_this_level + corr_length - 1] = current;
+    // //// 4
+    // current.x += x_moves[dir1];
+    // current.y += y_moves[dir1];
+    // corr_length++;
+    // position* temp4 = realloc((*corridors_of_all_levels)[level_num - 1], 
+    //                                  (*current_n_of_corr_characters_on_this_level + corr_length) * sizeof(position));
+    // if (temp4 == NULL) {
+    //     mvprintw(LINES/2 , COLS/2 , "Memory allocation FAILED!");
+    //     return;
+    // }
+    // (*corridors_of_all_levels)[level_num - 1] = temp4;
+    // (*corridors_of_all_levels)[level_num - 1][*current_n_of_corr_characters_on_this_level + corr_length - 1] = current;
     
 
 
-    while(!(abs(current.x - destination.x) <= 1 && abs(current.y - destination.y) <= 1)){
+    while( !(abs(current.x - destination.x) <= 1 && abs(current.y - destination.y) <= 1) ){
         int random_direction = rand() % 4; // up 0 , down 1 , right 2 , left 3 , up-right 4 , up-left 5 , down-right 6 , down-left 7
         int x_new = current.x + x_moves[random_direction];
         int y_new = current.y + y_moves[random_direction];
@@ -355,7 +362,6 @@ int can_corridor_pass(int x , int y , room* all_rooms_on_this_level , int n_room
         }
     }
 
-    
     // char there = mvinch(x , y) & A_CHARTEXT;
     // if (there != '_' && there != '|' && there != '=' && there != '.' && there != ',' && there != '-' && there != '~' && there != 'O'){
     //     return 1;
@@ -384,7 +390,7 @@ void print_corridors(position* corridors_of_this_level , int n_of_corr_character
 
 // random number of rooms
 int number_of_rooms(int difficulty){
-    int n_rooms_max = difficulty * 7; 
+    int n_rooms_max = pow(1.3 , difficulty )* 6; 
     int n_rooms_min = 6;
     int n_rooms = rand() % ((n_rooms_max - n_rooms_min)+1) + n_rooms_min;
     return n_rooms;
@@ -398,22 +404,22 @@ void new_map(int difficulty ,
              int level_num,
              room*** address_rooms_of_all_levels
              ){
-    int room_types[8] = {0 , 0 , 0 , 0 , 0 , 2 , 2 , 4};
+    int room_types[10] = {0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 2 , 4};
 
     int max_length , max_width;
     switch (difficulty)
     {
     case 1:
+        max_length = 17;
+        max_width = 26;
+        break;
+    case 2:
         max_length = 15;
         max_width = 22;
         break;
-    case 2:
-        max_length = 12;
-        max_width = 18;
-        break;
     case 3:
-        max_length = 10;
-        max_width = 16;
+        max_length = 13;
+        max_width = 20;
         break;
     }
 
@@ -426,7 +432,7 @@ void new_map(int difficulty ,
     do {
         room ROOM;
         ROOM.floor_level = level_num;
-        ROOM.type = room_types[rand() % 8];
+        ROOM.type = room_types[rand() % 10];
         ROOM.length = rand() % (max_length - 6) + 6;
         ROOM.width = rand() % (max_width - 6) + 6;
         ROOM.corner.x = rand() % (max_x_for_corner - min_x_for_corner) + min_x_for_corner;
@@ -446,6 +452,9 @@ void new_map(int difficulty ,
         }
 
     } while(done_rooms < n_rooms);
+
+    sort_rooms(*(address_rooms_of_all_levels)[level_num - 1] , n_rooms);
+    
 }
 // incomplete
 
@@ -493,5 +502,52 @@ int room_valid(room ROOM , room*** address_rooms_of_all_levels , int level_num ,
     return 1;
 }
 // checked
+
+// function that returns the index of the room with the least corner.x
+int find_min_y(room* my_rooms, int n_rooms) {
+    int min_index = 0;
+    for (int i = 1; i < n_rooms; i++) {
+        if (my_rooms[i].corner.y < my_rooms[min_index].corner.y) {
+            min_index = i;
+        }
+    }
+    return min_index;
+}
+// 
+
+// function to sort rooms (based on how close they are to each other)
+void sort_rooms(room* my_rooms, int n_rooms) {
+    // find the first room with the smallest corner.y value
+    int start_index = find_min_y(my_rooms, n_rooms);
+    
+    // swap it to the first position
+    room temp = my_rooms[0];
+    my_rooms[0] = my_rooms[start_index];
+    my_rooms[start_index] = temp;
+    
+
+    // select the closest room 
+    for (int i = 1; i < n_rooms; i++) {
+        int nearest_index = i;
+        double min_distance = sqrt(pow(my_rooms[i - 1].corner.x - my_rooms[i].corner.x, 2) + pow(my_rooms[i - 1].corner.y - my_rooms[i].corner.y, 2));
+       
+        for (int j = i + 1; j < n_rooms; j++) {
+            double d = sqrt(pow(my_rooms[i - 1].corner.x - my_rooms[j].corner.x, 2) + pow(my_rooms[i - 1].corner.y - my_rooms[j].corner.y, 2));
+            if (d < min_distance) {
+                min_distance = d;
+                nearest_index = j;
+            }
+        }
+
+        // swap the nearest room with the current
+        temp = my_rooms[i];
+        my_rooms[i] = my_rooms[nearest_index];
+        my_rooms[nearest_index] = temp;
+    }
+
+    for (int k = 0 ; k < n_rooms ; k++){
+        my_rooms[k].room_number = k + 1;
+    }
+}
 
 #endif
