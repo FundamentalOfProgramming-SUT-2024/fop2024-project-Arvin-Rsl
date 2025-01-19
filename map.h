@@ -14,16 +14,6 @@
 #include <ncurses.h>
 #include <math.h>
 
-void new_map();
-void print_map();
-void print_room();
-void print_corridors();
-void add_door_and_window();
-void make_corridor();
-int can_corridor_pass();
-int number_of_rooms();
-int room_valid();
-
 // x (row) and y (col)
 typedef struct {
     int x; // row
@@ -33,7 +23,7 @@ typedef struct {
 // room
 typedef struct {
     int floor_level; // the floor/level/ground where room is located (start floor: 1 , end floor: 4)
-    int room_number; // room's number in that floor
+    int room_number; // room's number in that floor , starting from 1
     // length and width include the wall characters
     int length; // |
                 // |
@@ -65,11 +55,22 @@ typedef struct {
     
 } room;
 
+void new_map();
+void print_map();
+void print_room();
+void print_corridors();
+void add_door_and_window();
+void make_corridor();
+int can_corridor_pass();
+int number_of_rooms();
+int room_valid();
+position closest_door();
+
 // function to add the doors and windows to room 
 void add_door_and_window(room* Room){
     srand(time(NULL));
-    int n_doors_max = 3;
-    int n_doors_min = 2;
+    int n_doors_max = 2;
+    int n_doors_min = 1;
     int n_doors = rand() % ((n_doors_max - n_doors_min)+1) + n_doors_min;
     Room->number_of_doors = n_doors;
     int n_windows_max = 2;
@@ -241,6 +242,7 @@ void make_corridor(position door1 ,
     
     // first we must know each door is on which wall of the room
     // north 0 , south 1 , west 3 , east 2 (just like our movement arrays)
+    // stepping away from the wall
     int dir1 , dir2;
     if(door1.x == room1.corner.x) dir1 = 0;
     else if(door1.x == room1.corner.x + room1.length - 1) dir1 = 1;
@@ -317,7 +319,7 @@ void make_corridor(position door1 ,
         double current_distance = sqrt( pow((destination.x - current.x) , 2) + pow((destination.y - current.y) , 2) );
         double new_distance = sqrt( pow((destination.x - x_new) , 2) + pow((destination.y - y_new) , 2) );
 
-        if (new_distance <= current_distance && can_corridor_pass(x_new , y_new , all_rooms_on_this_level , n_rooms_on_this_level)){
+        if (new_distance < current_distance && can_corridor_pass(x_new , y_new , all_rooms_on_this_level , n_rooms_on_this_level)){
             current.x = x_new;
             current.y = y_new;
             corr_length++;
@@ -446,6 +448,32 @@ void new_map(int difficulty ,
     } while(done_rooms < n_rooms);
 }
 // incomplete
+
+
+position closest_door(position start_door , room*** address_rooms_of_all_levels , int level_num, int room_number , int number_of_rooms, room * closest_room){
+    double distance = LINES; // s.th. large for initializing
+    position closest;
+    for (int i = 0 ; i < number_of_rooms ; i++){
+        if(i != room_number - 1){ // other rooms!
+            room roooom = (*address_rooms_of_all_levels)[level_num - 1][i];
+            for (int k = 0 ; k < roooom.number_of_doors ; k++){
+                int x = roooom.doors_x[k];
+                int y = roooom.doors_y[k];
+                double temp_distance = sqrt( pow((start_door.x - x) , 2) + pow((start_door.y - y) , 2) );
+                if (temp_distance < distance){
+                    distance = temp_distance;
+                    closest.x = roooom.doors_x[k];
+                    closest.y = roooom.doors_y[k];
+                    *closest_room = roooom;
+                }
+            }
+        }
+    }
+
+    return closest;
+
+}
+
 
 // check if new room has overlap with previous ones
 int room_valid(room ROOM , room*** address_rooms_of_all_levels , int level_num , int i){
