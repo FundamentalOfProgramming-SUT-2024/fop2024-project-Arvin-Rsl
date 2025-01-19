@@ -17,11 +17,12 @@
 void new_map();
 void print_map();
 void print_room();
+void print_corridors();
 void add_door_and_window();
 void make_corridor();
 int can_corridor_pass();
-void print_corridors();
-
+int number_of_rooms();
+int room_valid();
 
 // x (row) and y (col)
 typedef struct {
@@ -379,17 +380,90 @@ void print_corridors(position* corridors_of_this_level , int n_of_corr_character
 }
 // checked
 
-// create new map
-void new_map(int difficulty){
-    // srand(time(NULL));
-    // int n_rooms_max = difficulty * 8; 
-    // int n_rooms_min = 6;
-    // int n_rooms = rand() % ((n_rooms_max - n_rooms_min)+1) + n_rooms_min;
-    
-
-    // position** corridors_of_all_levels = (position**) malloc(3 * sizeof(position*));
-    // make_corridor(door1 , door2, &corridors_of_all_levels , level_num);
+// random number of rooms
+int number_of_rooms(int difficulty){
+    int n_rooms_max = difficulty * 7; 
+    int n_rooms_min = 6;
+    int n_rooms = rand() % ((n_rooms_max - n_rooms_min)+1) + n_rooms_min;
+    return n_rooms;
 }
-// incomplete!!
+// checked
+
+// create new map
+void new_map(int difficulty ,
+             int n_rooms , 
+             position *** address_corridors_of_all_levels , 
+             int level_num,
+             room*** address_rooms_of_all_levels
+             ){
+    int room_types[8] = {0 , 0 , 0 , 0 , 0 , 2 , 2 , 4};
+
+    int max_length , max_width;
+    switch (difficulty)
+    {
+    case 1:
+        max_length = 15;
+        max_width = 22;
+        break;
+    case 2:
+        max_length = 12;
+        max_width = 18;
+        break;
+    case 3:
+        max_length = 10;
+        max_width = 16;
+        break;
+    }
+
+    int max_y_for_corner = COLS - (3+max_width),
+        min_y_for_corner = 3, 
+        max_x_for_corner = LINES - (3+max_length), 
+        min_x_for_corner = 3;
+
+    int done_rooms = 0;
+    do {
+        room ROOM;
+        ROOM.floor_level = level_num;
+        ROOM.type = room_types[rand() % 8];
+        ROOM.length = rand() % (max_length - 6) + 6;
+        ROOM.width = rand() % (max_width - 6) + 6;
+        ROOM.corner.x = rand() % (max_x_for_corner - min_x_for_corner) + min_x_for_corner;
+        ROOM.corner.y = rand() % (max_y_for_corner - min_y_for_corner) + min_y_for_corner;
+        if (room_valid(ROOM , address_rooms_of_all_levels , level_num , done_rooms)){
+            done_rooms++;
+            ROOM.room_number = done_rooms;
+
+            room* temp = realloc((*address_rooms_of_all_levels)[level_num - 1], done_rooms * sizeof(room));
+            if (temp == NULL) {
+                mvprintw(LINES/2 , COLS/2 , "Memory allocation FAILED!");
+                return;
+            }
+
+            (*address_rooms_of_all_levels)[level_num - 1] = temp;
+            (*address_rooms_of_all_levels)[level_num - 1][done_rooms - 1] = ROOM;
+        }
+
+    } while(done_rooms < n_rooms);
+}
+// incomplete
+
+// check if new room has overlap with previous ones
+int room_valid(room ROOM , room*** address_rooms_of_all_levels , int level_num , int i){
+    int x_min = ROOM.corner.x , x_max = ROOM.corner.x + ROOM.length;
+    int y_min = ROOM.corner.y , y_max = ROOM.corner.y + ROOM.width;
+
+    for (int j = 0 ; j < i ; j++){
+        room checking = (*address_rooms_of_all_levels)[level_num - 1][j];
+        int check_x_min = checking.corner.x - 3, check_x_max = checking.corner.x + checking.length + 3;
+        int check_y_min = checking.corner.y - 3, check_y_max = checking.corner.y + checking.width + 3;
+
+        if(( (x_max >= check_x_min && x_max <= check_x_max) || (x_min >= check_x_min && x_min <= check_x_max) )
+             && ( (y_max >= check_y_min && y_max <= check_y_max) || (y_min >= check_y_min && y_min <= check_y_max) )){
+            return 0;
+        }
+    }
+    return 1;
+}
+// checked
 
 #endif
