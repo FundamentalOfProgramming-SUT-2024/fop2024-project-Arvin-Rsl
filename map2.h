@@ -87,32 +87,17 @@ void add_door_and_window(room* Room , int n_rooms){
 
     // adding (x,y) values for doors
     for (int i = 0 ; i < n_doors ; i++){
-        int random_wall = rand() % 4;   // 0 : northern wall
-                                        // 1 : southern wall
+        int wall = 3 - i;   
                                         // 2 : western wall
-                                        // 3 : eastern wall
-        if(random_wall == 0){
-            int y_max = y_east - 1;
-            int y_min = y_west + 1;
-            int y = rand() % ((y_max - y_min)+1) + y_min;
-            Room->doors_x[i] = x_north;
-            Room->doors_y[i] = y;
-        }
-        else if (random_wall == 1){
-            int y_max = y_east - 1;
-            int y_min = y_west + 1;
-            int y = rand() % ((y_max - y_min)+1) + y_min;
-            Room->doors_x[i] = x_south;
-            Room->doors_y[i] = y;
-        }        
-        else if (random_wall == 2){
+                                        // 3 : eastern wall    
+        if (wall == 2){ // i = 1
             int x_max = x_south - 1;
             int x_min = x_north + 1;
             int x = rand() % ((x_max - x_min)+1) + x_min;
             Room->doors_x[i] = x;
             Room->doors_y[i] = y_west;
         }        
-        else if (random_wall == 3){
+        else if (wall == 3){ // i = 0
             int x_max = x_south - 1;
             int x_min = x_north + 1;
             int x = rand() % ((x_max - x_min)+1) + x_min;
@@ -123,10 +108,8 @@ void add_door_and_window(room* Room , int n_rooms){
     
     // adding (x,y) values for windows
     for (int i = 0 ; i < n_windows ; i++){
-        int random_wall = rand() % 4;   // 0 : northern wall
+        int random_wall = rand() % 2;   // 0 : northern wall
                                         // 1 : southern wall
-                                        // 2 : western wall
-                                        // 3 : eastern wall
         if(random_wall == 0){
             int y_max = y_east - 1;
             int y_min = y_west + 1;
@@ -141,20 +124,6 @@ void add_door_and_window(room* Room , int n_rooms){
             Room->windows_x[i] = x_south;
             Room->windows_y[i] = y;
         }        
-        else if (random_wall == 2){
-            int x_max = x_south - 1;
-            int x_min = x_north + 1;
-            int x = rand() % ((x_max - x_min)+1) + x_min;
-            Room->windows_x[i] = x;
-            Room->windows_y[i] = y_west;
-        }        
-        else if (random_wall == 3){
-            int x_max = x_south - 1;
-            int x_min = x_north + 1;
-            int x = rand() % ((x_max - x_min)+1) + x_min;
-            Room->windows_x[i] = x;
-            Room->windows_y[i] = y_east;
-        }
     }
 
 }
@@ -385,7 +354,7 @@ void make_corridor(position door1 ,
 }
 // checked (can be improved)
 
-// function to check if there is a room (corridor cannot pass) or not
+// function to check if there is a room (corridor cannot pass) or not.
 int can_corridor_pass(int x , int y , room* all_rooms_on_this_level , int n_rooms_on_this_level){
     if (x <= 0 || y <= 0 || x >= LINES  || y >= COLS ){
         return 0;
@@ -411,7 +380,6 @@ int can_corridor_pass(int x , int y , room* all_rooms_on_this_level , int n_room
     // }
 
     return 1;
-
 }
 // checked 
 
@@ -430,7 +398,7 @@ void print_corridors(position* corridors_of_this_level , int n_of_corr_character
 
 // random number of rooms
 int number_of_rooms(int difficulty){
-    int n_rooms_max = pow(1.3 , difficulty )* 6; 
+    int n_rooms_max = pow(1.4 , difficulty )* 6; 
     int n_rooms_min = 6;
     int n_rooms = rand() % ((n_rooms_max - n_rooms_min)+1) + n_rooms_min;
     return n_rooms;
@@ -518,9 +486,7 @@ void new_map(int difficulty ,
 //             }
 //         }
 //     }
-
 //     return closest;
-
 // }
 
 
@@ -534,11 +500,15 @@ int room_valid(room ROOM , room*** address_rooms_of_all_levels , int level_num ,
         int check_x_min = checking.corner.x - 3, check_x_max = checking.corner.x + checking.length + 3;
         int check_y_min = checking.corner.y - 3, check_y_max = checking.corner.y + checking.width + 3;
 
-        if(( (x_max >= check_x_min && x_max <= check_x_max) || (x_min >= check_x_min && x_min <= check_x_max) )
-             && ( (y_max >= check_y_min && y_max <= check_y_max) || (y_min >= check_y_min && y_min <= check_y_max) )){
-            return 0;
+        for (int x = x_min ; x <= x_max ; x++){
+            for (int y = y_min ; y <= y_max ; y++){
+                if ( (x >= check_x_min && x <= check_x_max) && (y >= check_y_min && y <= check_y_max) ){
+                    return 0;
+                }
+            }
         }
     }
+    
     return 1;
 }
 // checked
