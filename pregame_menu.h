@@ -15,7 +15,7 @@
 #include "entrance_menu.h" // needed for print_menu() function  &  going back to entrance menu
 // #include "map.h" // for new_map() function (which is not ready yet)
 #include "score_table.h" // for show_score_table() function (which is not ready yet)
-
+#include "song.h"
 
 void pregame_menu();
 void settings();
@@ -41,7 +41,7 @@ void pregame_menu(){
     int highlight = 1;
     int choice = 0;
     int c;
-    char *choices[] = {"Settings", "Score Table", "New Game" , "Continue Saved Game" , "Back"}; 
+    char *choices[] = {"Settings", "Score Table", "New Game" , "Continue Saved Game" , "Back to Entrance Menu"}; 
 
     while (1){
         clear();
@@ -155,7 +155,7 @@ void settings(){
     }
     else if (choice == 2){
         int song;
-        choose_song(song);
+        choose_song(&song);
     }
     else if (choice == 3){
         int color;
@@ -292,7 +292,7 @@ void choose_color(int color){
                                 //     1 for song1   
                                 //     2 for song2   
                                 //     3 for song3
-void choose_song(int song){
+void choose_song(int* song){
 
     initscr();
     start_color();
@@ -303,15 +303,23 @@ void choose_song(int song){
     int highlight = 1;
     int choice = 0;
     int c;
-    char *choices[] = {"Song 1 (default)", "Song 2" , "Song 3" , "Back"}; 
+    char *choices[] = {"Song 1 (default)", "Song 2" , "Song 3" , "None" ,"Back"}; 
+    init_audio();
     while (1){
         // draw_title(/);
-        print_menu(highlight , choices , 4 , 12 , "Theme Song");
+        print_menu(highlight , choices , 5 , 12 , "Theme Song");
+        if(1 == highlight || 2 == highlight || 3 == highlight){
+            choose_soundtrack(highlight);
+        }
+        else if (4 == highlight || 5 == highlight){
+            stop_soundtrack();
+        }
+
         c = getch();
         switch(c){
             case KEY_UP:
                 if (highlight == 1){
-                    highlight = 4;
+                    highlight = 5;
                     break;
                 }
                 else{
@@ -319,7 +327,7 @@ void choose_song(int song){
                     break;
                 }
             case KEY_DOWN:
-                if (highlight == 4){
+                if (highlight == 5){
                     highlight = 1;
                     break;
                 }
@@ -339,12 +347,16 @@ void choose_song(int song){
         }
     }
 
-    if (choice == 4){
-        // song = 1; // default
+    if (choice == 5){
+        stop_soundtrack();
         settings();
     }
     else{
-        song = choice;
+        if (choice == 4){
+            choice = 0;
+        }
+        // choose_soundtrack(choice);
+        *song = choice;
     }
     
     endwin(); 
