@@ -16,9 +16,14 @@
 #include "new_user.h"
 #define Usernames_File "/home/arvin_rsl/Desktop/FOP_Project/Users_Folder/Rogue_Usernames.txt"
 #define MAX_SIZE 1000
+#include "pregame_menu.h"
+#include "entrance_menu.h" // for design
 
 int check_password();
 void log_in();
+void draw_borders(int);
+void draw_title(const char*);
+
 // already_a_username(): function to check if username exists (using new_user.h library)
 
 // function to check if the password matches the username
@@ -29,7 +34,7 @@ int check_password(const char* username, const char* input){
     FILE* user_data_fptr = fopen(path , "r");
 
     if (user_data_fptr == NULL){
-        printf("user_data file not found for this user\n");
+        mvprintw(LINES / 2 , COLS / 2 , "user_data file not found for this user\n");
         return 0;
     }
 
@@ -73,6 +78,8 @@ void log_in(){
 
     while (1){
         clear();
+        draw_title("Log In");
+        draw_borders(11);
         mvprintw(LINES / 2 - 3, COLS / 2 - 10, "Enter Username: ");
         echo();
         getstr(username);
@@ -90,8 +97,10 @@ void log_in(){
 
     while (1){
         clear();
+        draw_title("Log In");
+        draw_borders(11);
         mvprintw(LINES / 2 - 3, COLS / 2 - 10, "Enter Username: ");
-        mvprintw(LINES / 2 - 3, COLS / 2 + 5, username);
+        mvprintw(LINES / 2 - 3, COLS / 2 + 5, "%s" , username);
         mvprintw(LINES / 2 - 1, COLS / 2 - 10, "Enter Password: ");
         echo();
         getstr(pass);
@@ -109,10 +118,13 @@ void log_in(){
        
     if (valid_user && valid_pass) {
         clear();
+        draw_title("Log In");
+        draw_borders(12);
         mvprintw(LINES / 2, COLS / 2 - 10, "Log in was successful!");
         mvprintw(LINES / 2 + 2, COLS / 2 - 11, "Press any key to proceed");
         refresh();
         getch();
+        pregame_menu();
     }
     endwin();
 }

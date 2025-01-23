@@ -15,6 +15,9 @@
 #include <ncurses.h>
 #define Usernames_File "/home/arvin_rsl/Desktop/FOP_Project/Users_Folder/Rogue_Usernames.txt"
 #define MAX_SIZE 1000
+#include "pregame_menu.h"
+#include "entrance_menu.h" // for design
+
 
 int already_a_username();
 int is_pass_valid();
@@ -24,6 +27,9 @@ void create_user();
 void append_username();
 void make_user_directory();
 void create_user_data_file();
+void draw_borders(int);
+void draw_title(const char*);
+
 
 // function to check if the username already exists
     // returns 0 if username is new
@@ -240,6 +246,8 @@ void create_user(){
 
     while (1){
         clear();
+        draw_title("New User");
+        draw_borders(11);
         mvprintw(LINES / 2 - 3, COLS / 2 - 10, "Enter Username: ");
         echo();
         getstr(username);
@@ -257,8 +265,10 @@ void create_user(){
 
     while (1){
         clear();
+        draw_title("New User");
+        draw_borders(11);
         mvprintw(LINES / 2 - 3, COLS / 2 - 10, "Enter Username: ");
-        mvprintw(LINES / 2 - 3, COLS / 2 + 5, username);
+        mvprintw(LINES / 2 - 3, COLS / 2 + 5, "%s" , username);
         mvprintw(LINES / 2 - 1, COLS / 2 - 10, "Enter email: ");
         echo();
         getstr(email);
@@ -275,10 +285,11 @@ void create_user(){
     }
 
     clear();
+    draw_borders(11);
     mvprintw(LINES / 2 - 3, COLS / 2 - 10, "Enter Username: ");
-    mvprintw(LINES / 2 - 3, COLS / 2 + 5, username);
+    mvprintw(LINES / 2 - 3, COLS / 2 + 5, "%s" , username);
     mvprintw(LINES / 2 - 1, COLS / 2 - 10, "Enter email: ");
-    mvprintw(LINES / 2 - 1, COLS / 2 + 5, email);
+    mvprintw(LINES / 2 - 1, COLS / 2 + 5, "%s" , email);
     mvprintw(LINES / 2 + 1, COLS / 2 - 20, "Do you want a randomly generated password? (y/n)");
     int yes_no = getch();
 
@@ -299,10 +310,11 @@ void create_user(){
     else{
         while (1){
             clear();
+            draw_borders(11);
             mvprintw(LINES / 2 - 3, COLS / 2 - 10, "Enter Username: ");
-            mvprintw(LINES / 2 - 3, COLS / 2 + 5, username);
+            mvprintw(LINES / 2 - 3, COLS / 2 + 5, "%s" , username);
             mvprintw(LINES / 2 - 1, COLS / 2 - 10, "Enter email: ");
-            mvprintw(LINES / 2 - 1, COLS / 2 + 5, email);
+            mvprintw(LINES / 2 - 1, COLS / 2 + 5, "%s" , email);
             mvprintw(LINES / 2 + 1, COLS / 2 - 10, "Enter your password: ");
             echo();
             getstr(password);
@@ -325,6 +337,7 @@ void create_user(){
 
     if (valid_user && valid_pass && valid_email) {
         clear();
+        draw_borders(12);
         mvprintw(LINES / 2, COLS / 2 - 15, "New user successfully created!");
         mvprintw(LINES / 2 + 2, COLS / 2 - 15, "Press any key to proceed");
         append_username(username);
@@ -332,6 +345,7 @@ void create_user(){
         create_user_data_file(username, email, password);
         refresh();
         getch();
+        pregame_menu();
     }
     endwin();
 }
