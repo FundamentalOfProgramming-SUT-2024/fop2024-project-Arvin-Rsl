@@ -5,6 +5,7 @@
 // Arvin Rasulzadeh
 // 403110422
 
+#include <locale.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -28,10 +29,12 @@ void print_menu(int , char** , int , int , const char*);
 void entrance_menu();
 void draw_borders(int);
 void draw_title(const char*);
+void show_score_table(char* , int );
 
 
 // show the options in pregame menu (Settings , Score Table , New Game , Continue Saved Game , Back)
 void pregame_menu(){
+    setlocale(LC_ALL, "");
     initscr();
     start_color();
     init_pair(1, COLOR_WHITE, COLOR_BLACK);
@@ -42,6 +45,7 @@ void pregame_menu(){
     int choice = 0;
     int c;
     char *choices[] = {"Settings", "Score Table", "New Game" , "Continue Saved Game" , "Back to Entrance Menu"}; 
+    setlocale(LC_ALL, "");
 
     while (1){
         clear();
@@ -85,7 +89,11 @@ void pregame_menu(){
         settings();
     }
     else if (choice == 2){
-        // show_score_table();
+        char my_username[] = "arvin";
+        int start_page = 1;
+        // setlocale(LC_ALL, "");
+        // Show the score table starting from the first page
+        show_score_table(my_username, start_page);
     }
     else if (choice == 3){
         // new_game();

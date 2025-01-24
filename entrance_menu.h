@@ -21,6 +21,7 @@ void draw_title(const char*);
 void draw_borders(int);
 void entrance_menu();
 void print_menu(int , char** , int , int , const char*);
+void show_score_table(char* , int );
 
 // function to print the menu options
 void print_menu(int highlight , char** choices, int n_choices , int which_color , const char* title){
@@ -127,6 +128,7 @@ void draw_borders(int which_color){
     init_pair(10 , COLOR_CYAN , COLOR_BLACK);
     init_pair(11 , COLOR_RED , COLOR_BLACK);
     init_pair(12 , COLOR_GREEN , COLOR_BLACK);
+    init_pair(13 , COLOR_YELLOW , COLOR_BLACK);
     
     attron(COLOR_PAIR(which_color));      
     for (int i = 1; i < COLS - 1; i++) { 
