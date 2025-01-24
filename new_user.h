@@ -268,7 +268,7 @@ void create_user(){
         draw_title("New User");
         draw_borders(11);
         mvprintw(LINES / 2 - 3, COLS / 2 - 10, "Enter Username: ");
-        mvprintw(LINES / 2 - 3, COLS / 2 + 5, "%s" , username);
+        mvprintw(LINES / 2 - 3, COLS / 2 + 5, "  %s" , username);
         mvprintw(LINES / 2 - 1, COLS / 2 - 10, "Enter email: ");
         echo();
         getstr(email);
@@ -287,9 +287,9 @@ void create_user(){
     clear();
     draw_borders(11);
     mvprintw(LINES / 2 - 3, COLS / 2 - 10, "Enter Username: ");
-    mvprintw(LINES / 2 - 3, COLS / 2 + 5, "%s" , username);
+    mvprintw(LINES / 2 - 3, COLS / 2 + 5, "  %s" , username);
     mvprintw(LINES / 2 - 1, COLS / 2 - 10, "Enter email: ");
-    mvprintw(LINES / 2 - 1, COLS / 2 + 5, "%s" , email);
+    mvprintw(LINES / 2 - 1, COLS / 2 + 5, "  %s" , email);
     mvprintw(LINES / 2 + 1, COLS / 2 - 20, "Do you want a randomly generated password? (y/n)");
     int yes_no = getch();
 
@@ -312,9 +312,9 @@ void create_user(){
             clear();
             draw_borders(11);
             mvprintw(LINES / 2 - 3, COLS / 2 - 10, "Enter Username: ");
-            mvprintw(LINES / 2 - 3, COLS / 2 + 5, "%s" , username);
+            mvprintw(LINES / 2 - 3, COLS / 2 + 5, "  %s" , username);
             mvprintw(LINES / 2 - 1, COLS / 2 - 10, "Enter email: ");
-            mvprintw(LINES / 2 - 1, COLS / 2 + 5, "%s" , email);
+            mvprintw(LINES / 2 - 1, COLS / 2 + 5, "  %s" , email);
             mvprintw(LINES / 2 + 1, COLS / 2 - 10, "Enter your password: ");
             echo();
             getstr(password);
