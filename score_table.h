@@ -160,7 +160,7 @@ void show_score_table(char* my_username, int page) {
         // user input
         int ch = getch();
         if (ch == 'q' || ch == 'Q') {
-            pregame_menu();
+            pregame_menu(my_username);
             break;
         } 
         else if (ch == 'n' || ch == 'N') {

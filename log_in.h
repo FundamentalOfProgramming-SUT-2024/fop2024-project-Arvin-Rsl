@@ -164,7 +164,7 @@ void log_in(){
         mvprintw(LINES / 2 + 2, (COLS - strlen("Press any key to proceed"))/ 2, "Press any key to proceed");
         refresh();
         getch();
-        pregame_menu();
+        pregame_menu(username);
     }
        
     else if (valid_user && valid_pass) {
@@ -175,7 +175,7 @@ void log_in(){
         mvprintw(LINES / 2 + 2, (COLS - strlen("Press any key to proceed"))/ 2, "Press any key to proceed");
         refresh();
         getch();
-        pregame_menu();
+        pregame_menu(username);
     }
     endwin();
 }

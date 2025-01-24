@@ -114,7 +114,7 @@ void entrance_menu(){
         mvprintw(LINES / 2 + 2, COLS / 2 - 11, "Press any key to proceed");
         refresh();
         getch();
-        pregame_menu();
+        pregame_menu("GUEST");
     }
 
     endwin(); 

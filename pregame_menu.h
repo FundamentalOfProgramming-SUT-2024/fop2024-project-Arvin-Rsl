@@ -18,7 +18,7 @@
 #include "score_table.h" // for show_score_table() function (which is not ready yet)
 #include "song.h"
 
-void pregame_menu();
+void pregame_menu(char*);
 void settings();
 void choose_song();
 void choose_color();
@@ -33,7 +33,7 @@ void show_score_table(char* , int );
 
 
 // show the options in pregame menu (Settings , Score Table , New Game , Continue Saved Game , Back)
-void pregame_menu(){
+void pregame_menu(char* my_username){
     setlocale(LC_ALL, "");
     initscr();
     start_color();
@@ -86,12 +86,10 @@ void pregame_menu(){
 
     // call the appropriate function based on the choice
     if (choice == 1){
-        settings();
+        settings(my_username);
     }
     else if (choice == 2){
-        char my_username[] = "arvin";
         int start_page = 1;
-        // setlocale(LC_ALL, "");
         // Show the score table starting from the first page
         show_score_table(my_username, start_page);
     }
@@ -108,7 +106,7 @@ void pregame_menu(){
 }
 
 // show the options in Settings (Level Of Difficulty , Songs , Hero's Color)
-void settings(){
+void settings(char* my_username){
     initscr();
     start_color();
     init_pair(1, COLOR_WHITE, COLOR_BLACK);
@@ -159,18 +157,18 @@ void settings(){
     // call the appropriate function based on the choice
     if (choice == 1){
         int level = 0; // 1 = easy ; 2 = medium ; 3 = hard
-        choose_difficulty(level);
+        choose_difficulty(level , my_username);
     }
     else if (choice == 2){
         int song;
-        choose_song(&song);
+        choose_song(&song , my_username);
     }
     else if (choice == 3){
         int color;
-        choose_color(color);
+        choose_color(color , my_username);
     }
     else if (choice == 4){
-        pregame_menu();
+        pregame_menu(my_username);
     }
     endwin(); 
 }
@@ -179,7 +177,7 @@ void settings(){
                                 //     1 for Easy   
                                 //     2 for Medium   
                                 //     3 for Hard   
-void choose_difficulty(int level){
+void choose_difficulty(int level , char* my_username){
     initscr();
     start_color();
     init_pair(1, COLOR_WHITE, COLOR_BLACK);
@@ -227,7 +225,7 @@ void choose_difficulty(int level){
 
     if (choice == 4){
         // level = 1;
-        settings();
+        settings(my_username);
     }
     else{
         level = choice;
@@ -241,7 +239,7 @@ void choose_difficulty(int level){
                                 //     BLUE	    3  
                                 //     MAGENTA  4   
                                 //     CYAN	    5  
-void choose_color(int color){
+void choose_color(int color , char* my_username){
     initscr();
     start_color();
     init_pair(1, COLOR_WHITE, COLOR_BLACK);
@@ -287,7 +285,7 @@ void choose_color(int color){
         }
     }
     if (choice == 6){
-        settings();
+        settings(my_username);
     }
     else{
         color = choice;
@@ -300,7 +298,7 @@ void choose_color(int color){
                                 //     1 for song1   
                                 //     2 for song2   
                                 //     3 for song3
-void choose_song(int* song){
+void choose_song(int* song , char* my_username){
 
     initscr();
     start_color();
@@ -357,7 +355,7 @@ void choose_song(int* song){
 
     if (choice == 5){
         stop_soundtrack();
-        settings();
+        settings(my_username);
     }
     else{
         if (choice == 4){

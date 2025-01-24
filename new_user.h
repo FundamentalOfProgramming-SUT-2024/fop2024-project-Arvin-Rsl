@@ -345,7 +345,7 @@ void create_user(){
         create_user_data_file(username, email, password);
         refresh();
         getch();
-        pregame_menu();
+        pregame_menu(username);
     }
     endwin();
 }
