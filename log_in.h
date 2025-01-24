@@ -80,12 +80,12 @@ void log_in(){
         clear();
         draw_title("Log In");
         draw_borders(11);
-        mvprintw(LINES / 2 - 3, COLS / 2 - 10, "Enter Username: ");
+        mvprintw(LINES / 2 - 3, (COLS - strlen("Enter Username: 00000000"))/ 2, "Enter Username: ");
         echo();
         getstr(username);
         noecho();
         if (!already_a_username(username)){
-            mvprintw(LINES / 2 - 1, COLS / 2 - 20, "Username doesn't exist! Try again");
+            mvprintw(LINES / 2 - 1, (COLS - strlen("Username doesn't exist! Try again"))/ 2 , "Username doesn't exist! Try again");
             refresh();
             getch();
         } 
@@ -95,13 +95,14 @@ void log_in(){
         }
     }
 
-    while (1){
+    int forgot = 0;
+    while (!forgot){
         clear();
         draw_title("Log In");
         draw_borders(11);
-        mvprintw(LINES / 2 - 3, COLS / 2 - 10, "Enter Username: ");
-        mvprintw(LINES / 2 - 3, COLS / 2 + 5, "%s" , username);
-        mvprintw(LINES / 2 - 1, COLS / 2 - 10, "Enter Password: ");
+        mvprintw(LINES / 2 - 3, (COLS - strlen("Enter Username: 00000000"))/ 2, "Enter Username: ");
+        mvprintw(LINES / 2 - 3, (COLS + strlen("Enter User"))/ 2 , "%s" , username);
+        mvprintw(LINES / 2 - 1, (COLS - strlen("Enter Password: 00000000"))/ 2 , "Enter Password: ");
         echo();
         getstr(pass);
         noecho();
@@ -110,18 +111,68 @@ void log_in(){
             break;
         } 
         else{
-            mvprintw(LINES / 2 + 1, COLS / 2 - 15, "Password doesn't match! Try again");
+            mvprintw(LINES / 2 + 1, (COLS - strlen("Password doesn't match! Try again"))/ 2 , "Password doesn't match! Try again");
+            mvprintw(LINES / 2 + 3, (COLS - strlen("Forgot Password?  Press 'f'"))/ 2, "Forgot Password?  Press 'f'");
+
             refresh();
-            getch();
+            char c = getch();
+            if (c == 'f' || c == 'F'){
+                forgot = 1;
+            }
         }
     }
-       
-    if (valid_user && valid_pass) {
+
+    if (forgot == 1){
         clear();
         draw_title("Log In");
+        draw_borders(11);
+        char random_pass[MAX_SIZE];
+        generate_pass(random_pass);
+        // strcpy(password, random_pass);
+        init_pair(101 , COLOR_YELLOW , COLOR_BLACK);
+        attron(COLOR_PAIR(101));
+        mvprintw(LINES / 2 , (COLS - strlen("Your new password is: 123456789000"))/ 2, "Your new password is: %s", random_pass);
+        attroff(COLOR_PAIR(101));
+        mvprintw(LINES / 2 + 2, (COLS - strlen("Press any key to proceed"))/ 2, "Press any key to proceed");
+        refresh();   
+
+        char path[1024];
+        snprintf(path, sizeof(path), "/home/arvin_rsl/Desktop/FOP_Project/Users_Folder/%s/user_data.txt", username);
+        FILE *file = fopen(path, "r");
+        if (file == NULL) {
+            perror("Error opening file");
+        }
+
+        char buffer[256];
+        char email[256];
+        while (fgets(buffer, sizeof(buffer), file) != NULL) {
+            if (strncmp(buffer, "email:", 6) == 0) {
+                sscanf(buffer, "email: %s", email);
+                break;
+            }
+        }
+
+        fclose(file);
+        remove(path);
+        
+        create_user_data_file(username , email , random_pass);
+
+        getch();
+        clear();
         draw_borders(12);
-        mvprintw(LINES / 2, COLS / 2 - 10, "Log in was successful!");
-        mvprintw(LINES / 2 + 2, COLS / 2 - 11, "Press any key to proceed");
+        mvprintw(LINES / 2, (COLS - strlen("Log in was successful!"))/ 2 , "Log in was successful!");
+        mvprintw(LINES / 2 + 2, (COLS - strlen("Press any key to proceed"))/ 2, "Press any key to proceed");
+        refresh();
+        getch();
+        pregame_menu();
+    }
+       
+    else if (valid_user && valid_pass) {
+        clear();
+        // draw_title("Log In");
+        draw_borders(12);
+        mvprintw(LINES / 2, (COLS - strlen("Log in was successful!"))/ 2, "Log in was successful!");
+        mvprintw(LINES / 2 + 2, (COLS - strlen("Press any key to proceed"))/ 2, "Press any key to proceed");
         refresh();
         getch();
         pregame_menu();
