@@ -124,9 +124,9 @@ void show_score_table(char* my_username, int page) {
             }
 
             attron(COLOR_PAIR(color_pair));
-            if (strcmp(entries[i].username, my_username) == 0) { // the user 
+            if (strcmp(entries[i].username, my_username) == 0) { // the user him-/her- self
                 // Bold my_username
-                attron(A_BOLD);
+                attron(A_BOLD | A_ITALIC);
                 mvprintw(start_x + (i - start_index) + 3, start_y, "| %*d | %-*s |  %*d | %*d | %*d | %*d   | %s",
                          rank_width, entries[i].rank,
                          username_width, entries[i].username,
@@ -135,7 +135,7 @@ void show_score_table(char* my_username, int page) {
                          games_width, entries[i].rank, 
                          experience_width, entries[i].experience,
                          label);
-                attroff(A_BOLD);
+                attroff(A_BOLD | A_ITALIC);
             } 
             else { // others
                 mvprintw(start_x + (i - start_index) + 3, start_y, "| %*d | %-*s |  %*d | %*d | %*d | %*d   | %s",
