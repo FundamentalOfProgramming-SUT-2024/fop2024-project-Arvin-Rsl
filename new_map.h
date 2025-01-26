@@ -56,6 +56,10 @@ typedef struct {
     int n_foods;
     int foods_x[3];
     int foods_y[3];
+
+    int n_golds;
+    int golds_x[3];
+    int golds_y[3];
     
 } room;
 
@@ -70,11 +74,36 @@ void print_corridors();
 void add_door_and_window();
 void add_pillars();
 void add_food();
+void add_gold();
 int number_of_rooms();
 int room_valid();
 int find_min_y();
 void sort_rooms();
 int can_corridor_pass(int  , int , room*  , int );
+
+// function to add golds (U+2666) to room 
+void add_gold(room** address_rooms_this_level , int n_rooms){
+    srand(time(NULL));
+    for (int i = 0 ; i < n_rooms ; i++){
+    
+        room r1 = (*address_rooms_this_level)[i];
+
+        for (int k = 0 ; k < r1.n_golds ; k++){
+            int x_north1 = r1.corner.x;
+            int x_south1 = r1.corner.x + r1.length - 1;
+            int y_west1 = r1.corner.y;
+            int y_east1 = r1.corner.y + r1.width - 1;
+
+            int x = rand() % (x_south1 - x_north1 - 3) + x_north1 + 2;
+            int y = rand() % (y_east1 - y_west1 - 3) + y_west1 + 2;
+            
+            (*address_rooms_this_level)[i].golds_x[k] = x;
+            (*address_rooms_this_level)[i].golds_y[k] = y;
+        }
+    }
+
+}
+
 
 // function to add the regular foods ( 'f' ) to room 
 void add_food(room** address_rooms_this_level , int n_rooms){
@@ -402,6 +431,8 @@ void print_room(room *Room){
         init_pair(4 , COLOR_BLUE , COLOR_BLACK); 
         init_color(76, 720 , 570 , 800); // for food
         init_pair(8, 76 , COLOR_BLACK); // for food
+        init_color(77, 1000 , 1000 , 0); // for gold
+        init_pair(15, 77 , COLOR_BLACK); // for gold
         attron(COLOR_PAIR(Room->type));
         for (int y = ul_corner.y + 1; y < ul_corner.y + Room->width - 1 ; y++){
             for (int x = ul_corner.x + 1 ; x < ul_corner.x + Room->length - 1 ; x++){
@@ -417,6 +448,14 @@ void print_room(room *Room){
             mvprintw(Room->foods_x[i],  Room->foods_y[i] , "f");
         }
         attroff(COLOR_PAIR(8));
+
+        attron(COLOR_PAIR(15));
+
+        for (int i = 0 ; i < Room->n_golds ; i++){   
+            mvprintw(Room->golds_x[i],  Room->golds_y[i] , "g");
+        }
+        attroff(COLOR_PAIR(15));
+
         if (Room->room_number == 1){
             mvprintw(Room->doors_x[0],  Room->doors_y[0] , "+");
         }
@@ -494,7 +533,14 @@ void new_map(int difficulty ,
         ROOM.type = room_types[rand() % 10];
         ROOM.length = rand() % (max_length - 6) + 7;
         ROOM.width = rand() % (max_width - 6) + 7;
-        ROOM.n_foods = rand() % 3;
+        if(3 == difficulty){
+            ROOM.n_foods = rand() % 3;
+        }
+        else if(2 == difficulty || 1 == difficulty){
+            ROOM.n_foods = rand() % 4;
+        }
+
+        ROOM.n_golds = rand() % 3;
         ROOM.corner.x = rand() % (max_x_for_corner - min_x_for_corner) + min_x_for_corner;
         ROOM.corner.y = rand() % (max_y_for_corner - min_y_for_corner) + min_y_for_corner;
         if (room_valid(ROOM , address_rooms_of_all_levels , level_num , done_rooms)){
