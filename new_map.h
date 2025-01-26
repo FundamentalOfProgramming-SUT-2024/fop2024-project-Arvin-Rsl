@@ -70,6 +70,33 @@ int room_valid();
 int find_min_y();
 void sort_rooms();
 int can_corridor_pass(int  , int , room*  , int );
+
+// function to add the pillars ( 'O' ) to room 
+void add_pillars(room** address_rooms_this_level , int n_rooms){
+    // initscr();
+    srand(time(NULL));
+    for (int i = 0 ; i < n_rooms ; i++){
+    
+        room r1 = (*address_rooms_this_level)[i];
+
+        for (int k = 0 ; k < 3 ; k++){
+            int x_north1 = r1.corner.x;
+            int x_south1 = r1.corner.x + r1.length - 1;
+            int y_west1 = r1.corner.y;
+            int y_east1 = r1.corner.y + r1.width - 1;
+
+            int x = rand() % (x_south1 - x_north1 - 2) + x_north1 + 2;
+            int y = rand() % (y_east1 - y_west1 - 2) + y_west1 + 2;
+            // mvprintw(x , y , "%c" , 'O');
+            // refresh();
+            // sleep(1);
+            (*address_rooms_this_level)[i].pillars_x[k] = x;
+            (*address_rooms_this_level)[i].pillars_y[k] = y;
+        }
+    }
+
+}
+
 // function to check if there is a room (corridor cannot pass) or not.
 // int can_corridor_pass(int x , int y , room* all_rooms_on_this_level , int n_rooms_on_this_level){
 //     // if (x <= 0 || y <= 0 || x >= LINES  || y >= COLS ){
@@ -436,12 +463,16 @@ void print_room(room *Room){
         init_pair(2 , COLOR_MAGENTA , COLOR_BLACK); 
         init_pair(3 , COLOR_YELLOW , COLOR_BLACK); 
         init_pair(4 , COLOR_BLUE , COLOR_BLACK); 
+        // init_color(5 , 255 , 234 , 0); 
         attron(COLOR_PAIR(Room->type));
         for (int y = ul_corner.y + 1; y < ul_corner.y + Room->width - 1 ; y++){
             for (int x = ul_corner.x + 1 ; x < ul_corner.x + Room->length - 1 ; x++){
                 mvprintw(x , y , "%c" , floor);
             }
         }
+        for (int i = 0 ; i < 2 ; i++){   
+            mvprintw(Room->pillars_x[i],  Room->pillars_y[i] , "O");
+        }  
         attroff(COLOR_PAIR(Room->type));
         if (Room->room_number == 1){
             mvprintw(Room->doors_x[0],  Room->doors_y[0] , "+");
@@ -452,10 +483,10 @@ void print_room(room *Room){
             }  
         }
 
-        // for (int i = 0 ; i < Room->number_of_windows ; i++){
-        //     mvprintw(Room->windows_x[i],  Room->windows_y[i] , "=");
-        // }
+
+
     } 
+
     else {
         // printf("Room is hidden\n"); // Debug print
     }
