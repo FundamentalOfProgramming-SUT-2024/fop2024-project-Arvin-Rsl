@@ -12,7 +12,8 @@
 #include <ctype.h>
 #include <ncurses.h>
 #include <math.h>
-#include "map2.h"
+// #include "map2.h"
+#include "new_map.h"
 #include "player.h"
 // typedef struct player player;
 // typedef struct position position;
@@ -24,7 +25,7 @@ void Move();
 
 int valid_move(int x , int y ){   
     char there = mvinch(x , y) & A_CHARTEXT;
-    if (there == '.'  || there == ',' || there == '-' || there == '~' || there == '#'){
+    if (there == '.'  || there == ',' || there == '-' || there == '~' || there == '#' || there == '+'){
         return 1;
     }
     return 0;

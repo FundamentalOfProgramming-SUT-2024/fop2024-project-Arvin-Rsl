@@ -10,7 +10,6 @@
 #include <math.h>
 #include <unistd.h> // for sleep() function (randomizing existance of windows between rooms)
 #define MAX_CORR (184 * 45) 
-// #define MAX_ROOM 16
 
 typedef struct {
     int x; // row
@@ -51,8 +50,8 @@ typedef struct {
     // int windows_y[2]; // the first two for windows and the rest for pillars
     // int windows_x[2]; // the first two for windows and the rest for pillars
 
-    // int pillars_x[2];
-    // int pillars_y[2];
+    int pillars_x[3];
+    int pillars_y[3];
     
 } room;
 
@@ -247,7 +246,7 @@ void build_corr(int n_rooms_level, position*** address_corridors_of_all_levels, 
                 (*address_corridors_of_all_levels)[level_num - 1][*ptr_corr_count + abs(K)].x = start.x ;
                 (*address_corridors_of_all_levels)[level_num - 1][*ptr_corr_count + abs(K)].y = start.y + K;
             }
-            for (int J = 0 ; (start.x  + J != end.x + sign_delta_x) ; J += sign_delta_x){
+            for (int J = 0 ; (start.x  + J != end.x + 2*sign_delta_x) ; J += sign_delta_x){
                 // if (*ptr_corr_count + (y_break - start.y) + abs(J) + 1 < MAX_CORR) {
                 // (*address_corridors_of_all_levels)[level_num - 1][*ptr_corr_count + (y_break - start.y) + abs(J) + 1].x = (start.x + sign_delta_x) + J;
                 // (*address_corridors_of_all_levels)[level_num - 1][*ptr_corr_count + (y_break - start.y) + abs(J) + 1].y = y_break;
@@ -280,7 +279,7 @@ void build_corr(int n_rooms_level, position*** address_corridors_of_all_levels, 
                 print_room(rooms_of_all_levels[level_num - 1] + roo);
             }
             print_corridors((*address_corridors_of_all_levels)[level_num - 1] , *ptr_corr_count);
-            sleep(1);
+            // sleep(1);
             refresh();
         } 
         
@@ -519,8 +518,8 @@ void new_map(int difficulty ,
         ROOM.floor_level = level_num;
         ROOM.hide = 0;
         ROOM.type = room_types[rand() % 10];
-        ROOM.length = rand() % (max_length - 6) + 6;
-        ROOM.width = rand() % (max_width - 6) + 6;
+        ROOM.length = rand() % (max_length - 6) + 7;
+        ROOM.width = rand() % (max_width - 6) + 7;
         ROOM.corner.x = rand() % (max_x_for_corner - min_x_for_corner) + min_x_for_corner;
         ROOM.corner.y = rand() % (max_y_for_corner - min_y_for_corner) + min_y_for_corner;
         if (room_valid(ROOM , address_rooms_of_all_levels , level_num , done_rooms)){
