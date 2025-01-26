@@ -99,7 +99,6 @@ void add_food(room** address_rooms_this_level , int n_rooms){
 
 }
 
-
 // function to add the pillars ( 'O' ) to room 
 void add_pillars(room** address_rooms_this_level , int n_rooms){
     srand(time(NULL));
@@ -123,95 +122,6 @@ void add_pillars(room** address_rooms_this_level , int n_rooms){
 
 }
 
-// function to check if there is a room (corridor cannot pass) or not.
-// int can_corridor_pass(int x , int y , room* all_rooms_on_this_level , int n_rooms_on_this_level){
-//     // if (x <= 0 || y <= 0 || x >= LINES  || y >= COLS ){
-//     //     return 0;
-//     // }
-//     for(int i = 0 ; i < n_rooms_on_this_level ; i++){
-//         room Room = all_rooms_on_this_level[i];
-//         if (x >= Room.corner.x  && 
-//                 x < Room.corner.x + Room.length &&
-//                 y >= Room.corner.y && 
-//                 y < Room.corner.y + Room.width ){
-//             return 0;
-//         }
-//     }
-//     return 1;
-// }
-// int valid_4_corr(int x , int y){   
-//     char there = mvinch(x , y) & A_CHARTEXT ; //& A_COLOR;
-//     if (there == '.'  || there == ',' || there == '-' || there == '~' || there == '_' || there == '|' || there == '=' || there == 'O'){
-//         return 0;
-//     }
-//     return 1;
-// }
-// void print_black_rooms(int n_rooms_this_level , room ** ALL_ROOMS , int level_num){
-//     start_color();
-//     init_pair(19 , COLOR_BLACK , COLOR_BLACK);
-//     attron(COLOR_PAIR(19));
-//     for(int r = 0 ; r < n_rooms_this_level ; r++ ){
-
-//         room Room = ALL_ROOMS[level_num - 1][r];
-//         position ul_corner;
-//         ul_corner.x = Room.corner.x;
-//         ul_corner.y = Room.corner.y;
-
-//         // WALLS
-//         // northern wall
-//         for (int i = ul_corner.y + 1 ; i < ul_corner.y + Room.width - 1 ; i++){
-//             mvprintw(ul_corner.x , i , "_");
-//         }
-
-//         // southern wall
-//         for (int i = ul_corner.y + 1 ; i < ul_corner.y + Room.width - 1 ; i++){
-//             mvprintw(ul_corner.x + Room.length - 1 , i , "_");
-//         }
-
-//         // western wall
-//         for (int i = ul_corner.x + 1 ; i < ul_corner.x + Room.length ; i++){
-//             mvprintw(i , ul_corner.y , "|");
-//         }
-
-//         // eastern wall
-//         for (int i = ul_corner.x + 1 ; i < ul_corner.x + Room.length ; i++){
-//             mvprintw(i , ul_corner.y + Room.width - 1, "|");
-//         }
-
-//         // FLOOR
-//         // determine floor's char
-//         char floor;
-//         if (Room.type == 0 || Room.type == 1){
-//             floor = '.';
-//         }
-//         else if (Room.type == 2){
-//             floor = ',';
-//         }
-//         else if (Room.type == 3){
-//             floor = '-';
-//         }
-//         else if (Room.type == 4){
-//             floor = '~';
-//         }
-        
-//         for (int y = ul_corner.y + 1; y < ul_corner.y + Room.width - 1 ; y++){
-//             for (int x = ul_corner.x + 1 ; x < ul_corner.x + Room.length - 1 ; x++){
-//                 mvprintw(x , y , "%c" , floor);
-//             }
-//         }
-
-//         // Door(s)
-//         for (int i = 0 ; i < Room.number_of_doors ; i++){
-//             mvprintw(Room.doors_x[i],  Room.doors_y[i] , "+");
-//         }
-//         // // Window(s)
-//         // for (int i = 0 ; i < Room.number_of_windows ; i++){
-//         //     mvprintw(Room.windows_x[i],  Room.windows_y[i] , "=");
-//         // }
-//     }
-//     attroff(COLOR_PAIR(19));
-// }
-
 // function to build the corridors of 1 floor level
 void build_corr(int n_rooms_level, position*** address_corridors_of_all_levels, room ** rooms_of_all_levels, int level_num, int* ptr_corr_count) {
     int x_moves[8] = {-1, +1, +0, +0, -1, -1, +1, +1}; // up, down, right, left, up-right, up-left, down-right, down-left
@@ -225,9 +135,6 @@ void build_corr(int n_rooms_level, position*** address_corridors_of_all_levels, 
     start_color(); 
     srand(time(NULL));  
     for (int i = 0; i < n_rooms_level - 1; i++) {
-        // printf("Processing room %d\n", i);
-        // getch();
-        // start and end doors
         position start;
         position end;
         start.x = rooms_of_all_levels[level_num - 1][i].doors_x[0];
@@ -368,7 +275,7 @@ void add_door_and_window(room** address_rooms_this_level , int n_rooms){
             int x2 = 0;
             int y1 = 0;
             int y2 = 0;
-        do{
+        // do{
             int wall_1 = 0;
             int wall_2 = 0;
             room r1 = (*address_rooms_this_level)[i];
@@ -402,7 +309,9 @@ void add_door_and_window(room** address_rooms_this_level , int n_rooms){
                 y1 = rand() % (r1.width - 2) + y_west1 + 1;
                 wall_2 = 1; // south
                 x2 = x_south2;
-                y2 = rand() % (r2.width - 2) + y_west2 + 1;
+                do{
+                    y2 = rand() % (r2.width - 2) + y_west2 + 1;
+                } while(y2 <= y1);
             }
             else if(r2.corner.x > r1.corner.x + r1.length){
                 wall_1 = 1; // south
@@ -410,7 +319,9 @@ void add_door_and_window(room** address_rooms_this_level , int n_rooms){
                 y1 = rand() % (r1.width - 2) + y_west1 + 1;
                 wall_2 = 0; // north
                 x2 = x_north2;
-                y2 = rand() % (r2.width - 2) + y_west2 + 1;
+                do{
+                    y2 = rand() % (r2.width - 2) + y_west2 + 1;
+                } while(y2 <= y1);
             }
             else if (r2.corner.y + r2.width < r1.corner.y) { // doesn't happen i guess ...
                 wall_1 = 3; // west
@@ -425,7 +336,7 @@ void add_door_and_window(room** address_rooms_this_level , int n_rooms){
             (*address_rooms_this_level)[i].doors_y[0] = y1;
             (*address_rooms_this_level)[i + 1].doors_x[1] = x2;
             (*address_rooms_this_level)[i + 1].doors_y[1] = y2;
-        } while(y2 <= y1);
+        // } while(y2 <= y1);
     }
 
 }
@@ -497,10 +408,10 @@ void print_room(room *Room){
                 mvprintw(x , y , "%c" , floor);
             }
         }
+        attroff(COLOR_PAIR(Room->type));
         for (int i = 0 ; i < 2 ; i++){   
             mvprintw(Room->pillars_x[i],  Room->pillars_y[i] , "O");
         }
-        attroff(COLOR_PAIR(Room->type));
         attron(COLOR_PAIR(8));
         for (int i = 0 ; i < Room->n_foods ; i++){   
             mvprintw(Room->foods_x[i],  Room->foods_y[i] , "f");
@@ -543,7 +454,7 @@ int number_of_rooms(int difficulty){
     return n_rooms;
 }
 
-// create new map
+// create new map (level_num-dependent)
 void new_map(int difficulty ,
              int n_rooms , 
              position *** address_corridors_of_all_levels , 
@@ -603,6 +514,12 @@ void new_map(int difficulty ,
     } while(done_rooms < n_rooms);
 
     sort_rooms(*(address_rooms_of_all_levels)[level_num - 1] , n_rooms);
+    
+    if (1 == level_num){
+        (*address_rooms_of_all_levels)[level_num - 1][1].hide = 0; // the player starts from room index 1 (second room)
+        (*address_rooms_of_all_levels)[level_num - 1][0].hide = 0; // the player starts from room index 1 (second room)
+    }
+
 
     //     // adding doors and windows
     // for (int i = 0 ; i < n_rooms ; i++){
