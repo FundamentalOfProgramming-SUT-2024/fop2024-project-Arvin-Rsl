@@ -53,6 +53,10 @@ typedef struct {
     int pillars_x[3];
     int pillars_y[3];
     
+    int n_foods;
+    int foods_x[3];
+    int foods_y[3];
+    
 } room;
 
 int valid_4_corr(int , int);
@@ -65,15 +69,39 @@ void print_room();
 void print_corridors();
 void add_door_and_window();
 void add_pillars();
+void add_food();
 int number_of_rooms();
 int room_valid();
 int find_min_y();
 void sort_rooms();
 int can_corridor_pass(int  , int , room*  , int );
 
+// function to add the regular foods ( 'f' ) to room 
+void add_food(room** address_rooms_this_level , int n_rooms){
+    srand(time(NULL));
+    for (int i = 0 ; i < n_rooms ; i++){
+    
+        room r1 = (*address_rooms_this_level)[i];
+
+        for (int k = 0 ; k < r1.n_foods ; k++){
+            int x_north1 = r1.corner.x;
+            int x_south1 = r1.corner.x + r1.length - 1;
+            int y_west1 = r1.corner.y;
+            int y_east1 = r1.corner.y + r1.width - 1;
+
+            int x = rand() % (x_south1 - x_north1 - 3) + x_north1 + 2;
+            int y = rand() % (y_east1 - y_west1 - 3) + y_west1 + 2;
+            
+            (*address_rooms_this_level)[i].foods_x[k] = x;
+            (*address_rooms_this_level)[i].foods_y[k] = y;
+        }
+    }
+
+}
+
+
 // function to add the pillars ( 'O' ) to room 
 void add_pillars(room** address_rooms_this_level , int n_rooms){
-    // initscr();
     srand(time(NULL));
     for (int i = 0 ; i < n_rooms ; i++){
     
@@ -85,11 +113,9 @@ void add_pillars(room** address_rooms_this_level , int n_rooms){
             int y_west1 = r1.corner.y;
             int y_east1 = r1.corner.y + r1.width - 1;
 
-            int x = rand() % (x_south1 - x_north1 - 2) + x_north1 + 2;
-            int y = rand() % (y_east1 - y_west1 - 2) + y_west1 + 2;
-            // mvprintw(x , y , "%c" , 'O');
-            // refresh();
-            // sleep(1);
+            int x = rand() % (x_south1 - x_north1 - 3) + x_north1 + 2;
+            int y = rand() % (y_east1 - y_west1 - 3) + y_west1 + 2;
+            
             (*address_rooms_this_level)[i].pillars_x[k] = x;
             (*address_rooms_this_level)[i].pillars_y[k] = y;
         }
@@ -463,7 +489,8 @@ void print_room(room *Room){
         init_pair(2 , COLOR_MAGENTA , COLOR_BLACK); 
         init_pair(3 , COLOR_YELLOW , COLOR_BLACK); 
         init_pair(4 , COLOR_BLUE , COLOR_BLACK); 
-        // init_color(5 , 255 , 234 , 0); 
+        init_color(76, 720 , 570 , 800); // for food
+        init_pair(8, 76 , COLOR_BLACK); // for food
         attron(COLOR_PAIR(Room->type));
         for (int y = ul_corner.y + 1; y < ul_corner.y + Room->width - 1 ; y++){
             for (int x = ul_corner.x + 1 ; x < ul_corner.x + Room->length - 1 ; x++){
@@ -472,8 +499,13 @@ void print_room(room *Room){
         }
         for (int i = 0 ; i < 2 ; i++){   
             mvprintw(Room->pillars_x[i],  Room->pillars_y[i] , "O");
-        }  
+        }
         attroff(COLOR_PAIR(Room->type));
+        attron(COLOR_PAIR(8));
+        for (int i = 0 ; i < Room->n_foods ; i++){   
+            mvprintw(Room->foods_x[i],  Room->foods_y[i] , "f");
+        }
+        attroff(COLOR_PAIR(8));
         if (Room->room_number == 1){
             mvprintw(Room->doors_x[0],  Room->doors_y[0] , "+");
         }
@@ -551,6 +583,7 @@ void new_map(int difficulty ,
         ROOM.type = room_types[rand() % 10];
         ROOM.length = rand() % (max_length - 6) + 7;
         ROOM.width = rand() % (max_width - 6) + 7;
+        ROOM.n_foods = rand() % 3;
         ROOM.corner.x = rand() % (max_x_for_corner - min_x_for_corner) + min_x_for_corner;
         ROOM.corner.y = rand() % (max_y_for_corner - min_y_for_corner) + min_y_for_corner;
         if (room_valid(ROOM , address_rooms_of_all_levels , level_num , done_rooms)){
