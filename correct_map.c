@@ -11,7 +11,10 @@
 #define MAX_ROOM 16
 #include "new_map.h"
 #include "move.h"
+#include "song.h"
 #include "messages.h"
+#include <locale.h>
+
 int main(){
     initscr();
     nodelay(stdscr, TRUE);
@@ -20,6 +23,7 @@ int main(){
     curs_set(FALSE);
     start_color(); 
     srand(time(NULL));  
+    setlocale(LC_ALL, "");
     position ** corridors_of_all_levels = (position**)malloc(4 * sizeof(position*));
     for (int i = 0 ; i < 4 ; i++){
         corridors_of_all_levels[i] = (position*)malloc(MAX_CORR * sizeof(position));
@@ -57,6 +61,7 @@ int main(){
 
     printf("done with pillars... \n");
     add_food(rooms_of_all_levels + level_num - 1 , n_rooms);
+    add_gold(rooms_of_all_levels + level_num - 1 , n_rooms);
 
     build_corr(n_rooms , &corridors_of_all_levels , rooms_of_all_levels , level_num , &corr_count_this_level);
     
@@ -64,10 +69,24 @@ int main(){
     player me;
     me.pos.x =  rooms_of_all_levels[level_num - 1][1].corner.x  + rooms_of_all_levels[level_num - 1][1].length/2;
     me.pos.y =  rooms_of_all_levels[level_num - 1][1].corner.y  + rooms_of_all_levels[level_num - 1][1].width/2;
-    me.food_count = 2;
-    me.gold_count = 3;
+    me.food_count = 0;
+    me.gold_count = 0;
     me.health = 13;
     me.color = 24;    
+    char message[] = "Hi! Welcome to Arvin's Rogue!";
+
+
+    // Set getch() to be non-blocking
+    nodelay(stdscr, TRUE);
+
+    // Initialize audio
+    init_audio();
+
+    int current_song = 0; // Start with song1
+
+    // Example: user chooses a soundtrack
+    choose_soundtrack(current_song);
+    int PiCk = 1;
     while(1){
         // attron(COLOR_PAIR(1));
         for (int i = 0 ; i < n_rooms ; i++){
@@ -79,7 +98,7 @@ int main(){
         // if (ch == 'q'){
         //     break;
         // }
-        print_top_message("yo yo this is ma rogue!");
+        print_top_message(message);
         print_bottom_message(&me , level_num);
 
         init_pair(24 , COLOR_CYAN , COLOR_BLACK);
@@ -87,9 +106,19 @@ int main(){
         mvprintw(me.pos.x , me.pos.y , "%c" , 'A');
         int ch = getch();
         if (ch == 'q') {
+            stop_soundtrack();
             break;  
         }
-        if (ch == '/') {
+        else if (ch == 's') {
+            // Stop current soundtrack
+            stop_soundtrack();
+
+            // Switch to the next song
+            current_song += 1;
+            init_audio();
+            choose_soundtrack(current_song);
+        }
+        else if (ch == '/') {
             nodelay(stdscr, FALSE);
             help();  // Show help screen if '/' key is pressed
 
@@ -126,7 +155,37 @@ int main(){
             
             nodelay(stdscr, TRUE);
         }
-        movement(ch , &me);
+
+        // char standing_on =  mvinch(me.pos.x , me.pos.y) & A_CHARTEXT;
+        if (ch == 'p' || ch == 'P') {
+        //     clear();
+        //     if(PiCk == 0){
+        //         // clear();
+        //         // mvprintw(LINES - 2 , 3 , "You can pick now!");
+        //         PiCk = 1;
+        //         attron(COLOR_PAIR(0));
+        //         // char message2[] = "You can pick now!";
+        //         // print_top_message(message2);
+        //         print_corridors(corridors_of_all_levels[level_num - 1] , corr_count_this_level );
+        //         attroff(COLOR_PAIR(0));
+        //         refresh();
+        //     }
+        //     else{
+        //         // clear();
+        //         // mvprintw(LINES - 2 , 3 , "You can not pick now!");
+        //         char message2[] = "You can not pick now!";
+        //         PiCk = 0;
+        //         attron(COLOR_PAIR(1));
+        //         // print_top_message(message2);
+        //         attroff(COLOR_PAIR(1));
+        //         print_corridors(corridors_of_all_levels[level_num - 1] , corr_count_this_level );
+        //         refresh();
+
+        //     }
+        }
+
+
+        movement(PiCk , ch , &me , rooms_of_all_levels + level_num - 1 , n_rooms);
         attroff(COLOR_PAIR(me.color));
         print_corridors(corridors_of_all_levels[level_num - 1] , corr_count_this_level );
         attron(COLOR_PAIR(me.color));
@@ -150,7 +209,8 @@ int main(){
         // }
 
 
-        for(int X = 0 ; X < LINES ; X++){
+        // print # instead of A if A is not in player's position
+        for(int X = 2 ; X < LINES - 1; X++){
             for (int Y = 0 ; Y < COLS ; Y++){
                 char there = mvinch(X , Y) & A_CHARTEXT;
                 if(there == 'A' && !(X == me.pos.x && Y == me.pos.y)){
