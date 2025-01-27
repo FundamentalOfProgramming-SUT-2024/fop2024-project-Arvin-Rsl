@@ -62,7 +62,7 @@ int which_food_in_room(int x , int y , room R){
 
 // returns the index of gold on position x , y
 int which_gold_in_room(int x , int y , room R){
-    for (int i = 0 ; i < R.n_foods ; i++){
+    for (int i = 0 ; i < R.n_golds ; i++){
         if (x == R.golds_x[i] && y == R.golds_y[i]){
             return i;
         }
@@ -175,8 +175,10 @@ void movement(int PiCk , int ch , player* hero , room** address_to_rooms_this_le
                 ((*address_to_rooms_this_level) + room_num)->picked_foods[which_food_in_room(x_new, y_new , (*address_to_rooms_this_level)[room_num])] = 1;
             }
             else if (ccc == 'g' && room_num >= 0){
-                hero->gold_count++;
                 ((*address_to_rooms_this_level) + room_num )->picked_golds[which_gold_in_room(x_new, y_new , (*address_to_rooms_this_level)[room_num])] = 1;
+                if( ((*address_to_rooms_this_level) + room_num )->picked_golds[which_gold_in_room(x_new, y_new , (*address_to_rooms_this_level)[room_num])] == 1){
+                    hero->gold_count++;
+                }
             }
             if (valid_move(x_new , y_new) == 1){
                 hero->pos.x = x_new;
@@ -200,8 +202,10 @@ void movement(int PiCk , int ch , player* hero , room** address_to_rooms_this_le
                 ((*address_to_rooms_this_level) + room_num)->picked_foods[which_food_in_room(x_new, y_new , (*address_to_rooms_this_level)[room_num])] = 1;
             }
             else if (ccc == 'g' && room_num >= 0){
-                hero->gold_count++;
                 ((*address_to_rooms_this_level) + room_num )->picked_golds[which_gold_in_room(x_new, y_new , (*address_to_rooms_this_level)[room_num])] = 1;
+                if( ((*address_to_rooms_this_level) + room_num )->picked_golds[which_gold_in_room(x_new, y_new , (*address_to_rooms_this_level)[room_num])] == 1){
+                    hero->gold_count++;
+                }
             }
             if (valid_move(x_new , y_new) == 1){
                 hero->pos.x = x_new;
@@ -225,8 +229,10 @@ void movement(int PiCk , int ch , player* hero , room** address_to_rooms_this_le
                 ((*address_to_rooms_this_level) + room_num)->picked_foods[which_food_in_room(x_new, y_new , (*address_to_rooms_this_level)[room_num])] = 1;
             }
             else if (ccc == 'g' && room_num >= 0){
-                hero->gold_count++;
-                ((*address_to_rooms_this_level) + room_num)->picked_golds[which_gold_in_room(x_new, y_new , (*address_to_rooms_this_level)[room_num])] = 1;
+                ((*address_to_rooms_this_level) + room_num )->picked_golds[which_gold_in_room(x_new, y_new , (*address_to_rooms_this_level)[room_num])] = 1;
+                if( ((*address_to_rooms_this_level) + room_num )->picked_golds[which_gold_in_room(x_new, y_new , (*address_to_rooms_this_level)[room_num])] == 1){
+                    hero->gold_count++;
+                }
             }
 
             if (valid_move(x_new , y_new) == 1){
@@ -252,8 +258,12 @@ void movement(int PiCk , int ch , player* hero , room** address_to_rooms_this_le
                 ((*address_to_rooms_this_level) + room_num)->picked_foods[which_food_in_room(x_new, y_new , (*address_to_rooms_this_level)[room_num])] = 1;
             }
             else if (ccc == 'g' && room_num >= 0){
-                hero->gold_count++;
-                ((*address_to_rooms_this_level) + room_num)->picked_golds[which_gold_in_room(x_new, y_new , (*address_to_rooms_this_level)[room_num])] = 1;
+                ((*address_to_rooms_this_level) + room_num )->picked_golds[which_gold_in_room(x_new, y_new , (*address_to_rooms_this_level)[room_num])] = 1;
+                if( ((*address_to_rooms_this_level) + room_num )->picked_golds[which_gold_in_room(x_new, y_new , (*address_to_rooms_this_level)[room_num])] == 1){
+                    hero->gold_count++;
+                }
+                // hero->gold_count++;
+                // ((*address_to_rooms_this_level) + room_num)->picked_golds[which_gold_in_room(x_new, y_new , (*address_to_rooms_this_level)[room_num])] = 1;
             }
             if (valid_move(x_new , y_new) == 1){
                 hero->pos.x = x_new;
@@ -277,8 +287,12 @@ void movement(int PiCk , int ch , player* hero , room** address_to_rooms_this_le
                 ((*address_to_rooms_this_level) + room_num )->picked_foods[which_food_in_room(x_new, y_new , (*address_to_rooms_this_level)[room_num])] = 1;
             }
             else if (ccc == 'g' && room_num >= 0){
-                hero->gold_count++;
                 ((*address_to_rooms_this_level) + room_num )->picked_golds[which_gold_in_room(x_new, y_new , (*address_to_rooms_this_level)[room_num])] = 1;
+                if( ((*address_to_rooms_this_level) + room_num )->picked_golds[which_gold_in_room(x_new, y_new , (*address_to_rooms_this_level)[room_num])] == 1){
+                    hero->gold_count++;
+                }
+                // hero->gold_count++;
+                // ((*address_to_rooms_this_level) + room_num )->picked_golds[which_gold_in_room(x_new, y_new , (*address_to_rooms_this_level)[room_num])] = 1;
             }
             if (valid_move(x_new , y_new) == 1){
                 hero->pos.x = x_new;
@@ -302,8 +316,12 @@ void movement(int PiCk , int ch , player* hero , room** address_to_rooms_this_le
                 ((*address_to_rooms_this_level) + room_num)->picked_foods[which_food_in_room(x_new, y_new , (*address_to_rooms_this_level)[room_num])] = 1;
             }
             else if (ccc == 'g' && room_num >= 0){
-                hero->gold_count++;
-                ((*address_to_rooms_this_level) +room_num )->picked_golds[which_gold_in_room(x_new, y_new , (*address_to_rooms_this_level)[room_num])] = 1;
+                ((*address_to_rooms_this_level) + room_num )->picked_golds[which_gold_in_room(x_new, y_new , (*address_to_rooms_this_level)[room_num])] = 1;
+                if( ((*address_to_rooms_this_level) + room_num )->picked_golds[which_gold_in_room(x_new, y_new , (*address_to_rooms_this_level)[room_num])] == 1){
+                    hero->gold_count++;
+                }
+                // hero->gold_count++;
+                // ((*address_to_rooms_this_level) +room_num )->picked_golds[which_gold_in_room(x_new, y_new , (*address_to_rooms_this_level)[room_num])] = 1;
             }
             if (valid_move(x_new , y_new) == 1){
                 hero->pos.x = x_new;
@@ -327,8 +345,12 @@ void movement(int PiCk , int ch , player* hero , room** address_to_rooms_this_le
                 ((*address_to_rooms_this_level) + room_num)->picked_foods[which_food_in_room(x_new, y_new , (*address_to_rooms_this_level)[room_num])] = 1;
             }
             else if (ccc == 'g' && room_num >= 0){
-                hero->gold_count++;
                 ((*address_to_rooms_this_level) + room_num )->picked_golds[which_gold_in_room(x_new, y_new , (*address_to_rooms_this_level)[room_num])] = 1;
+                if( ((*address_to_rooms_this_level) + room_num )->picked_golds[which_gold_in_room(x_new, y_new , (*address_to_rooms_this_level)[room_num])] == 1){
+                    hero->gold_count++;
+                }
+                // hero->gold_count++;
+                // ((*address_to_rooms_this_level) + room_num )->picked_golds[which_gold_in_room(x_new, y_new , (*address_to_rooms_this_level)[room_num])] = 1;
             }
             if (valid_move(x_new , y_new) == 1){
                 hero->pos.x = x_new;
@@ -352,8 +374,12 @@ void movement(int PiCk , int ch , player* hero , room** address_to_rooms_this_le
                 ((*address_to_rooms_this_level) + room_num)->picked_foods[which_food_in_room(x_new, y_new , (*address_to_rooms_this_level)[room_num])] = 1;
             }
             else if (ccc == 'g' && room_num >= 0){
-                hero->gold_count++;
-                ((*address_to_rooms_this_level) + room_num)->picked_golds[which_gold_in_room(x_new, y_new , (*address_to_rooms_this_level)[room_num])] = 1;
+                ((*address_to_rooms_this_level) + room_num )->picked_golds[which_gold_in_room(x_new, y_new , (*address_to_rooms_this_level)[room_num])] = 1;
+                if( ((*address_to_rooms_this_level) + room_num )->picked_golds[which_gold_in_room(x_new, y_new , (*address_to_rooms_this_level)[room_num])] == 1){
+                    hero->gold_count++;
+                }
+                // hero->gold_count++;
+                // ((*address_to_rooms_this_level) + room_num)->picked_golds[which_gold_in_room(x_new, y_new , (*address_to_rooms_this_level)[room_num])] = 1;
             }
             if (valid_move(x_new , y_new) == 1){
                 hero->pos.x = x_new;
