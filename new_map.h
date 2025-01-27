@@ -49,15 +49,17 @@ typedef struct {
     
     // int windows_y[2]; // the first two for windows and the rest for pillars
     // int windows_x[2]; // the first two for windows and the rest for pillars
-
+    // int n_pillars; /// always 3 pillars
     int pillars_x[3];
     int pillars_y[3];
     
     int n_foods;
+    int picked_foods[3]; // 1 if food is picked (don't print it anymore); 0 otherwise
     int foods_x[3];
     int foods_y[3];
 
     int n_golds;
+    int picked_golds[3]; // 1 if food is picked (don't print it anymore); 0 otherwise
     int golds_x[3];
     int golds_y[3];
     
@@ -82,48 +84,82 @@ void sort_rooms();
 int can_corridor_pass(int  , int , room*  , int );
 
 // function to add golds (U+2666) to room 
-void add_gold(room** address_rooms_this_level , int n_rooms){
+void add_gold(room** address_rooms_this_level , int n_rooms){ // first food, then gold
     srand(time(NULL));
     for (int i = 0 ; i < n_rooms ; i++){
     
         room r1 = (*address_rooms_this_level)[i];
+        int x_north1 = r1.corner.x;
+        int x_south1 = r1.corner.x + r1.length - 1;
+        int y_west1 = r1.corner.y;
+        int y_east1 = r1.corner.y + r1.width - 1;
+        int k = 0;
 
-        for (int k = 0 ; k < r1.n_golds ; k++){
-            int x_north1 = r1.corner.x;
-            int x_south1 = r1.corner.x + r1.length - 1;
-            int y_west1 = r1.corner.y;
-            int y_east1 = r1.corner.y + r1.width - 1;
-
+        while (k < r1.n_golds ){
             int x = rand() % (x_south1 - x_north1 - 3) + x_north1 + 2;
             int y = rand() % (y_east1 - y_west1 - 3) + y_west1 + 2;
+
+            int overlap = 0;
+            for (int P = 0 ; P < 3 ; P++){
+                if(x == r1.pillars_x[P] && y == r1.pillars_y[P]){
+                    // the random location overlaps with a pillar
+                    overlap = 1;
+                }
+            }
+            for (int F = 0 ; F < r1.n_foods ; F++){
+                if(x == r1.foods_x[F] && y == r1.foods_y[F]){
+                    // the random location overlaps with a food
+                    overlap = 1;
+                }
+            }
             
-            (*address_rooms_this_level)[i].golds_x[k] = x;
-            (*address_rooms_this_level)[i].golds_y[k] = y;
+
+            if(!overlap){
+                (*address_rooms_this_level)[i].golds_x[k] = x;
+                (*address_rooms_this_level)[i].golds_y[k] = y;
+
+                k++;
+            }
+
         }
+        
     }
 
 }
 
-
 // function to add the regular foods ( 'f' ) to room 
-void add_food(room** address_rooms_this_level , int n_rooms){
+void add_food(room** address_rooms_this_level , int n_rooms){ // first food, then gold
     srand(time(NULL));
     for (int i = 0 ; i < n_rooms ; i++){
     
         room r1 = (*address_rooms_this_level)[i];
+        int x_north1 = r1.corner.x;
+        int x_south1 = r1.corner.x + r1.length - 1;
+        int y_west1 = r1.corner.y;
+        int y_east1 = r1.corner.y + r1.width - 1;
+        int k = 0;
 
-        for (int k = 0 ; k < r1.n_foods ; k++){
-            int x_north1 = r1.corner.x;
-            int x_south1 = r1.corner.x + r1.length - 1;
-            int y_west1 = r1.corner.y;
-            int y_east1 = r1.corner.y + r1.width - 1;
-
+        while (k < r1.n_foods ){
             int x = rand() % (x_south1 - x_north1 - 3) + x_north1 + 2;
             int y = rand() % (y_east1 - y_west1 - 3) + y_west1 + 2;
-            
-            (*address_rooms_this_level)[i].foods_x[k] = x;
-            (*address_rooms_this_level)[i].foods_y[k] = y;
+
+            int overlap = 0;
+            for (int P = 0 ; P < 3 ; P++){
+                if(x == r1.pillars_x[P] && y == r1.pillars_y[P]){
+                    // the random location overlaps with a pillar
+                    overlap = 1;
+                }
+            }
+
+            if(!overlap){
+                (*address_rooms_this_level)[i].foods_x[k] = x;
+                (*address_rooms_this_level)[i].foods_y[k] = y;
+
+                k++;
+            }
+
         }
+    
     }
 
 }
@@ -135,7 +171,7 @@ void add_pillars(room** address_rooms_this_level , int n_rooms){
     
         room r1 = (*address_rooms_this_level)[i];
 
-        for (int k = 0 ; k < 3 ; k++){
+        for (int k = 0 ; k < 3 ; k++){ // always 3 pillars
             int x_north1 = r1.corner.x;
             int x_south1 = r1.corner.x + r1.length - 1;
             int y_west1 = r1.corner.y;
@@ -429,7 +465,7 @@ void print_room(room *Room){
         init_pair(2 , COLOR_MAGENTA , COLOR_BLACK); 
         init_pair(3 , COLOR_YELLOW , COLOR_BLACK); 
         init_pair(4 , COLOR_BLUE , COLOR_BLACK); 
-        init_color(76, 720 , 570 , 800); // for food
+        init_color(76, 990 , 570 , 800); // for food
         init_pair(8, 76 , COLOR_BLACK); // for food
         init_color(77, 1000 , 1000 , 0); // for gold
         init_pair(15, 77 , COLOR_BLACK); // for gold
@@ -445,14 +481,18 @@ void print_room(room *Room){
         }
         attron(COLOR_PAIR(8));
         for (int i = 0 ; i < Room->n_foods ; i++){   
-            mvprintw(Room->foods_x[i],  Room->foods_y[i] , "f");
+            if(Room->picked_foods[i] == 0){
+                mvprintw(Room->foods_x[i],  Room->foods_y[i] , "f");
+            }
         }
         attroff(COLOR_PAIR(8));
 
         attron(COLOR_PAIR(15));
 
         for (int i = 0 ; i < Room->n_golds ; i++){   
-            mvprintw(Room->golds_x[i],  Room->golds_y[i] , "g");
+            if(Room->picked_golds[i] == 0){
+                mvprintw(Room->golds_x[i],  Room->golds_y[i] , "g");
+            }
         }
         attroff(COLOR_PAIR(15));
 
@@ -477,12 +517,12 @@ void print_room(room *Room){
 // function to print corridors 
 void print_corridors(position* corridors_of_this_level , int n_of_corr_characters_on_this_level){
     start_color();
-    init_pair(1, COLOR_YELLOW, COLOR_BLACK);
-    attron(COLOR_PAIR(1));
+    init_pair(100, COLOR_YELLOW, COLOR_BLACK);
+    attron(COLOR_PAIR(100));
     for (int i = 0; i <= n_of_corr_characters_on_this_level; i++){
         mvprintw(corridors_of_this_level[i].x, corridors_of_this_level[i].y, "#");
     }
-    attroff(COLOR_PAIR(1));
+    attroff(COLOR_PAIR(100));
 }
 
 // random number of rooms
@@ -541,6 +581,15 @@ void new_map(int difficulty ,
         }
 
         ROOM.n_golds = rand() % 3;
+
+        // no food/gold has been picked yet
+        for (int F = 0 ; F < ROOM.n_foods ; F++){
+            ROOM.picked_foods[F] = 0;
+        }
+        for (int G = 0 ; G < ROOM.n_golds ; G++){
+            ROOM.picked_golds[G] = 0;
+        }
+
         ROOM.corner.x = rand() % (max_x_for_corner - min_x_for_corner) + min_x_for_corner;
         ROOM.corner.y = rand() % (max_y_for_corner - min_y_for_corner) + min_y_for_corner;
         if (room_valid(ROOM , address_rooms_of_all_levels , level_num , done_rooms)){
