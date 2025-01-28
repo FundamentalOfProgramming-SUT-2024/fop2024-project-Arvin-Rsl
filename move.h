@@ -34,6 +34,7 @@ void trap(player* hero , char* address_global_message){
     // sleep(2);
     // attroff(COLOR_PAIR(1));
 }
+
 // returns the index of the room in which player is standing
 int in_which_room(room* rooms_this_level , int n_rooms , player hero){
     if ((mvinch(hero.pos.x , hero.pos.y-1) & A_CHARTEXT) == '.' || (mvinch(hero.pos.x , hero.pos.y-1) & A_CHARTEXT) == ',' ||
@@ -145,7 +146,7 @@ void pick(int there, int pick_or_not , int x , int y ,player* hero , room** addr
 // check if the character on (x,y) is valid for passing
 int valid_move(int x , int y ){   
     char there = mvinch(x , y) & A_CHARTEXT ;
-    if (there == '.'  || there == ',' || there == '-' || there == '~' || there == '#' || there == '+' || there == '^'){
+    if (there == '.'  || there == ',' || there == '-' || there == '~' || there == '#' || there == '+' || there == '^' || there == '<'){
         return 1;
     }
     else if(there == 'f' || there == 'g'|| there == 'm'|| there == 'd'|| there == 'w'|| there == 'a'|| there == 's' || there == '^'){
@@ -172,8 +173,23 @@ void movement(int PiCk , int ch , player* hero , room** address_to_rooms_this_le
     int room_num = -1;
 
     switch (ch) {
-        case '8': // Up
+        // Up and Down for stairs: (room num here means index)
         case KEY_UP:
+            room_num = in_which_room(*address_to_rooms_this_level , n_rooms_this_level , *hero);
+            if (3 == room_num && hero->pos.x == (*address_to_rooms_this_level)[3].corner.x+1 && hero->pos.y == (*address_to_rooms_this_level)[3].corner.y+1){
+                snprintf(address_global_message, sizeof(char) * 100, "Going Upstairs ...                       ");
+                // sleep(1);
+            }
+            break;
+        case KEY_DOWN:
+            room_num = in_which_room(*address_to_rooms_this_level , n_rooms_this_level , *hero);
+            if (3 == room_num && hero->pos.x == (*address_to_rooms_this_level)[3].corner.x+1 && hero->pos.y == (*address_to_rooms_this_level)[3].corner.y+1){
+                snprintf(address_global_message, sizeof(char) * 100, "Going Downstairs ...                       ");
+                // sleep(1);
+            }
+            break;
+        // movement
+        case '8': // Up
         case 'J':
         case 'j':
             x_new = current.x + x_moves[0];
@@ -211,7 +227,6 @@ void movement(int PiCk , int ch , player* hero , room** address_to_rooms_this_le
             break;
 
         case '2': // Down
-        case KEY_DOWN:
         case 'K':
         case 'k':       
             x_new = current.x + x_moves[1];

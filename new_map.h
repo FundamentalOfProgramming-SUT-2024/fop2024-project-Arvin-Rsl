@@ -773,11 +773,9 @@ void new_map(int difficulty ,
     }
 
     // adding stair (up left corner of room)
-    for (int LEVEL = 1 ; LEVEL <= 4 ; LEVEL ++){
-        (*address_rooms_of_all_levels)[LEVEL - 1][3].stair_x = (*address_rooms_of_all_levels)[LEVEL - 1][3].corner.x + 1;
-        (*address_rooms_of_all_levels)[LEVEL - 1][3].stair_y = (*address_rooms_of_all_levels)[LEVEL - 1][3].corner.y + 1;
-    }
-
+    (*address_rooms_of_all_levels)[level_num - 1][3].stair_x = (*address_rooms_of_all_levels)[level_num - 1][3].corner.x + 1;
+    (*address_rooms_of_all_levels)[level_num - 1][3].stair_y = (*address_rooms_of_all_levels)[level_num - 1][3].corner.y + 1;
+    
 }
 
 // check if new room has overlap with previous ones
