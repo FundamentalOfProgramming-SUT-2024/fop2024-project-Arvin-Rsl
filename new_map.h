@@ -62,6 +62,10 @@ typedef struct {
     int picked_golds[3]; // 1 if food is picked (don't print it anymore); 0 otherwise
     int golds_x[3];
     int golds_y[3];
+
+    int trap_visibility;
+    int trap_x;
+    int trap_y;
     
 } room;
 
@@ -77,13 +81,144 @@ void add_door_and_window();
 void add_pillars();
 void add_food();
 void add_gold();
+void add_trap();
 int number_of_rooms();
 int room_valid();
 int find_min_y();
 void sort_rooms();
 int can_corridor_pass(int  , int , room*  , int );
 
-// function to add golds (U+2666) to room 
+// function to add 3 traps to the whole floor-level 
+void add_trap(room** address_rooms_this_level , int n_rooms){ // first food, then gold, then traps
+    srand(time(NULL));
+    // NOT in room number 2 (index 1) because player starts there
+    int which_room1 = rand() % n_rooms;
+    if(which_room1 == 1){
+        which_room1++;
+    }
+    int which_room2 = rand() % n_rooms;
+    int which_room3 = rand() % n_rooms;
+    do{
+        which_room2 = rand() % n_rooms;
+        which_room3 = rand() % n_rooms;
+    } while(which_room2 == which_room1 || which_room2 == which_room3 || which_room3 == which_room1 || which_room2 == 1 || which_room3 == 1 );
+
+    room r1 = (*address_rooms_this_level)[which_room1];
+    room r2 = (*address_rooms_this_level)[which_room2];
+    room r3 = (*address_rooms_this_level)[which_room3];
+
+    int x_north1 = r1.corner.x;
+    int x_south1 = r1.corner.x + r1.length - 1;
+    int y_west1 = r1.corner.y;
+    int y_east1 = r1.corner.y + r1.width - 1;
+
+    int x_north2 = r2.corner.x;
+    int x_south2 = r2.corner.x + r2.length - 1;
+    int y_west2 = r2.corner.y;
+    int y_east2 = r2.corner.y + r2.width - 1;
+    
+    int x_north3 = r3.corner.x;
+    int x_south3 = r3.corner.x + r3.length - 1;
+    int y_west3 = r3.corner.y;
+    int y_east3 = r3.corner.y + r3.width - 1;
+
+    int k1 = 0;
+    while (k1 < 1){
+        int x = rand() % (x_south1 - x_north1 - 3) + x_north1 + 2;
+        int y = rand() % (y_east1 - y_west1 - 3) + y_west1 + 2;
+
+        int overlap = 0;
+        for (int P = 0 ; P < 3 ; P++){
+            if(x == r1.pillars_x[P] && y == r1.pillars_y[P]){
+                // the random location overlaps with a pillar
+                overlap = 1;
+            }
+        }
+        for (int F = 0 ; F < r1.n_foods ; F++){
+            if(x == r1.foods_x[F] && y == r1.foods_y[F]){
+                // the random location overlaps with a food
+                overlap = 1;
+            }
+        }
+        for (int G = 0 ; G < r1.n_golds ; G++){
+            if(x == r1.golds_x[G] && y == r1.golds_y[G]){
+                // the random location overlaps with a gold
+                overlap = 1;
+            }
+        }
+        
+        if(!overlap){
+            (*address_rooms_this_level)[which_room1].trap_x = x;
+            (*address_rooms_this_level)[which_room1].trap_y = y;
+            k1++;
+        }
+    }
+    int k2 = 0;
+    while (k2 < 1){
+        int x = rand() % (x_south2 - x_north2 - 3) + x_north2 + 2;
+        int y = rand() % (y_east2 - y_west2 - 3) + y_west2 + 2;
+
+        int overlap = 0;
+        for (int P = 0 ; P < 3 ; P++){
+            if(x == r2.pillars_x[P] && y == r2.pillars_y[P]){
+                // the random location overlaps with a pillar
+                overlap = 1;
+            }
+        }
+        for (int F = 0 ; F < r2.n_foods ; F++){
+            if(x == r2.foods_x[F] && y == r2.foods_y[F]){
+                // the random location overlaps with a food
+                overlap = 1;
+            }
+        }
+        for (int G = 0 ; G < r2.n_golds ; G++){
+            if(x == r2.golds_x[G] && y == r2.golds_y[G]){
+                // the random location overlaps with a gold
+                overlap = 1;
+            }
+        }
+        
+        if(!overlap){
+            (*address_rooms_this_level)[which_room2].trap_x = x;
+            (*address_rooms_this_level)[which_room2].trap_y = y;
+            k2++;
+        }
+    }
+    int k3 = 0;
+    while (k3 < 1){
+        int x = rand() % (x_south3 - x_north3 - 3) + x_north3 + 2;
+        int y = rand() % (y_east3 - y_west3 - 3) + y_west3 + 2;
+
+        int overlap = 0;
+        for (int P = 0 ; P < 3 ; P++){
+            if(x == r3.pillars_x[P] && y == r3.pillars_y[P]){
+                // the random location overlaps with a pillar
+                overlap = 1;
+            }
+        }
+        for (int F = 0 ; F < r3.n_foods ; F++){
+            if(x == r3.foods_x[F] && y == r3.foods_y[F]){
+                // the random location overlaps with a food
+                overlap = 1;
+            }
+        }
+        for (int G = 0 ; G < r3.n_golds ; G++){
+            if(x == r3.golds_x[G] && y == r3.golds_y[G]){
+                // the random location overlaps with a gold
+                overlap = 1;
+            }
+        }
+        
+        if(!overlap){
+            (*address_rooms_this_level)[which_room3].trap_x = x;
+            (*address_rooms_this_level)[which_room3].trap_y = y;
+            k3++;
+        }
+    }
+    
+}
+
+// function to add golds to room 
 void add_gold(room** address_rooms_this_level , int n_rooms){ // first food, then gold
     srand(time(NULL));
     for (int i = 0 ; i < n_rooms ; i++){
@@ -475,6 +610,11 @@ void print_room(room *Room){
                 mvprintw(x , y , "%c" , floor);
             }
         }
+        if(Room->trap_x){ // cannot be zero if there is trap in room
+            if(Room->trap_visibility){
+                mvprintw(Room->trap_x , Room->trap_y , "^");
+            }
+        }
         attroff(COLOR_PAIR(Room->type));
         for (int i = 0 ; i < 2 ; i++){   
             mvprintw(Room->pillars_x[i],  Room->pillars_y[i] , "O");
@@ -567,7 +707,6 @@ void new_map(int difficulty ,
     int done_rooms = 0;
     do {
         room ROOM;
-        // ROOM.ajab = 0;
         ROOM.floor_level = level_num;
         ROOM.hide = 0;
         ROOM.type = room_types[rand() % 10];
@@ -592,6 +731,9 @@ void new_map(int difficulty ,
 
         ROOM.corner.x = rand() % (max_x_for_corner - min_x_for_corner) + min_x_for_corner;
         ROOM.corner.y = rand() % (max_y_for_corner - min_y_for_corner) + min_y_for_corner;
+        ROOM.trap_visibility = 0;
+        ROOM.trap_x = 0; // initialized: if later a room's trap_x is zero it means no trap in room
+        ROOM.trap_y = 0;
         if (room_valid(ROOM , address_rooms_of_all_levels , level_num , done_rooms)){
             done_rooms++;
             ROOM.room_number = done_rooms;
