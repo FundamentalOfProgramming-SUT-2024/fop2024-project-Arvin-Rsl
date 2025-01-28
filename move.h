@@ -14,6 +14,7 @@
 #include <math.h>
 #include "new_map.h"
 #include "player.h"
+#include "messages.h"
 
 int x_moves[] = {-1 , +1 , +0 , +0 , -1 , -1 , +1 , +1}; // up , down , right , left , up-right , up-left , down-right , down-left
 int y_moves[] = {+0 , +0 , +1 , -1 , +1 , -1 , +1 , -1};
@@ -23,6 +24,16 @@ void movement();
 void pick(int , int  , int , int , player* , room**  , int );
 int in_which_room();
 int which_food_in_room();
+void trap();
+
+// fell in trap 
+void trap(player* hero , char* address_global_message){
+    hero->health --;
+    // attron(COLOR_PAIR(1));
+    snprintf(address_global_message, sizeof(char) * 100, "You fell in Trap!                             ");
+    // sleep(2);
+    // attroff(COLOR_PAIR(1));
+}
 // returns the index of the room in which player is standing
 int in_which_room(room* rooms_this_level , int n_rooms , player hero){
     if ((mvinch(hero.pos.x , hero.pos.y-1) & A_CHARTEXT) == '.' || (mvinch(hero.pos.x , hero.pos.y-1) & A_CHARTEXT) == ',' ||
@@ -32,7 +43,7 @@ int in_which_room(room* rooms_this_level , int n_rooms , player hero){
         (mvinch(hero.pos.x , hero.pos.y-1) & A_CHARTEXT) == 'f' || (mvinch(hero.pos.x , hero.pos.y-1) & A_CHARTEXT) == 'g' ||
         (mvinch(hero.pos.x , hero.pos.y-1) & A_CHARTEXT) == 'm' || (mvinch(hero.pos.x , hero.pos.y-1) & A_CHARTEXT) == 'd' ||
         (mvinch(hero.pos.x , hero.pos.y-1) & A_CHARTEXT) == 'w' || (mvinch(hero.pos.x , hero.pos.y-1) & A_CHARTEXT) == 'a' ||
-        (mvinch(hero.pos.x , hero.pos.y-1) & A_CHARTEXT) == 's'){
+        (mvinch(hero.pos.x , hero.pos.y-1) & A_CHARTEXT) == 's' || (mvinch(hero.pos.x , hero.pos.y-1) & A_CHARTEXT) == '^'){
         int this_room = 0;
         for (int i = 0 ; i < n_rooms ; i++){
             room r = rooms_this_level[i];
@@ -134,10 +145,10 @@ void pick(int there, int pick_or_not , int x , int y ,player* hero , room** addr
 // check if the character on (x,y) is valid for passing
 int valid_move(int x , int y ){   
     char there = mvinch(x , y) & A_CHARTEXT ;
-    if (there == '.'  || there == ',' || there == '-' || there == '~' || there == '#' || there == '+' ){
+    if (there == '.'  || there == ',' || there == '-' || there == '~' || there == '#' || there == '+' || there == '^'){
         return 1;
     }
-    else if(there == 'f' || there == 'g'|| there == 'm'|| there == 'd'|| there == 'w'|| there == 'a'|| there == 's'){
+    else if(there == 'f' || there == 'g'|| there == 'm'|| there == 'd'|| there == 'w'|| there == 'a'|| there == 's' || there == '^'){
         return 2;
     }
     return 0;
@@ -145,7 +156,7 @@ int valid_move(int x , int y ){
 // checked
 
 // technically just a switch/case that changes the players position (if valid) .  
-void movement(int PiCk , int ch , player* hero , room** address_to_rooms_this_level , int n_rooms_this_level){ // later in while(1) of the print_map() function: 
+void movement(int PiCk , int ch , player* hero , room** address_to_rooms_this_level , int n_rooms_this_level , char* address_global_message){ // later in while(1) of the print_map() function: 
                                       // char ch = getchar();
                                       // attron
                                       // mvprintw(hero.pos.x , hero.pos.y , "A");
@@ -170,23 +181,33 @@ void movement(int PiCk , int ch , player* hero , room** address_to_rooms_this_le
             ccc = mvinch(x_new , y_new) & A_CHARTEXT;
             //// PAY Attention: here by room_num I mean room_index
             room_num = in_which_room(*address_to_rooms_this_level , n_rooms_this_level , *hero);
+
+            // trap
+            if(((*address_to_rooms_this_level) + room_num)->trap_x){
+                if(x_new == ((*address_to_rooms_this_level) + room_num)->trap_x && y_new == ((*address_to_rooms_this_level) + room_num)->trap_y){
+                    ((*address_to_rooms_this_level) + room_num)->trap_visibility = 1;
+                    trap(hero , address_global_message);
+                    // clear(); // for message
+                }
+            }
+            // food
             if (ccc == 'f' && room_num >= 0){
                 hero->food_count++;
                 ((*address_to_rooms_this_level) + room_num)->picked_foods[which_food_in_room(x_new, y_new , (*address_to_rooms_this_level)[room_num])] = 1;
             }
+            // gold
             else if (ccc == 'g' && room_num >= 0){
                 ((*address_to_rooms_this_level) + room_num )->picked_golds[which_gold_in_room(x_new, y_new , (*address_to_rooms_this_level)[room_num])] = 1;
                 if( ((*address_to_rooms_this_level) + room_num )->picked_golds[which_gold_in_room(x_new, y_new , (*address_to_rooms_this_level)[room_num])] == 1){
                     hero->gold_count++;
+                    snprintf(address_global_message, sizeof(char) * 100, "+1 Gold!                             ");
                 }
             }
+            // just move
             if (valid_move(x_new , y_new) == 1){
                 hero->pos.x = x_new;
                 hero->pos.y = y_new;
             } 
-            else if(valid_move(x_new , y_new) == 2){
-                // pick(ccc , PiCk ,x_new , y_new, hero ,  address_to_rooms_this_level, n_rooms_this_level);
-            }
             break;
 
         case '2': // Down
@@ -197,6 +218,14 @@ void movement(int PiCk , int ch , player* hero , room** address_to_rooms_this_le
             y_new = current.y + y_moves[1];
             ccc = mvinch(x_new , y_new) & A_CHARTEXT;
             room_num = in_which_room(*address_to_rooms_this_level , n_rooms_this_level , *hero);
+            // trap
+            if(((*address_to_rooms_this_level) + room_num)->trap_x){
+                if(x_new == ((*address_to_rooms_this_level) + room_num)->trap_x && y_new == ((*address_to_rooms_this_level) + room_num)->trap_y){
+                    ((*address_to_rooms_this_level) + room_num)->trap_visibility = 1;
+                    trap(hero , address_global_message);
+
+                }
+            }
             if (ccc == 'f' && room_num >= 0){
                 hero->food_count++;
                 ((*address_to_rooms_this_level) + room_num)->picked_foods[which_food_in_room(x_new, y_new , (*address_to_rooms_this_level)[room_num])] = 1;
@@ -205,6 +234,7 @@ void movement(int PiCk , int ch , player* hero , room** address_to_rooms_this_le
                 ((*address_to_rooms_this_level) + room_num )->picked_golds[which_gold_in_room(x_new, y_new , (*address_to_rooms_this_level)[room_num])] = 1;
                 if( ((*address_to_rooms_this_level) + room_num )->picked_golds[which_gold_in_room(x_new, y_new , (*address_to_rooms_this_level)[room_num])] == 1){
                     hero->gold_count++;
+                    snprintf(address_global_message, sizeof(char) * 100, "+1 Gold!                             ");
                 }
             }
             if (valid_move(x_new , y_new) == 1){
@@ -224,6 +254,14 @@ void movement(int PiCk , int ch , player* hero , room** address_to_rooms_this_le
             y_new = current.y + y_moves[2];
             ccc = mvinch(x_new , y_new) & A_CHARTEXT;
             room_num = in_which_room(*address_to_rooms_this_level , n_rooms_this_level , *hero);
+            // trap
+            if(((*address_to_rooms_this_level) + room_num)->trap_x){
+                if(x_new == ((*address_to_rooms_this_level) + room_num)->trap_x && y_new == ((*address_to_rooms_this_level) + room_num)->trap_y){
+                    ((*address_to_rooms_this_level) + room_num)->trap_visibility = 1;
+                    trap(hero , address_global_message);
+
+                }
+            }
             if (ccc == 'f' && room_num >= 0){
                 hero->food_count++;
                 ((*address_to_rooms_this_level) + room_num)->picked_foods[which_food_in_room(x_new, y_new , (*address_to_rooms_this_level)[room_num])] = 1;
@@ -232,6 +270,7 @@ void movement(int PiCk , int ch , player* hero , room** address_to_rooms_this_le
                 ((*address_to_rooms_this_level) + room_num )->picked_golds[which_gold_in_room(x_new, y_new , (*address_to_rooms_this_level)[room_num])] = 1;
                 if( ((*address_to_rooms_this_level) + room_num )->picked_golds[which_gold_in_room(x_new, y_new , (*address_to_rooms_this_level)[room_num])] == 1){
                     hero->gold_count++;
+                    snprintf(address_global_message, sizeof(char) * 100, "+1 Gold!                             ");
                 }
             }
 
@@ -252,6 +291,13 @@ void movement(int PiCk , int ch , player* hero , room** address_to_rooms_this_le
             y_new = current.y + y_moves[3];
             ccc = mvinch(x_new , y_new) & A_CHARTEXT;
             room_num = in_which_room(*address_to_rooms_this_level , n_rooms_this_level , *hero);
+            // trap
+            if(((*address_to_rooms_this_level) + room_num)->trap_x){
+                if(x_new == ((*address_to_rooms_this_level) + room_num)->trap_x && y_new == ((*address_to_rooms_this_level) + room_num)->trap_y){
+                    ((*address_to_rooms_this_level) + room_num)->trap_visibility = 1;
+                    trap(hero , address_global_message);
+                }
+            }
 
             if (ccc == 'f' && room_num >= 0){
                 hero->food_count++;
@@ -261,6 +307,7 @@ void movement(int PiCk , int ch , player* hero , room** address_to_rooms_this_le
                 ((*address_to_rooms_this_level) + room_num )->picked_golds[which_gold_in_room(x_new, y_new , (*address_to_rooms_this_level)[room_num])] = 1;
                 if( ((*address_to_rooms_this_level) + room_num )->picked_golds[which_gold_in_room(x_new, y_new , (*address_to_rooms_this_level)[room_num])] == 1){
                     hero->gold_count++;
+                    snprintf(address_global_message, sizeof(char) * 100, "+1 Gold!                             ");
                 }
                 // hero->gold_count++;
                 // ((*address_to_rooms_this_level) + room_num)->picked_golds[which_gold_in_room(x_new, y_new , (*address_to_rooms_this_level)[room_num])] = 1;
@@ -282,6 +329,15 @@ void movement(int PiCk , int ch , player* hero , room** address_to_rooms_this_le
             ccc = mvinch(x_new , y_new) & A_CHARTEXT;
             room_num = in_which_room(*address_to_rooms_this_level , n_rooms_this_level , *hero);
 
+            // trap
+            if(((*address_to_rooms_this_level) + room_num)->trap_x){
+                if(x_new == ((*address_to_rooms_this_level) + room_num)->trap_x && y_new == ((*address_to_rooms_this_level) + room_num)->trap_y){
+                    ((*address_to_rooms_this_level) + room_num)->trap_visibility = 1;
+                    trap(hero , address_global_message);
+
+                }
+            }
+
             if (ccc == 'f' && room_num >= 0){
                 hero->food_count++;
                 ((*address_to_rooms_this_level) + room_num )->picked_foods[which_food_in_room(x_new, y_new , (*address_to_rooms_this_level)[room_num])] = 1;
@@ -290,6 +346,7 @@ void movement(int PiCk , int ch , player* hero , room** address_to_rooms_this_le
                 ((*address_to_rooms_this_level) + room_num )->picked_golds[which_gold_in_room(x_new, y_new , (*address_to_rooms_this_level)[room_num])] = 1;
                 if( ((*address_to_rooms_this_level) + room_num )->picked_golds[which_gold_in_room(x_new, y_new , (*address_to_rooms_this_level)[room_num])] == 1){
                     hero->gold_count++;
+                    snprintf(address_global_message, sizeof(char) * 100, "+1 Gold!                             ");
                 }
                 // hero->gold_count++;
                 // ((*address_to_rooms_this_level) + room_num )->picked_golds[which_gold_in_room(x_new, y_new , (*address_to_rooms_this_level)[room_num])] = 1;
@@ -310,6 +367,14 @@ void movement(int PiCk , int ch , player* hero , room** address_to_rooms_this_le
             y_new = current.y + y_moves[5];
             ccc = mvinch(x_new , y_new) & A_CHARTEXT;
             room_num = in_which_room(*address_to_rooms_this_level , n_rooms_this_level , *hero);
+            // trap
+            if(((*address_to_rooms_this_level) + room_num)->trap_x){
+                if(x_new == ((*address_to_rooms_this_level) + room_num)->trap_x && y_new == ((*address_to_rooms_this_level) + room_num)->trap_y){
+                    ((*address_to_rooms_this_level) + room_num)->trap_visibility = 1;
+                    trap(hero , address_global_message);
+
+                }
+            }
 
             if (ccc == 'f' && room_num >= 0){
                 hero->food_count++;
@@ -319,6 +384,7 @@ void movement(int PiCk , int ch , player* hero , room** address_to_rooms_this_le
                 ((*address_to_rooms_this_level) + room_num )->picked_golds[which_gold_in_room(x_new, y_new , (*address_to_rooms_this_level)[room_num])] = 1;
                 if( ((*address_to_rooms_this_level) + room_num )->picked_golds[which_gold_in_room(x_new, y_new , (*address_to_rooms_this_level)[room_num])] == 1){
                     hero->gold_count++;
+                    snprintf(address_global_message, sizeof(char) * 100, "+1 Gold!                             ");
                 }
                 // hero->gold_count++;
                 // ((*address_to_rooms_this_level) +room_num )->picked_golds[which_gold_in_room(x_new, y_new , (*address_to_rooms_this_level)[room_num])] = 1;
@@ -339,6 +405,13 @@ void movement(int PiCk , int ch , player* hero , room** address_to_rooms_this_le
             y_new = current.y + y_moves[7];
             ccc = mvinch(x_new , y_new) & A_CHARTEXT;
             room_num = in_which_room(*address_to_rooms_this_level , n_rooms_this_level , *hero);
+            // trap
+            if(((*address_to_rooms_this_level) + room_num)->trap_x){
+                if(x_new == ((*address_to_rooms_this_level) + room_num)->trap_x && y_new == ((*address_to_rooms_this_level) + room_num)->trap_y){
+                    ((*address_to_rooms_this_level) + room_num)->trap_visibility = 1;
+                    trap(hero , address_global_message);
+                }
+            }
 
             if (ccc == 'f' && room_num >= 0){
                 hero->food_count++;
@@ -348,6 +421,7 @@ void movement(int PiCk , int ch , player* hero , room** address_to_rooms_this_le
                 ((*address_to_rooms_this_level) + room_num )->picked_golds[which_gold_in_room(x_new, y_new , (*address_to_rooms_this_level)[room_num])] = 1;
                 if( ((*address_to_rooms_this_level) + room_num )->picked_golds[which_gold_in_room(x_new, y_new , (*address_to_rooms_this_level)[room_num])] == 1){
                     hero->gold_count++;
+                    snprintf(address_global_message, sizeof(char) * 100, "+1 Gold!                             ");
                 }
                 // hero->gold_count++;
                 // ((*address_to_rooms_this_level) + room_num )->picked_golds[which_gold_in_room(x_new, y_new , (*address_to_rooms_this_level)[room_num])] = 1;
@@ -368,6 +442,14 @@ void movement(int PiCk , int ch , player* hero , room** address_to_rooms_this_le
             y_new = current.y + y_moves[6];
             ccc = mvinch(x_new , y_new) & A_CHARTEXT;
             room_num = in_which_room(*address_to_rooms_this_level , n_rooms_this_level , *hero);
+            // trap
+            if(((*address_to_rooms_this_level) + room_num)->trap_x){
+                if(x_new == ((*address_to_rooms_this_level) + room_num)->trap_x && y_new == ((*address_to_rooms_this_level) + room_num)->trap_y){
+                    ((*address_to_rooms_this_level) + room_num)->trap_visibility = 1;
+                    trap(hero , address_global_message);
+
+                }
+            }
 
             if (ccc == 'f' && room_num >= 0){
                 hero->food_count++;
@@ -377,6 +459,7 @@ void movement(int PiCk , int ch , player* hero , room** address_to_rooms_this_le
                 ((*address_to_rooms_this_level) + room_num )->picked_golds[which_gold_in_room(x_new, y_new , (*address_to_rooms_this_level)[room_num])] = 1;
                 if( ((*address_to_rooms_this_level) + room_num )->picked_golds[which_gold_in_room(x_new, y_new , (*address_to_rooms_this_level)[room_num])] == 1){
                     hero->gold_count++;
+                    snprintf(address_global_message, sizeof(char) * 100, "+1 Gold!                             ");
                 }
                 // hero->gold_count++;
                 // ((*address_to_rooms_this_level) + room_num)->picked_golds[which_gold_in_room(x_new, y_new , (*address_to_rooms_this_level)[room_num])] = 1;

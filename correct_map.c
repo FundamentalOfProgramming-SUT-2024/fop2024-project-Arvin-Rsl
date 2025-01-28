@@ -14,7 +14,7 @@
 #include "song.h"
 #include "messages.h"
 #include <locale.h>
-
+char global_message[100] = "Welcome to Arvin's Rogue!";
 int main(){
     initscr();
     nodelay(stdscr, TRUE);
@@ -49,8 +49,11 @@ int main(){
     int corr_count_this_level = 0;
 
     // printf("Before new_map\n");
+    printf("trying to make rooms ... \n");
+
     new_map(difficulty, n_rooms, &corridors_of_all_levels, level_num, &rooms_of_all_levels);
     // printf("After new_map\n");
+    printf("done making rooms! :)\n");
 
     printf("trying to make doors ... \n");
     add_door_and_window(rooms_of_all_levels + level_num - 1 , n_rooms);
@@ -60,8 +63,10 @@ int main(){
     add_pillars(rooms_of_all_levels + level_num - 1 , n_rooms);
 
     printf("done with pillars... \n");
+    
     add_food(rooms_of_all_levels + level_num - 1 , n_rooms);
     add_gold(rooms_of_all_levels + level_num - 1 , n_rooms);
+    add_trap(rooms_of_all_levels + level_num - 1 , n_rooms);
 
     build_corr(n_rooms , &corridors_of_all_levels , rooms_of_all_levels , level_num , &corr_count_this_level);
     
@@ -73,7 +78,6 @@ int main(){
     me.gold_count = 0;
     me.health = 13;
     me.color = 24;    
-    char message[] = "Hi! Welcome to Arvin's Rogue!";
 
 
     // Set getch() to be non-blocking
@@ -88,17 +92,17 @@ int main(){
     choose_soundtrack(current_song);
     int PiCk = 1;
     while(1){
-        // attron(COLOR_PAIR(1));
         for (int i = 0 ; i < n_rooms ; i++){
-            init_pair(1 , COLOR_CYAN , COLOR_BLACK);
             print_room(rooms_of_all_levels[level_num - 1] + i);
         }
+
         print_corridors(corridors_of_all_levels[level_num - 1] , corr_count_this_level);
         // int ch = getch();
         // if (ch == 'q'){
         //     break;
         // }
-        print_top_message(message);
+        print_top_message(global_message);
+        
         print_bottom_message(&me , level_num);
 
         init_pair(24 , COLOR_CYAN , COLOR_BLACK);
@@ -185,7 +189,7 @@ int main(){
         }
 
 
-        movement(PiCk , ch , &me , rooms_of_all_levels + level_num - 1 , n_rooms);
+        movement(PiCk , ch , &me , rooms_of_all_levels + level_num - 1 , n_rooms , global_message);
         attroff(COLOR_PAIR(me.color));
         print_corridors(corridors_of_all_levels[level_num - 1] , corr_count_this_level );
         attron(COLOR_PAIR(me.color));

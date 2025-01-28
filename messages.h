@@ -13,6 +13,11 @@
 #include <ctype.h>
 #include <ncurses.h>
 #include "player.h"
+#include <locale.h>
+#include <pthread.h> // for pthread functions   !!!! bad
+#include <unistd.h> // for usleep()
+#include "new_map.h"
+
 
 // my LINES is 45 and COLS is 184
 
@@ -21,57 +26,29 @@
 void help();
 void print_top_message();
 void print_bottom_message();
+// void* decrease_health();
 
-// // x (row) and y (col)
-// typedef struct {
-//     int x; // row
-//     int y; // col
-// } position;
-
-// // room
-// typedef struct {
-//     int floor_level; // the floor/level/ground where room is located (start floor: 1 , end floor: 4)
-//     int room_number; // room's number in that floor , starting from 1
-//     // length and width include the wall characters
-//     int length; // |
-//                 // |
-//                 // |
-//                 // |
-//     int width;  // ____
-//     int hide;   // if 0, the Room is visible
-//     int number_of_doors;
-//     int number_of_windows;
-//     int number_of_pillars;
-//     position corner; // corner = upper left corner of the room
-//     int type; // 0 => Regular Room
-//               // 1 => Battle Room (trap)
-//               // 2 => Enchant Room
-//               // 3 => Treasure Room ( Third is the charm :D )
-//               // 4 => Nightmare Room
-// /*  Type of Room:    Pillar Char:       Floor Char      Floor & Pillar Color      int type  
-//     Regular Room          O                 .                   White                 0
-//     Battle Room        No Pillar            .                   Red                   1
-//     Enchant Room          O                 ,                   Magenta               2
-//     Treasure Room      No Pillar            -                   Yellow                3
-//     Nightmare Room        O                 ~                   Blue                  4
-
-// */
-//     int doors_x[3];
-//     int doors_y[3];
-    
-//     int windows_and_pillars_x[2]; // the first two for windows and the rest for pillars
-//     int windows_and_pillars_y[2]; // the first two for windows and the rest for pillars
-
-//     // int pillars_x[2];
-//     // int pillars_y[2];
-    
-// } room;
+// void* decrease_health(void* arg , int difficulty , player *hero){
+//     while (1) {
+//         double rate = 1.2 * difficulty; // decrease rate
+//         int delay = 10000000; // delay in microseconds
+//         usleep(delay);
+//         hero->health--;
+//         if (hero->health < 0) hero->health = 0; 
+//     }
+//     return NULL;
+// }
 
 // print message (top of the map)
 void print_top_message(char * message){
+    setlocale(LC_ALL, "");
     // HELP
     mvprintw(0 , COLS - 18 - 3 , "Press '/' for help" ); // 18 chars
     mvprintw(0 , 3 , "%s" , message); 
+    // usleep(500000);
+    // Sleep for 5 seconds without blocking
+    // struct timespec req = {5, 0}; // 5 seconds
+    // nanosleep(&req, NULL);
 }
 
 
@@ -89,18 +66,17 @@ void print_bottom_message(player* hero , int level_num){
 
 
     // gold count
-    init_pair(74 , COLOR_YELLOW , COLOR_BLACK);
-    attron(COLOR_PAIR(74));
+    attron(COLOR_PAIR(15));
     mvprintw(LINES - 1 , 10 + start_col + 14 , "Gold: "); // 6 chars
-    attroff(COLOR_PAIR(74));
+    attroff(COLOR_PAIR(15));
     mvprintw(LINES - 1 , 10 + start_col + 14 + 6 , "%d" , hero->gold_count); // 1 char
 
 
     // food count
-    init_pair(75 , COLOR_MAGENTA , COLOR_BLACK);
-    attron(COLOR_PAIR(75));
+    // init_pair(75 , COLOR_MAGENTA , COLOR_BLACK);
+    attron(COLOR_PAIR(8));
     mvprintw(LINES - 1, 2*10 + start_col + 14 + 7, "Food: " ); // 6 chars
-    attroff(COLOR_PAIR(75));
+    attroff(COLOR_PAIR(8));
     mvprintw(LINES - 1, 2*10 + start_col + 14 + 7 + 6, "%d" , hero->food_count); // 1 chars
 
 
@@ -119,8 +95,14 @@ void print_bottom_message(player* hero , int level_num){
     mvprintw(LINES - 1, 3*10 + start_col + 14 + 7 + 7 , "Health: "); // 8 chars
     attroff(COLOR_CYAN);
     attron(COLOR_PAIR(3));
-    for (int i = 0 ; i < hero->health ; i++){ // maximum: 16 chars
-        mvprintw(LINES - 1, 3*10 + start_col + 14 + 7 + 7 + 8 + i, "*");
+    for (int i = 0 ; i < 16 ; i++){ // maximum: 16 chars
+
+        if (i < hero->health) {
+            mvprintw(LINES - 1, 3*10 + start_col + 14 + 7 + 7 + 8 + i, "%c", '*');
+        } else {
+            mvprintw(LINES - 1, 3*10 + start_col + 14 + 7 + 7 + 8 + i, "%c", ' ');
+        }
+        // mvprintw(LINES - 1, 3*10 + start_col + 14 + 7 + 7 + 8 + i, "%c" , '*');
     }
     attroff(COLOR_PAIR(3));
 }
