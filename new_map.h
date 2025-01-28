@@ -66,8 +66,14 @@ typedef struct {
     int trap_visibility;
     int trap_x;
     int trap_y;
+
+// staircase is always in room index 3 (4th room). 
+    int stair_x; 
+    int stair_y;
+
     
 } room;
+
 
 int valid_4_corr(int , int);
 void print_black_rooms(int , room** , int);
@@ -87,6 +93,7 @@ int room_valid();
 int find_min_y();
 void sort_rooms();
 int can_corridor_pass(int  , int , room*  , int );
+
 
 // function to add 3 traps to the whole floor-level 
 void add_trap(room** address_rooms_this_level , int n_rooms){ // first food, then gold, then traps
@@ -619,6 +626,12 @@ void print_room(room *Room){
         for (int i = 0 ; i < 2 ; i++){   
             mvprintw(Room->pillars_x[i],  Room->pillars_y[i] , "O");
         }
+
+        if (Room->room_number == 4){
+            // room index 3 (STAIRS!)
+            mvprintw(Room->stair_x , Room->stair_y , "<");
+        }
+
         attron(COLOR_PAIR(8));
         for (int i = 0 ; i < Room->n_foods ; i++){   
             if(Room->picked_foods[i] == 0){
@@ -734,6 +747,8 @@ void new_map(int difficulty ,
         ROOM.trap_visibility = 0;
         ROOM.trap_x = 0; // initialized: if later a room's trap_x is zero it means no trap in room
         ROOM.trap_y = 0;
+        ROOM.stair_x = 0;
+        ROOM.stair_y = 0;
         if (room_valid(ROOM , address_rooms_of_all_levels , level_num , done_rooms)){
             done_rooms++;
             ROOM.room_number = done_rooms;
@@ -754,16 +769,15 @@ void new_map(int difficulty ,
     
     if (1 == level_num){
         (*address_rooms_of_all_levels)[level_num - 1][1].hide = 0; // the player starts from room index 1 (second room)
-        (*address_rooms_of_all_levels)[level_num - 1][0].hide = 0; // the player starts from room index 1 (second room)
+        // (*address_rooms_of_all_levels)[level_num - 1][0].hide = 0; // the player starts from room index 1 (second room)
     }
 
+    // adding stair (up left corner of room)
+    for (int LEVEL = 1 ; LEVEL <= 4 ; LEVEL ++){
+        (*address_rooms_of_all_levels)[LEVEL - 1][3].stair_x = (*address_rooms_of_all_levels)[LEVEL - 1][3].corner.x + 1;
+        (*address_rooms_of_all_levels)[LEVEL - 1][3].stair_y = (*address_rooms_of_all_levels)[LEVEL - 1][3].corner.y + 1;
+    }
 
-    //     // adding doors and windows
-    // for (int i = 0 ; i < n_rooms ; i++){
-    //     srand(time(NULL));
-    //     add_door_and_window((*address_rooms_of_all_levels)[level_num - 1] + i , n_rooms);
-    //     // add_pillars((*address_rooms_of_all_levels)[level_num - 1] + i);
-    // }
 }
 
 // check if new room has overlap with previous ones
