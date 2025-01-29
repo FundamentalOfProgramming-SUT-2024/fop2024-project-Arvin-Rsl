@@ -71,6 +71,10 @@ typedef struct {
     int stair_x; 
     int stair_y;
 
+// We either have 1 black gold in room index 0 (room number 1) on each floor level, or we don't have any on that level
+    int black_gold; // 0 if no black gold, 1 if there is one
+    int black_gold_x;
+    int black_gold_y;
     
 } room;
 
@@ -87,6 +91,7 @@ void add_door_and_window();
 void add_pillars();
 void add_food();
 void add_gold();
+void add_black_gold();
 void add_trap();
 int number_of_rooms();
 int room_valid();
@@ -224,6 +229,57 @@ void add_trap(room** address_rooms_this_level , int n_rooms){ // first food, the
     }
     
 }
+
+// function to add black gold to room index 0
+void add_black_gold(room** address_rooms_this_level , int n_rooms){ // first food, then gold
+    srand(time(NULL));
+    
+    room r1 = (*address_rooms_this_level)[0];
+    int x_north1 = r1.corner.x;
+    int x_south1 = r1.corner.x + r1.length - 1;
+    int y_west1 = r1.corner.y;
+    int y_east1 = r1.corner.y + r1.width - 1;
+    r1.black_gold = rand() % 2;
+    (*address_rooms_this_level)[0].black_gold = r1.black_gold;
+
+    int k = 0 ;
+    while (k < r1.black_gold ){
+        int x = rand() % (x_south1 - x_north1 - 3) + x_north1 + 2;
+        int y = rand() % (y_east1 - y_west1 - 3) + y_west1 + 2;
+
+        int overlap = 0;
+        for (int P = 0 ; P < 3 ; P++){
+            if(x == r1.pillars_x[P] && y == r1.pillars_y[P]){
+                // the random location overlaps with a pillar
+                overlap = 1;
+            }
+        }
+        for (int F = 0 ; F < r1.n_foods ; F++){
+            if(x == r1.foods_x[F] && y == r1.foods_y[F]){
+                // the random location overlaps with a food
+                overlap = 1;
+            }
+        }
+        for (int G = 0 ; G < r1.n_golds ; G++){
+            if(x == r1.golds_x[G] && y == r1.golds_y[G]){
+                // the random location overlaps with a gold
+                overlap = 1;
+            }
+        }
+        
+
+        if(!overlap){
+            (*address_rooms_this_level)[0].black_gold_x = x;
+            (*address_rooms_this_level)[0].black_gold_y = y;
+
+            k++;
+        }
+
+    }
+        
+
+}
+
 
 // function to add golds to room 
 void add_gold(room** address_rooms_this_level , int n_rooms){ // first food, then gold
@@ -741,6 +797,9 @@ void print_room(room *Room){
         init_pair(8, 76 , COLOR_BLACK); // for food
         init_color(77, 1000 , 1000 , 0); // for gold
         init_pair(15, 77 , COLOR_BLACK); // for gold
+        init_color(78, 700, 700, 0); // for black gold
+        init_pair(16, 78 , COLOR_BLACK); // for black gold
+
         if(Room->type == 3){
             attron(COLOR_PAIR(33));
         }
@@ -787,6 +846,14 @@ void print_room(room *Room){
                 }
             }
             attroff(COLOR_PAIR(15));
+
+            // black gold
+            attron(COLOR_PAIR(16));
+            if(Room->black_gold == 1){
+                mvprintw(Room->black_gold_x,  Room->black_gold_y , "G");
+            }
+            attroff(COLOR_PAIR(16));
+
         }
         
         // staircase
@@ -898,6 +965,9 @@ void new_map(int difficulty ,
         ROOM.trap_y = 0;
         ROOM.stair_x = 0;
         ROOM.stair_y = 0;
+        ROOM.black_gold = 0;
+        ROOM.black_gold_x = 0;
+        ROOM.black_gold_y = 0;
         if (room_valid(ROOM , address_rooms_of_all_levels , level_num , done_rooms)){
             done_rooms++;
             ROOM.room_number = done_rooms;
@@ -927,6 +997,7 @@ void new_map(int difficulty ,
     // adding stair (up left corner of room)
     (*address_rooms_of_all_levels)[level_num - 1][3].stair_x = (*address_rooms_of_all_levels)[level_num - 1][3].corner.x + 1;
     (*address_rooms_of_all_levels)[level_num - 1][3].stair_y = (*address_rooms_of_all_levels)[level_num - 1][3].corner.y + 1;
+    
     
 }
 

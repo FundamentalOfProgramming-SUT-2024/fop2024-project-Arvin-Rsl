@@ -160,7 +160,7 @@ int valid_move(int x , int y ){
     if (there == '.'  || there == ',' || there == '-' || there == '~' || there == '#' || there == '+' || there == '^' || there == '<'){
         return 1;
     }
-    else if(there == 'f' || there == 'g'|| there == 'm'|| there == 'd'|| there == 'w'|| there == 'a'|| there == 's' || there == '^'){
+    else if(there == 'f' || there == 'G'|| there == 'g'|| there == 'm'|| there == 'd'|| there == 'w'|| there == 'a'|| there == 's' || there == '^'){
         return 2;
     }
     return 0;
@@ -585,6 +585,13 @@ void movement2(int PiCk , int ch , player* hero , room** rooms_of_all_levels , i
                     snprintf(address_global_message, sizeof(char) * 100, "+1 Gold!                                                                        ");
                 }
             }
+            else if (ccc == 'G' && room_num >= 0){
+                (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->black_gold = 0;
+                if(!(*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->black_gold){
+                    hero->gold_count += 15;
+                    snprintf(address_global_message, sizeof(char) * 100, "+15 Gold!                                                                        ");
+                }
+            }
             // just move
             if (valid_move(x_new, y_new) == 1){
                 hero->pos.x = x_new;
@@ -616,6 +623,13 @@ void movement2(int PiCk , int ch , player* hero , room** rooms_of_all_levels , i
                 if((*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->picked_golds[which_gold_in_room(x_new, y_new , (*(rooms_of_all_levels + *ptr_level_num - 1))[room_num])] == 1){
                     hero->gold_count++;
                     snprintf(address_global_message, sizeof(char) * 100, "+1 Gold!                                                                 ");
+                }
+            }
+            else if (ccc == 'G' && room_num >= 0){
+                (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->black_gold = 0;
+                if(!(*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->black_gold){
+                    hero->gold_count += 15;
+                    snprintf(address_global_message, sizeof(char) * 100, "+15 Gold!                                                                        ");
                 }
             }
             if (valid_move(x_new , y_new) == 1){
@@ -654,7 +668,13 @@ void movement2(int PiCk , int ch , player* hero , room** rooms_of_all_levels , i
                     snprintf(address_global_message, sizeof(char) * 100, "+1 Gold!                                                                         ");
                 }
             }
-
+            else if (ccc == 'G' && room_num >= 0){
+                (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->black_gold = 0;
+                if(!(*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->black_gold){
+                    hero->gold_count += 15;
+                    snprintf(address_global_message, sizeof(char) * 100, "+15 Gold!                                                                        ");
+                }
+            }
             if (valid_move(x_new , y_new) == 1){
                 hero->pos.x = x_new;
                 hero->pos.y = y_new;
@@ -688,6 +708,13 @@ void movement2(int PiCk , int ch , player* hero , room** rooms_of_all_levels , i
                 if((*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->picked_golds[which_gold_in_room(x_new, y_new , (*(rooms_of_all_levels + *ptr_level_num - 1))[room_num])] == 1){
                     hero->gold_count++;
                     snprintf(address_global_message, sizeof(char) * 100, "+1 Gold!                                                                    ");
+                }
+            }
+            else if (ccc == 'G' && room_num >= 0){
+                (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->black_gold = 0;
+                if(!(*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->black_gold){
+                    hero->gold_count += 15;
+                    snprintf(address_global_message, sizeof(char) * 100, "+15 Gold!                                                                        ");
                 }
             }
             if (valid_move(x_new, y_new) == 1){
@@ -725,6 +752,13 @@ void movement2(int PiCk , int ch , player* hero , room** rooms_of_all_levels , i
                     snprintf(address_global_message, sizeof(char) * 100, "+1 Gold!                                                                                  ");
                 }
             }
+            else if (ccc == 'G' && room_num >= 0){
+                (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->black_gold = 0;
+                if(!(*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->black_gold){
+                    hero->gold_count += 15;
+                    snprintf(address_global_message, sizeof(char) * 100, "+15 Gold!                                                                        ");
+                }
+            }
             if (valid_move(x_new, y_new) == 1){
                 hero->pos.x = x_new;
                 hero->pos.y = y_new;
@@ -758,6 +792,13 @@ void movement2(int PiCk , int ch , player* hero , room** rooms_of_all_levels , i
                 if((*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->picked_golds[which_gold_in_room(x_new, y_new , (*(rooms_of_all_levels + *ptr_level_num - 1))[room_num])] == 1){
                     hero->gold_count++;
                     snprintf(address_global_message, sizeof(char) * 100, "+1 Gold!                                                                               ");
+                }
+            }
+            else if (ccc == 'G' && room_num >= 0){
+                (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->black_gold = 0;
+                if(!(*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->black_gold){
+                    hero->gold_count += 15;
+                    snprintf(address_global_message, sizeof(char) * 100, "+15 Gold!                                                                        ");
                 }
             }
             if (valid_move(x_new, y_new) == 1){
@@ -795,6 +836,13 @@ void movement2(int PiCk , int ch , player* hero , room** rooms_of_all_levels , i
                     snprintf(address_global_message, sizeof(char) * 100, "+1 Gold!                                                                                   ");
                 }
             }
+            else if (ccc == 'G' && room_num >= 0){
+                (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->black_gold = 0;
+                if(!(*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->black_gold){
+                    hero->gold_count += 15;
+                    snprintf(address_global_message, sizeof(char) * 100, "+15 Gold!                                                                        ");
+                }
+            }
             if (valid_move(x_new, y_new) == 1){
                 hero->pos.x = x_new;
                 hero->pos.y = y_new;
@@ -828,6 +876,13 @@ void movement2(int PiCk , int ch , player* hero , room** rooms_of_all_levels , i
                 if((*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->picked_golds[which_gold_in_room(x_new, y_new , (*(rooms_of_all_levels + *ptr_level_num - 1))[room_num])] == 1){
                     hero->gold_count++;
                     snprintf(address_global_message, sizeof(char) * 100, "+1 Gold!                                                                                      ");
+                }
+            }
+            else if (ccc == 'G' && room_num >= 0){
+                (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->black_gold = 0;
+                if(!(*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->black_gold){
+                    hero->gold_count += 15;
+                    snprintf(address_global_message, sizeof(char) * 100, "+15 Gold!                                                                        ");
                 }
             }
             if (valid_move(x_new, y_new) == 1){
