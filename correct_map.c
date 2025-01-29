@@ -112,6 +112,7 @@ int main(){
     add_trap(rooms_of_all_levels + 0 , n_rooms[0]);
     add_black_gold(rooms_of_all_levels + 0 , n_rooms[0]);
     add_weapon(rooms_of_all_levels + 0 , n_rooms[0]);
+    add_spell(rooms_of_all_levels + 0 , n_rooms[0]);
 
 
     add_food(rooms_of_all_levels + 1 , n_rooms[1]);
@@ -119,18 +120,21 @@ int main(){
     add_trap(rooms_of_all_levels + 1 , n_rooms[1]);
     add_black_gold(rooms_of_all_levels + 0 , n_rooms[1]);
     add_weapon(rooms_of_all_levels + 1 , n_rooms[1]);
+    add_spell(rooms_of_all_levels + 1 , n_rooms[1]);
 
     add_food(rooms_of_all_levels + 2 , n_rooms[2]);
     add_gold(rooms_of_all_levels + 2 , n_rooms[2]);
     add_trap(rooms_of_all_levels + 2 , n_rooms[2]);
     add_black_gold(rooms_of_all_levels + 0 , n_rooms[2]);
     add_weapon(rooms_of_all_levels + 2 , n_rooms[2]);
+    add_spell(rooms_of_all_levels + 2 , n_rooms[2]);
 
     add_food(rooms_of_all_levels + 3 , n_rooms[3]);
     add_gold(rooms_of_all_levels + 3 , n_rooms[3]);
     add_trap(rooms_of_all_levels + 3 , n_rooms[3]);
     add_black_gold(rooms_of_all_levels + 0 , n_rooms[3]);
     add_weapon(rooms_of_all_levels + 3 , n_rooms[3]);
+    add_spell(rooms_of_all_levels + 3 , n_rooms[3]);
 
 
     printf("done adding foods/golds/traps! \n");
@@ -156,9 +160,9 @@ int main(){
                         // 2 : Magic Wand (w)
                         // 3 : Normal Arrow (a)
                         // 4 : Sword (s)
-    me.current_spell = 0;// 0 : Health ♥ 
-                         // 1 : Speed → or $
-                         // 2 : Damage $
+    me.current_spell = 0;// 0 : Health H
+                         // 1 : Speed $
+                         // 2 : Damage !
     for (int w = 0 ; w < 5 ; w++){
         me.weapons[w] = 0;
     }
