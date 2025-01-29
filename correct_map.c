@@ -14,7 +14,9 @@
 #include "song.h"
 #include "messages.h"
 #include <locale.h>
+
 char global_message[100] = "Welcome to Arvin's Rogue!";
+
 int main(){
     initscr();
     nodelay(stdscr, TRUE);
@@ -24,6 +26,29 @@ int main(){
     start_color(); 
     srand(time(NULL));  
     setlocale(LC_ALL, "");
+    
+    int difficulty = 1;
+    // int n_rooms1 = number_of_rooms(difficulty);
+    // int n_rooms2 = number_of_rooms(difficulty);
+    // int n_rooms3 = number_of_rooms(difficulty);
+    // int n_rooms4 = number_of_rooms(difficulty);
+    int n_rooms[4];
+    for (int q = 0 ; q < 4 ; q++){
+        n_rooms[q] = number_of_rooms(difficulty);
+    }
+    int level_num = 1; // initializing 
+
+    room ** rooms_of_all_levels = (room**) malloc (4 * sizeof(room*));
+    for (int i = 0 ; i < 4 ; i++){
+        rooms_of_all_levels[i] = (room*) malloc(n_rooms[i] * sizeof(room));
+        // rooms_of_all_levels[i] = (room*)malloc(MAX_ROOM * sizeof(room));
+        // if (rooms_of_all_levels[i] == NULL) {
+        //     endwin();
+        //     printf("Memory allocation FAILED for rooms_of_all_levels[%d]!\n", i);
+        //     return 1;
+        // }
+    }
+
     position ** corridors_of_all_levels = (position**)malloc(4 * sizeof(position*));
     for (int i = 0 ; i < 4 ; i++){
         corridors_of_all_levels[i] = (position*)malloc(MAX_CORR * sizeof(position));
@@ -34,41 +59,79 @@ int main(){
             return 1;
         }
     }
-    room ** rooms_of_all_levels = (room**) malloc (4 * sizeof(room*));
-    for (int i = 0 ; i < 4 ; i++){
-        rooms_of_all_levels[i] = (room*)malloc(MAX_ROOM * sizeof(room));
-        if (rooms_of_all_levels[i] == NULL) {
-            endwin();
-            printf("Memory allocation FAILED for rooms_of_all_levels[%d]!\n", i);
-            return 1;
-        }
-    }
-    int difficulty = 1;
-    int n_rooms = number_of_rooms(difficulty);
-    int level_num = 1;
-    int corr_count_this_level = 0;
+    int corr_count[4] = {0};
 
-    // printf("Before new_map\n");
-    printf("trying to make rooms ... \n");
+    printf("trying to make rooms 1 ... \n");
+    new_map(difficulty, n_rooms[0], &corridors_of_all_levels, 1, &rooms_of_all_levels);
+    printf("done making rooms 1 ! :)\n");
 
-    new_map(difficulty, n_rooms, &corridors_of_all_levels, level_num, &rooms_of_all_levels);
-    // printf("After new_map\n");
-    printf("done making rooms! :)\n");
+    printf("trying to make rooms 2 ... \n");
+    new_map(difficulty, n_rooms[1], &corridors_of_all_levels, 2, &rooms_of_all_levels);
+    printf("done making rooms 2 ! :)\n");
 
-    printf("trying to make doors ... \n");
-    add_door_and_window(rooms_of_all_levels + level_num - 1 , n_rooms);
-    printf("done making doors! :)\n");
-    printf("now go for pillars ... \n");
-
-    add_pillars(rooms_of_all_levels + level_num - 1 , n_rooms);
-
-    printf("done with pillars... \n");
+    // printf("trying to make rooms 3 ... \n");
+    // new_map(difficulty, n_rooms[2] , &corridors_of_all_levels, 3, &rooms_of_all_levels);
+    // printf("done making rooms 3 ! :)\n");
     
-    add_food(rooms_of_all_levels + level_num - 1 , n_rooms);
-    add_gold(rooms_of_all_levels + level_num - 1 , n_rooms);
-    add_trap(rooms_of_all_levels + level_num - 1 , n_rooms);
+    // printf("trying to make rooms 4 ... \n");
+    // new_map(difficulty, n_rooms[3], &corridors_of_all_levels, 4, &rooms_of_all_levels);
+    // printf("done making rooms 4 ! :)\n");
 
-    build_corr(n_rooms , &corridors_of_all_levels , rooms_of_all_levels , level_num , &corr_count_this_level);
+
+    printf("trying to make doors 1 ... \n");
+    add_door_and_window(rooms_of_all_levels + 0 , n_rooms[0]);
+    printf("done making doors 1! :)\n");
+
+    // printf("trying to make doors 2 ... \n");
+    // add_door_and_window(rooms_of_all_levels + 1 , n_rooms[1]);
+    // printf("done making doors 2 ! :)\n");
+
+    // printf("trying to make doors 3 ... \n");
+    // add_door_and_window(rooms_of_all_levels + 2 , n_rooms[2]);
+    // printf("done making doors 3 ! :)\n");
+
+    // printf("trying to make doors 4 ... \n");
+    // add_door_and_window(rooms_of_all_levels + 3 , n_rooms[3]);
+    // printf("done making doors 4 ! :)\n");
+
+
+    printf("now go for pillars 1 ... \n");
+    add_pillars(rooms_of_all_levels + 0 , n_rooms[0]);
+    printf("done with pillars 1 ... \n");
+
+    // printf("now go for pillars 2 ... \n");
+    // add_pillars(rooms_of_all_levels + 1 , n_rooms[1]);
+    // printf("done with pillars 2 ... \n");
+
+    // printf("now go for pillars 3 ... \n");
+    // add_pillars(rooms_of_all_levels + 2 , n_rooms[2]);
+    // printf("done with pillars 3 ... \n");
+
+    // printf("now go for pillars 4 ... \n");
+    // add_pillars(rooms_of_all_levels + 3 , n_rooms[3]);
+    // printf("done with pillars 4 ... \n");
+    
+    add_food(rooms_of_all_levels + 0 , n_rooms[0]);
+    add_gold(rooms_of_all_levels + 0 , n_rooms[0]);
+    add_trap(rooms_of_all_levels + 0 , n_rooms[0]);
+
+    // add_food(rooms_of_all_levels + 1 , n_rooms[1]);
+    // add_gold(rooms_of_all_levels + 1 , n_rooms[1]);
+    // add_trap(rooms_of_all_levels + 1 , n_rooms[1]);
+
+    // add_food(rooms_of_all_levels + 2 , n_rooms[2]);
+    // add_gold(rooms_of_all_levels + 2 , n_rooms[2]);
+    // add_trap(rooms_of_all_levels + 2 , n_rooms[2]);
+
+    // add_food(rooms_of_all_levels + 3 , n_rooms[3]);
+    // add_gold(rooms_of_all_levels + 3 , n_rooms[3]);
+    // add_trap(rooms_of_all_levels + 3 , n_rooms[3]);
+
+
+    build_corr(n_rooms[0] , &corridors_of_all_levels , rooms_of_all_levels , 1 , corr_count + 0);
+    // build_corr(n_rooms[1] , &corridors_of_all_levels , rooms_of_all_levels , 2 , corr_count + 1);
+    // build_corr(n_rooms[2] , &corridors_of_all_levels , rooms_of_all_levels , 3 , corr_count + 2);
+    // build_corr(n_rooms[3] , &corridors_of_all_levels , rooms_of_all_levels , 4 , corr_count + 3);
     
 
     player me;
@@ -92,11 +155,11 @@ int main(){
     choose_soundtrack(current_song);
     int PiCk = 1;
     while(1){
-        for (int i = 0 ; i < n_rooms ; i++){
+        for (int i = 0 ; i < n_rooms[level_num - 1] ; i++){
             print_room(rooms_of_all_levels[level_num - 1] + i);
         }
 
-        print_corridors(corridors_of_all_levels[level_num - 1] , corr_count_this_level);
+        print_corridors(corridors_of_all_levels[level_num - 1] , *(corr_count + level_num - 1));
         // int ch = getch();
         // if (ch == 'q'){
         //     break;
@@ -126,7 +189,7 @@ int main(){
             nodelay(stdscr, FALSE);
             help();  // Show help screen if '/' key is pressed
 
-            for (int ro = 0 ; ro < n_rooms ; ro++){
+            for (int ro = 0 ; ro < n_rooms[level_num - 1] ; ro++){
                 room ey_baba = rooms_of_all_levels[level_num - 1][ro];
                 for(int door = 0 ; door < 2; door++){
                     int X = ey_baba.doors_x[door];
@@ -189,9 +252,10 @@ int main(){
         }
 
 
-        movement(PiCk , ch , &me , rooms_of_all_levels + level_num - 1 , n_rooms , global_message);
+        // movement(PiCk , ch , &me , rooms_of_all_levels + level_num - 1 , n_rooms , global_message);
+        movement2(PiCk , ch , &me , rooms_of_all_levels, n_rooms[level_num - 1] , global_message , &level_num);
         attroff(COLOR_PAIR(me.color));
-        print_corridors(corridors_of_all_levels[level_num - 1] , corr_count_this_level );
+        print_corridors(corridors_of_all_levels[level_num - 1] , *(corr_count + level_num - 1));
         attron(COLOR_PAIR(me.color));
         mvprintw(me.pos.x , me.pos.y , "%c" , 'A');
         attroff(COLOR_PAIR(me.color));
