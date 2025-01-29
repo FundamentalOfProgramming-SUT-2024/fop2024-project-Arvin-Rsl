@@ -147,7 +147,7 @@ void pick(int there, int pick_or_not , int x , int y ,player* hero , room** addr
 // check if the character on (x,y) is valid for passing
 int valid_move(int x , int y ){   
     char there = mvinch(x , y) & A_CHARTEXT ;
-    if (there == '.'  || there == ',' || there == '-' || there == '~' || there == '#' || there == '+' || there == '^' || there == '<' || there == ' '){
+    if (there == '.'  || there == ',' || there == '-' || there == '~' || there == '#' || there == '+' || there == '^' || there == '<'){
         return 1;
     }
     else if(there == 'f' || there == 'g'|| there == 'm'|| there == 'd'|| there == 'w'|| there == 'a'|| there == 's' || there == '^'){

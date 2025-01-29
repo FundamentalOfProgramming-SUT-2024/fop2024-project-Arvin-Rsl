@@ -333,14 +333,13 @@ void add_pillars(room** address_rooms_this_level , int n_rooms){
 void build_corr(int n_rooms_level, position*** address_corridors_of_all_levels, room ** rooms_of_all_levels, int level_num, int* ptr_corr_count) {
     int x_moves[8] = {-1, +1, +0, +0, -1, -1, +1, +1}; // up, down, right, left, up-right, up-left, down-right, down-left
     int y_moves[8] = {+0, +0, +1, -1, +1, -1, +1, -1};
-    initscr();
-    initscr();
-    nodelay(stdscr, TRUE);
-    noecho();
-    cbreak();
-    curs_set(FALSE);
-    start_color(); 
-    srand(time(NULL));  
+    // initscr();
+    // nodelay(stdscr, TRUE);
+    // noecho();
+    // cbreak();
+    // curs_set(FALSE);
+    // start_color(); 
+    // srand(time(NULL));  
     for (int i = 0; i < n_rooms_level - 1; i++) {
         position start;
         position end;
@@ -442,12 +441,12 @@ void build_corr(int n_rooms_level, position*** address_corridors_of_all_levels, 
             if(*ptr_corr_count > MAX_CORR){break;}
             // char c = getch();
             // mvprintw(LINES/2 , COLS/2 , "%c" , c);
-            for (int roo = 0 ; roo < n_rooms_level ; roo ++){
-                print_room(rooms_of_all_levels[level_num - 1] + roo);
-            }
-            print_corridors((*address_corridors_of_all_levels)[level_num - 1] , *ptr_corr_count);
+            // for (int roo = 0 ; roo < n_rooms_level ; roo ++){
+            //     print_room(rooms_of_all_levels[level_num - 1] + roo);
+            // }
+            // print_corridors((*address_corridors_of_all_levels)[level_num - 1] , *ptr_corr_count);
             // sleep(1);
-            refresh();
+            // refresh();
         } 
         
         else{ // end.y = start.y
@@ -456,12 +455,12 @@ void build_corr(int n_rooms_level, position*** address_corridors_of_all_levels, 
                 (*address_corridors_of_all_levels)[level_num - 1][*ptr_corr_count + abs(J)].y = start.y;
             }
             *ptr_corr_count += corr_length;
-            for (int roo = 0 ; roo < n_rooms_level ; roo ++){
-                print_room(rooms_of_all_levels[level_num - 1] + roo);
-            }
-            print_corridors((*address_corridors_of_all_levels)[level_num - 1] , *ptr_corr_count);
-            sleep(1);
-            refresh();
+            // for (int roo = 0 ; roo < n_rooms_level ; roo ++){
+            //     print_room(rooms_of_all_levels[level_num - 1] + roo);
+            // }
+            // print_corridors((*address_corridors_of_all_levels)[level_num - 1] , *ptr_corr_count);
+            // sleep(1);
+            // refresh();
         }
         // with realloc:
         // position* temp = realloc((*address_corridors_of_all_levels)[level_num - 1], (*ptr_corr_count + corr_length) * sizeof(position));
@@ -765,11 +764,14 @@ void new_map(int difficulty ,
 
     } while(done_rooms < n_rooms);
 
-    sort_rooms(*(address_rooms_of_all_levels)[level_num - 1] , n_rooms);
+    sort_rooms((*address_rooms_of_all_levels)[level_num - 1] , n_rooms);
     
     if (1 == level_num){
         (*address_rooms_of_all_levels)[level_num - 1][1].hide = 0; // the player starts from room index 1 (second room)
         // (*address_rooms_of_all_levels)[level_num - 1][0].hide = 0; // the player starts from room index 1 (second room)
+    }
+    else{
+        (*address_rooms_of_all_levels)[level_num - 1][3].hide = 0; // the staircase in all levels
     }
 
     // adding stair (up left corner of room)
