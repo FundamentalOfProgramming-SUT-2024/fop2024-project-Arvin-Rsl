@@ -18,6 +18,7 @@
 char global_message[100] = "Welcome to Arvin's Rogue!";
 
 int main(){
+    setlocale(LC_ALL, "");
     initscr();
     nodelay(stdscr, TRUE);
     noecho();
@@ -25,7 +26,6 @@ int main(){
     curs_set(FALSE);
     start_color(); 
     srand(time(NULL));  
-    setlocale(LC_ALL, "");
     
     int difficulty = 1;
     // int n_rooms1 = number_of_rooms(difficulty);
@@ -110,18 +110,28 @@ int main(){
     add_food(rooms_of_all_levels + 0 , n_rooms[0]);
     add_gold(rooms_of_all_levels + 0 , n_rooms[0]);
     add_trap(rooms_of_all_levels + 0 , n_rooms[0]);
+    add_black_gold(rooms_of_all_levels + 0 , n_rooms[0]);
+    add_weapon(rooms_of_all_levels + 0 , n_rooms[0]);
+
 
     add_food(rooms_of_all_levels + 1 , n_rooms[1]);
     add_gold(rooms_of_all_levels + 1 , n_rooms[1]);
     add_trap(rooms_of_all_levels + 1 , n_rooms[1]);
+    add_black_gold(rooms_of_all_levels + 0 , n_rooms[1]);
+    add_weapon(rooms_of_all_levels + 1 , n_rooms[1]);
 
     add_food(rooms_of_all_levels + 2 , n_rooms[2]);
     add_gold(rooms_of_all_levels + 2 , n_rooms[2]);
     add_trap(rooms_of_all_levels + 2 , n_rooms[2]);
+    add_black_gold(rooms_of_all_levels + 0 , n_rooms[2]);
+    add_weapon(rooms_of_all_levels + 2 , n_rooms[2]);
 
     add_food(rooms_of_all_levels + 3 , n_rooms[3]);
     add_gold(rooms_of_all_levels + 3 , n_rooms[3]);
     add_trap(rooms_of_all_levels + 3 , n_rooms[3]);
+    add_black_gold(rooms_of_all_levels + 0 , n_rooms[3]);
+    add_weapon(rooms_of_all_levels + 3 , n_rooms[3]);
+
 
     printf("done adding foods/golds/traps! \n");
     printf("building corridors of levels \n");
@@ -139,7 +149,8 @@ int main(){
     me.food_count = 0;
     me.gold_count = 0;
     me.health = 13;
-    me.color = 24;   
+    me.color = 24; 
+    me.pick = 0;  
     me.current_weapon = 3; // 0 : Mace (m)
                         // 1 : Dagger (d)
                         // 2 : Magic Wand (w)
@@ -239,7 +250,7 @@ int main(){
         }
         else if (ch == '/') {
             nodelay(stdscr, FALSE);
-            help();  // Show help screen if '/' key is pressed
+            help(&me);  // Show help screen if '/' key is pressed
             nodelay(stdscr, TRUE);
         }
         else if (ch == 'f' || ch == 'F') {
@@ -259,7 +270,13 @@ int main(){
         }
         else if (ch == 'c' || ch == 'C') {
             if(me.food_count > 0){
-                me.food_count--;
+                if(me.health != 16){ // don't consume if health is full
+                    me.food_count--;
+                }
+                else{
+                    snprintf(global_message, sizeof(char) * 100, "Health is already maximum!                           ");
+                }
+
                 if(me.health <= 14){
                     me.health += 2; 
                 }
@@ -268,7 +285,7 @@ int main(){
                 }
             }
             else{
-                snprintf(global_message, sizeof(char) * 100, "You are out of food!                              ");
+                snprintf(global_message, sizeof(char) * 100, "Out of food!                                            ");
             }
 
         }

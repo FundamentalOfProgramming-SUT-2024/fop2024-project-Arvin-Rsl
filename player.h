@@ -15,7 +15,6 @@
 // Arvin Rasulzadeh
 // 403110422
 
-
 typedef struct 
 {
     position pos;
@@ -27,16 +26,24 @@ typedef struct
                  // 1 : ideal
                  // 2 : magical
                  // 3 : rotten
-    int weapons[5]; // 0 : Mace
-                    // 1 : Dagger
-                    // 2 : Magic Wand
-                    // 3 : Normal Arrow
-                    // 4 : Sword
-    int spell[3]; // ...
+    int weapons[5]; // 0 : Mace (m)
+                    // 1 : Dagger (d)
+                    // 2 : Magic Wand (w)
+                    // 3 : Normal Arrow (a)
+                    // 4 : Sword (s)
+    int current_weapon; // 0 : Mace (m)
+                        // 1 : Dagger (d)
+                        // 2 : Magic Wand (w)
+                        // 3 : Normal Arrow (a)
+                        // 4 : Sword (s)
+    int spells[3]; // 0 : Health → H
+                  // 1 : Speed   → $
+                  // 2 : Damage  → !
+    int current_spell;
+    int pick; // 1 if player has enabled picking up "spells" and "weapons" , 0 otherwise
     int color; // ...
     char username[100];
 
 } player;
-
 
 #endif
