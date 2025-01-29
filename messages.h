@@ -271,7 +271,6 @@ void spell_list(player* ptr_to_hero){
 }
 
 
-
 // print message (top of the map)
 void print_top_message(char * message){
     setlocale(LC_ALL, "");
@@ -342,9 +341,9 @@ void print_bottom_message(player* hero , int level_num){
 
 
 // the help screen
-void help() {
-    int height = 26;
-    int width = 40;
+void help(player* hero) {
+    int height = 30;
+    int width = 50;
     int start_x = (LINES - height) / 2;
     int start_y = (COLS - width) / 2;
 
@@ -365,44 +364,74 @@ void help() {
     wattron(help_win, COLOR_PAIR(5) | A_BOLD);
     mvwprintw(help_win, 1, title_y, "HELP MENU");
     wattroff(help_win, COLOR_PAIR(5) | A_BOLD);
+    char CH = 'p';
+    while(CH == 'p' || CH == 'P'){
+        wattron(help_win, A_BOLD);
 
-    wattron(help_win, A_BOLD);
+        // print instructions inside the window
+        mvwprintw(help_win, 3, 1, " Viewing Foods: F");
+        mvwprintw(help_win, 4, 1, " Viewing Weapons: I");
+        mvwprintw(help_win, 5, 1, " Viewing Spells: X");
+        mvwprintw(help_win, 7, 1, " Pick Up option: ");
+        wattron(help_win, A_ITALIC);
+        if (hero->pick){
+            mvwprintw(help_win, 7, 1 + 17, "ON ");
+        }
+        else{
+            mvwprintw(help_win, 7, 1 + 17, "OFF");
+        }
+        wattroff(help_win, A_ITALIC);
 
-    // print instructions inside the window
-    mvwprintw(help_win, 3, 1, " Viewing Foods: F");
-    mvwprintw(help_win, 4, 1, " Viewing Weapons: I");
-    mvwprintw(help_win, 5, 1, " Viewing Spells: X");
+        wattroff(help_win, A_BOLD);
+        mvwprintw(help_win, 8, 1, " To turn on/off the Pick Up option, enter 'P'");
+        wattron(help_win, A_BOLD);
 
-    int movement_start_x = (height - 16) / 2 + 2; // Vertically center the movement instructions
-    int movement_start_y = (width - 15) / 2;     // Horizontally center the movement instructions
+        int movement_start_x = (height - 16) / 2 + 4; // Vertically center the movement instructions
+        int movement_start_y = (width - 15) / 2;     // Horizontally center the movement instructions
 
-    // Print movement instructions inside the window
-    mvwprintw(help_win, movement_start_x, 1, " Movement:");
-    mvwprintw(help_win, movement_start_x + 1, movement_start_y, "+---+---+---+");
-    mvwprintw(help_win, movement_start_x + 2, movement_start_y, "| 7 | 8 | 9 |");
-    mvwprintw(help_win, movement_start_x + 3, movement_start_y, "+---+---+---+");
-    mvwprintw(help_win, movement_start_x + 4, movement_start_y, "| 4 |   | 6 |");
-    mvwprintw(help_win, movement_start_x + 5, movement_start_y, "+---+---+---+");
-    mvwprintw(help_win, movement_start_x + 6, movement_start_y, "| 1 | 2 | 3 |");
-    mvwprintw(help_win, movement_start_x + 7, movement_start_y, "+---+---+---+");
+        // Print movement instructions inside the window
+        mvwprintw(help_win, movement_start_x, 1, " Movement:");
+        mvwprintw(help_win, movement_start_x + 1, movement_start_y, "+---+---+---+");
+        mvwprintw(help_win, movement_start_x + 2, movement_start_y, "| 7 | 8 | 9 |");
+        mvwprintw(help_win, movement_start_x + 3, movement_start_y, "+---+---+---+");
+        mvwprintw(help_win, movement_start_x + 4, movement_start_y, "| 4 |   | 6 |");
+        mvwprintw(help_win, movement_start_x + 5, movement_start_y, "+---+---+---+");
+        mvwprintw(help_win, movement_start_x + 6, movement_start_y, "| 1 | 2 | 3 |");
+        mvwprintw(help_win, movement_start_x + 7, movement_start_y, "+---+---+---+");
 
-    // Print alternative movement keys inside the window, centered
-    mvwprintw(help_win, movement_start_x + 9, 1, " Alternative Movement:");
-    mvwprintw(help_win, movement_start_x + 10, movement_start_y, "+---+---+---+");
-    mvwprintw(help_win, movement_start_x + 11, movement_start_y, "| Y | J | U |");
-    mvwprintw(help_win, movement_start_x + 12, movement_start_y, "+---+---+---+");
-    mvwprintw(help_win, movement_start_x + 13, movement_start_y, "| H |   | L |");
-    mvwprintw(help_win, movement_start_x + 14, movement_start_y, "+---+---+---+");
-    mvwprintw(help_win, movement_start_x + 15, movement_start_y, "| B | K | N |");
-    mvwprintw(help_win, movement_start_x + 16, movement_start_y, "+---+---+---+");
+        // Print alternative movement keys inside the window, centered
+        mvwprintw(help_win, movement_start_x + 9, 1, " Alternative Movement:");
+        mvwprintw(help_win, movement_start_x + 10, movement_start_y, "+---+---+---+");
+        mvwprintw(help_win, movement_start_x + 11, movement_start_y, "| Y | J | U |");
+        mvwprintw(help_win, movement_start_x + 12, movement_start_y, "+---+---+---+");
+        mvwprintw(help_win, movement_start_x + 13, movement_start_y, "| H |   | L |");
+        mvwprintw(help_win, movement_start_x + 14, movement_start_y, "+---+---+---+");
+        mvwprintw(help_win, movement_start_x + 15, movement_start_y, "| B | K | N |");
+        mvwprintw(help_win, movement_start_x + 16, movement_start_y, "+---+---+---+");
 
-    wattroff(help_win, A_BOLD);
+        wattroff(help_win, A_BOLD);
 
-    wrefresh(help_win);
+        CH = wgetch(help_win);
 
-    // wait for user input to close the help screen
-    wgetch(help_win);
+        // int whichWeapon = 0;
+        // ptr_to_hero->current_weapon = whichWeapon;
+        switch (CH)
+        {
+        case 'p':
+        case 'P':
+            if(hero->pick == 0){
+                hero->pick = 1;
+            }
+            else{
+                hero->pick = 0;
+            }
+        default:
+            break;
+        }
 
+        wrefresh(help_win);
+
+    }
     // delete the window
     delwin(help_win);
     clear();
