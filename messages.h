@@ -25,6 +25,8 @@
 
 void help();
 void food_list();
+void weapon_list();
+void spell_list();
 void print_top_message();
 void print_bottom_message();
 // void* decrease_health();
@@ -43,14 +45,14 @@ void print_bottom_message();
 
 // display food list
 
-// the help screen
+// the food list window
 void food_list(player hero){
     int height = 23;
-    int width = 60;
+    int width = 52;
     int start_x = (LINES - height) / 2;
     int start_y = (COLS - width) / 2;
 
-    // create a new window for the help screen
+    // create a new window for the food screen
     WINDOW *help_win = newwin(height, width, start_x, start_y);
 
     init_pair(6, COLOR_MAGENTA, COLOR_BLACK);
@@ -61,12 +63,12 @@ void food_list(player hero){
     wattron(help_win, COLOR_PAIR(5));
 
 
-    int title_y = (width - 9) / 2; // length of "HELP MENU" = 9
+    int title_y = (width - 9) / 2; // length of "FOOD MENU" = 9
 
-    // Print HELP MENU in cyan color and centered
-    wattron(help_win, COLOR_PAIR(8));
+    // Print FOOD MENU centered
+    wattron(help_win, COLOR_PAIR(8) | A_BOLD);
     mvwprintw(help_win, 1, title_y, "FOOD MENU");
-    wattroff(help_win, COLOR_PAIR(8));
+    wattroff(help_win, COLOR_PAIR(8) |A_BOLD);
 
     // print instructions inside the window
     mvwprintw(help_win, 3, 1, " Regular Food: %d" , hero.food_count);
@@ -82,6 +84,187 @@ void food_list(player hero){
     wgetch(help_win);
 
     // delete the window
+    delwin(help_win);
+    clear();
+
+}
+
+
+// the weapon list window
+void weapon_list(player* ptr_to_hero){
+    int height = 23;
+    int width = 55;
+    int start_x = (LINES - height) / 2;
+    int start_y = (COLS - width) / 2;
+
+    // create a new window for the help screen
+    WINDOW *help_win = newwin(height, width, start_x, start_y);
+
+    init_pair(6, COLOR_MAGENTA, COLOR_BLACK);
+    init_pair(5, COLOR_CYAN, COLOR_BLACK);
+    // draw borders around the window
+    wattron(help_win, COLOR_PAIR(6));
+    box(help_win, 0, 0);
+    wattron(help_win, COLOR_PAIR(6));
+
+
+    int title_y = (width - 11) / 2; // length of "WEAPON MENU" = 11
+
+    // Print WEAPON MENU centered
+    wattron(help_win, COLOR_PAIR(1) | A_BOLD);
+    mvwprintw(help_win, 1, title_y, "WEAPON MENU");
+    wattroff(help_win, COLOR_PAIR(1) | A_BOLD);
+
+    char CH = 'm';
+    // CH = wgetch(help_win);
+    while (CH == 'm' || CH == 'd'|| CH == 'w'|| CH == 'a' || CH == 's' || CH == 'M' || CH == 'D'|| CH == 'W'|| CH == 'A' || CH == 'S'){
+        mvwprintw(help_win, 16, 1, " The current weapon is bold.");
+        mvwprintw(help_win, 18, 1, " To select weapon, enter the weapon's character.");
+        mvwprintw(help_win, 20, 1, " Default weapon is Mace.");
+    
+        // print instructions inside the window
+        if(ptr_to_hero->current_weapon == 0) wattron(help_win , A_BOLD);
+        mvwprintw(help_win, 3, 1, " Mace (m): %d" , ptr_to_hero->weapons[0]);
+        if(ptr_to_hero->current_weapon == 0) wattroff(help_win , A_BOLD);
+
+        if(ptr_to_hero->current_weapon == 1) wattron(help_win , A_BOLD);
+        mvwprintw(help_win, 5, 1, " Dagger (d): %d" , ptr_to_hero->weapons[1]);
+        if(ptr_to_hero->current_weapon == 1) wattroff(help_win , A_BOLD);
+
+        if(ptr_to_hero->current_weapon == 2) wattron(help_win , A_BOLD);
+        mvwprintw(help_win, 7, 1, " Magic Wand (w): %d" , ptr_to_hero->weapons[2]);
+        if(ptr_to_hero->current_weapon == 2) wattroff(help_win , A_BOLD);
+
+        if(ptr_to_hero->current_weapon == 3) wattron(help_win , A_BOLD);
+        mvwprintw(help_win, 9, 1, " Normal Arrow (a): %d" , ptr_to_hero->weapons[3]);
+        if(ptr_to_hero->current_weapon == 3) wattroff(help_win , A_BOLD);
+
+        if(ptr_to_hero->current_weapon == 4) wattron( help_win , A_BOLD);
+        mvwprintw(help_win, 11, 1, " Sword (s): %d" , ptr_to_hero->weapons[4]);
+        if(ptr_to_hero->current_weapon == 4) wattroff( help_win , A_BOLD);
+        CH = wgetch(help_win);
+
+        // int whichWeapon = 0;
+        // ptr_to_hero->current_weapon = whichWeapon;
+        switch (CH)
+        {
+        case 'm':
+        case 'M':
+            ptr_to_hero->current_weapon = 0;
+            break;
+        case 'd':
+        case 'D':
+            ptr_to_hero->current_weapon = 1;
+            break;
+        case 'w':
+        case 'W':
+            ptr_to_hero->current_weapon = 2;
+            break;
+        case 'a':
+        case 'A':
+            ptr_to_hero->current_weapon = 3;
+            break;
+        case 's':
+        case 'S':
+            ptr_to_hero->current_weapon = 4;
+            break;
+        
+        default:
+            break;
+        }
+
+        wrefresh(help_win);
+    }
+
+
+
+    // int CH;
+    // CH = wgetch(help_win);
+    // while (CH == 'm' || CH == 'd'|| CH == 'w'|| CH == 'a' || CH == 's' || CH == 'M' || CH == 'D'|| CH == 'W'|| CH == 'A' || CH == 'S'){
+    //     int whichWeapon = 0;
+    //     hero.current_weapon = whichWeapon;
+    //     CH = wgetch(help_win);
+    // }
+    // do {
+    //     CH = wgetch(help_win);
+    // } while (CH == 'm' || CH == 'd'|| CH == 'w'|| CH == 'a' || CH == 's' || CH == 'M' || CH == 'D'|| CH == 'W'|| CH == 'A' || CH == 'S');
+
+    // delete the window
+    delwin(help_win);
+    clear();
+
+}
+
+
+// the weapon list window
+void spell_list(player* ptr_to_hero){
+    int height = 23;
+    int width = 55;
+    int start_x = (LINES - height) / 2;
+    int start_y = (COLS - width) / 2;
+
+    // create a new window for the help screen
+    WINDOW *help_win = newwin(height, width, start_x, start_y);
+
+    init_pair(6, COLOR_MAGENTA, COLOR_BLACK);
+    init_pair(5, COLOR_CYAN, COLOR_BLACK);
+    // draw borders around the window
+    wattron(help_win, COLOR_PAIR(4));
+    box(help_win, 0, 0);
+    wattron(help_win, COLOR_PAIR(4));
+
+
+    int title_y = (width - 10) / 2; // length of "SPELL MENU" = 10
+
+    // Print SPELL MENU centered
+    wattron(help_win, COLOR_PAIR(2) | A_BOLD);
+    mvwprintw(help_win, 1, title_y, "SPELL MENU");
+    wattroff(help_win, COLOR_PAIR(2) | A_BOLD);
+
+    char CH = 'h';
+    while (CH == 'h' || CH == 'd'|| CH == 's' || CH == 'H' || CH == 'D' || CH == 'S'){
+        mvwprintw(help_win, 13, 1, " To use spell, exit this menu and enter 'Z'");
+        mvwprintw(help_win, 16, 1, " The current spell is bold.");
+        mvwprintw(help_win, 18, 1, " To select spell, enter the spell's character.");
+        mvwprintw(help_win, 20, 1, " Default selected spell is Health.");
+    
+        // print instructions inside the window
+        if(ptr_to_hero->current_spell == 0) wattron(help_win , A_BOLD);
+        mvwprintw(help_win, 4, 1, " Health (h): %d" , ptr_to_hero->spells[0]);
+        if(ptr_to_hero->current_spell == 0) wattroff(help_win , A_BOLD);
+
+        if(ptr_to_hero->current_spell == 1) wattron(help_win , A_BOLD);
+        mvwprintw(help_win, 6, 1, " Speed (s): %d" , ptr_to_hero->spells[1]);
+        if(ptr_to_hero->current_spell == 1) wattroff(help_win , A_BOLD);
+
+        if(ptr_to_hero->current_spell == 2) wattron(help_win , A_BOLD);
+        mvwprintw(help_win, 8, 1, " Damage (d): %d" , ptr_to_hero->spells[2]);
+        if(ptr_to_hero->current_spell == 2) wattroff(help_win , A_BOLD);
+        CH = wgetch(help_win);
+
+        // int whichWeapon = 0;
+        // ptr_to_hero->current_weapon = whichWeapon;
+        switch (CH)
+        {
+        case 'h':
+        case 'H':
+            ptr_to_hero->current_spell = 0;
+            break;
+        case 'd':
+        case 'D':
+            ptr_to_hero->current_spell = 2;
+            break;
+        case 's':
+        case 'S':
+            ptr_to_hero->current_spell = 1;
+            break;
+        default:
+            break;
+        }
+
+        wrefresh(help_win);
+    }
+
     delwin(help_win);
     clear();
 
@@ -160,7 +343,7 @@ void print_bottom_message(player* hero , int level_num){
 
 // the help screen
 void help() {
-    int height = 24;
+    int height = 26;
     int width = 40;
     int start_x = (LINES - height) / 2;
     int start_y = (COLS - width) / 2;
@@ -179,13 +362,16 @@ void help() {
     int title_y = (width - 9) / 2; // length of "HELP MENU" = 9
 
     // Print HELP MENU in cyan color and centered
-    wattron(help_win, COLOR_PAIR(5));
+    wattron(help_win, COLOR_PAIR(5) | A_BOLD);
     mvwprintw(help_win, 1, title_y, "HELP MENU");
-    wattroff(help_win, COLOR_PAIR(5));
+    wattroff(help_win, COLOR_PAIR(5) | A_BOLD);
+
+    wattron(help_win, A_BOLD);
 
     // print instructions inside the window
     mvwprintw(help_win, 3, 1, " Viewing Foods: F");
     mvwprintw(help_win, 4, 1, " Viewing Weapons: I");
+    mvwprintw(help_win, 5, 1, " Viewing Spells: X");
 
     int movement_start_x = (height - 16) / 2 + 2; // Vertically center the movement instructions
     int movement_start_y = (width - 15) / 2;     // Horizontally center the movement instructions
@@ -209,6 +395,8 @@ void help() {
     mvwprintw(help_win, movement_start_x + 14, movement_start_y, "+---+---+---+");
     mvwprintw(help_win, movement_start_x + 15, movement_start_y, "| B | K | N |");
     mvwprintw(help_win, movement_start_x + 16, movement_start_y, "+---+---+---+");
+
+    wattroff(help_win, A_BOLD);
 
     wrefresh(help_win);
 

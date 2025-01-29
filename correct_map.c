@@ -139,7 +139,21 @@ int main(){
     me.food_count = 0;
     me.gold_count = 0;
     me.health = 13;
-    me.color = 24;    
+    me.color = 24;   
+    me.current_weapon = 3; // 0 : Mace (m)
+                        // 1 : Dagger (d)
+                        // 2 : Magic Wand (w)
+                        // 3 : Normal Arrow (a)
+                        // 4 : Sword (s)
+    me.current_spell = 0;// 0 : Health ♥ 
+                         // 1 : Speed → or $
+                         // 2 : Damage $
+    for (int w = 0 ; w < 5 ; w++){
+        me.weapons[w] = 0;
+    }
+    for (int s = 0 ; s < 3 ; s++){
+        me.spells[s] = 0;
+    }
 
 
     // Set getch() to be non-blocking
@@ -230,7 +244,17 @@ int main(){
         }
         else if (ch == 'f' || ch == 'F') {
             nodelay(stdscr, FALSE);
-            food_list(me);  // Show help screen if '/' key is pressed
+            food_list(me);  // Show food screen if 'f' key is pressed
+            nodelay(stdscr, TRUE);
+        }
+        else if (ch == 'i' || ch == 'I') {
+            nodelay(stdscr, FALSE);
+            weapon_list(&me);  // Show weapon screen if 'i' key is pressed
+            nodelay(stdscr, TRUE);
+        }
+        else if (ch == 'x' || ch == 'X') {
+            nodelay(stdscr, FALSE);
+            spell_list(&me);  // Show spell screen if 'x' key is pressed
             nodelay(stdscr, TRUE);
         }
         else if (ch == 'c' || ch == 'C') {
