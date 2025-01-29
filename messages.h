@@ -24,6 +24,7 @@
 // the upper three lines and lower three lines of map are dedicated to messages
 
 void help();
+void food_list();
 void print_top_message();
 void print_bottom_message();
 // void* decrease_health();
@@ -38,6 +39,55 @@ void print_bottom_message();
 //     }
 //     return NULL;
 // }
+
+
+// display food list
+
+// the help screen
+void food_list(player hero){
+    int height = 23;
+    int width = 60;
+    int start_x = (LINES - height) / 2;
+    int start_y = (COLS - width) / 2;
+
+    // create a new window for the help screen
+    WINDOW *help_win = newwin(height, width, start_x, start_y);
+
+    init_pair(6, COLOR_MAGENTA, COLOR_BLACK);
+    init_pair(5, COLOR_CYAN, COLOR_BLACK);
+    // draw borders around the window
+    wattron(help_win, COLOR_PAIR(5));
+    box(help_win, 0, 0);
+    wattron(help_win, COLOR_PAIR(5));
+
+
+    int title_y = (width - 9) / 2; // length of "HELP MENU" = 9
+
+    // Print HELP MENU in cyan color and centered
+    wattron(help_win, COLOR_PAIR(8));
+    mvwprintw(help_win, 1, title_y, "FOOD MENU");
+    wattroff(help_win, COLOR_PAIR(8));
+
+    // print instructions inside the window
+    mvwprintw(help_win, 3, 1, " Regular Food: %d" , hero.food_count);
+    mvwprintw(help_win, 5, 1, " Ideal Food: %d" , 0);
+    mvwprintw(help_win, 7, 1, " Magical Food: %d" , 0);
+    mvwprintw(help_win, 9, 1, " Rotten Food: %d" , 0);
+    mvwprintw(help_win, 14, 1, " To consume food, exit this menu and enter 'C'");
+
+    
+    wrefresh(help_win);
+
+    // wait for user input to close the help screen
+    wgetch(help_win);
+
+    // delete the window
+    delwin(help_win);
+    clear();
+
+}
+
+
 
 // print message (top of the map)
 void print_top_message(char * message){

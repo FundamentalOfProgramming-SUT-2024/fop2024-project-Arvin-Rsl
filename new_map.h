@@ -473,6 +473,91 @@ void build_corr(int n_rooms_level, position*** address_corridors_of_all_levels, 
     }
 }
  
+void build_corr2(int n_rooms_level, position*** address_corridors_of_all_levels, room ** rooms_of_all_levels, int level_num, int* ptr_corr_count) {
+    int x_moves[8] = {-1, +1, +0, +0, -1, -1, +1, +1}; // up, down, right, left, up-right, up-left, down-right, down-left
+    int y_moves[8] = {+0, +0, +1, -1, +1, -1, +1, -1};
+
+    for (int i = 0; i < n_rooms_level - 1; i++) {
+        if (i < 0 || i >= n_rooms_level) continue;
+        
+        position start;
+        position end;
+        start.x = rooms_of_all_levels[level_num - 1][i].doors_x[0];
+        start.y = rooms_of_all_levels[level_num - 1][i].doors_y[0];
+        end.x = rooms_of_all_levels[level_num - 1][i + 1].doors_x[1];
+        end.y = rooms_of_all_levels[level_num - 1][i + 1].doors_y[1];
+
+        int dir1, dir2;
+        if (start.x == rooms_of_all_levels[level_num - 1][i].corner.x) dir1 = 0;
+        else if (start.x == rooms_of_all_levels[level_num - 1][i].corner.x + rooms_of_all_levels[level_num - 1][i].length - 1) dir1 = 1;
+        else if (start.y == rooms_of_all_levels[level_num - 1][i].corner.y) dir1 = 3;
+        else if (start.y == rooms_of_all_levels[level_num - 1][i].corner.y + rooms_of_all_levels[level_num - 1][i].width - 1) dir1 = 2;
+        if (end.x == rooms_of_all_levels[level_num - 1][i + 1].corner.x) dir2 = 0;
+        else if (end.x == rooms_of_all_levels[level_num - 1][i + 1].corner.x + rooms_of_all_levels[level_num - 1][i + 1].length - 1) dir2 = 1;
+        else if (end.y == rooms_of_all_levels[level_num - 1][i + 1].corner.y) dir2 = 3;
+        else if (end.y == rooms_of_all_levels[level_num - 1][i + 1].corner.y + rooms_of_all_levels[level_num - 1][i + 1].width - 1) dir2 = 2;
+        start.x += x_moves[dir1];
+        start.y += y_moves[dir1];
+        end.x += x_moves[dir2];
+        end.y += y_moves[dir2];
+
+        position current;
+        current.x = start.x;
+        current.y = start.y;
+        int delta_x = end.x - current.x;
+        int sign_delta_x = (delta_x < 0) ? -1 : 1;
+        int delta_y = end.y - start.y;
+        int corr_length = abs(delta_x) + abs(delta_y) + 1;
+        int y_break;
+        int sign_delta_y = (delta_y < 0) ? -1 : (delta_y > 0) ? 1 : 0;
+
+        // Adjust y_break calculation to avoid negative indices
+        if (delta_y != 0) {
+            if(i > 0 && rooms_of_all_levels[level_num - 1][i - 1].corner.y + rooms_of_all_levels[level_num - 1][i - 1].width - 1 >= rooms_of_all_levels[level_num - 1][i].corner.y + rooms_of_all_levels[level_num - 1][i].width - 1) {
+                y_break = rand() % (abs(end.y - (rooms_of_all_levels[level_num - 1][i - 1].corner.y + rooms_of_all_levels[level_num - 1][i - 1].width))) + rooms_of_all_levels[level_num - 1][i - 1].corner.y + rooms_of_all_levels[level_num - 1][i - 1].width + 1;
+            } else {
+                y_break = rand() % abs(delta_y) + start.y;
+            }
+            if (y_break == end.y || y_break == end.y + 1) {
+                y_break--;
+            }
+
+            if (end.x > rooms_of_all_levels[level_num - 1][i - 1].corner.x && rooms_of_all_levels[level_num - 1][i - 1].corner.y + rooms_of_all_levels[level_num - 1][i - 1].width - 1 >= start.y) {
+                y_break = end.y - 1;
+            }
+            for (int K = 0; start.y + K != y_break + sign_delta_y; K += sign_delta_y) {
+                if ((*ptr_corr_count + abs(K)) < MAX_CORR) {
+                    (*address_corridors_of_all_levels)[level_num - 1][*ptr_corr_count + abs(K)].x = start.x;
+                    (*address_corridors_of_all_levels)[level_num - 1][*ptr_corr_count + abs(K)].y = start.y + K;
+                }
+            }
+            for (int J = 0; (start.x + J != end.x + 2 * sign_delta_x); J += sign_delta_x) {
+                if ((*ptr_corr_count + abs(y_break - start.y) + abs(J) + 1) < MAX_CORR) {
+                    (*address_corridors_of_all_levels)[level_num - 1][*ptr_corr_count + abs(y_break - start.y) + abs(J) + 1].x = (start.x + sign_delta_x) + J;
+                    (*address_corridors_of_all_levels)[level_num - 1][*ptr_corr_count + abs(y_break - start.y) + abs(J) + 1].y = y_break;
+                }
+            }
+            for (int L = 0; (y_break + L != end.y + sign_delta_y); L += sign_delta_y) {
+                if ((*ptr_corr_count + abs(y_break - start.y) + abs(delta_x) + 1 + abs(L)) < MAX_CORR) {
+                    (*address_corridors_of_all_levels)[level_num - 1][*ptr_corr_count + abs(y_break - start.y) + abs(delta_x) + 1 + abs(L)].x = end.x;
+                    (*address_corridors_of_all_levels)[level_num - 1][*ptr_corr_count + abs(y_break - start.y) + abs(delta_x) + 1 + abs(L)].y = y_break + L;
+                }
+            }
+            *ptr_corr_count += corr_length;
+            if (*ptr_corr_count > MAX_CORR) break;
+        } else { 
+            for (int J = 0; (start.x + J != end.x + sign_delta_x); J += sign_delta_x) {
+                if ((*ptr_corr_count + abs(J)) < MAX_CORR) {
+                    (*address_corridors_of_all_levels)[level_num - 1][*ptr_corr_count + abs(J)].x = start.x + J;
+                    (*address_corridors_of_all_levels)[level_num - 1][*ptr_corr_count + abs(J)].y = start.y;
+                }
+            }
+            *ptr_corr_count += corr_length;
+        }
+    }
+}
+
+
 // function to add the doors and windows to room 
 void add_door_and_window(room** address_rooms_this_level , int n_rooms){
     srand(time(NULL));
@@ -512,22 +597,66 @@ void add_door_and_window(room** address_rooms_this_level , int n_rooms){
             else if(r2.corner.x + r2.length < r1.corner.x){
                 wall_1 = 0; // north
                 x1 = x_north1;
-                y1 = rand() % (r1.width - 2) + y_west1 + 1;
+                // y1 = rand() % (y_west2 - y_west1) + y_west1 + 1;
+                if(y_west2 > y_west1 + 1){
+                    y1 = rand() % (y_west2 - y_west1) + y_west1 + 1;
+                }
+                else{
+                    if(y_east2 < y_east1){
+                        y1 = rand() % (y_east2 - y_west1 - 1) + y_west1 + 1;
+                    }
+                    else{
+                        y1 = rand() % (y_east1 - y_west1 - 1) + y_west1 + 1;
+                    }
+                    // y1 = rand() % (y_west2 + (int)(2*r2.width/3) - y_west1) + y_west1 + 1;
+                }
                 wall_2 = 1; // south
                 x2 = x_south2;
+                int attempts = 0;
+                printf("begin do/while door... \n");
                 do{
-                    y2 = rand() % (r2.width - 2) + y_west2 + 1;
-                } while(y2 <= y1);
+                    y2 = rand() % (r2.width - 1) + y_west2;
+                    attempts++;
+                    if (attempts > 100) { // Safety mechanism to break out of the loop
+                        mvprintw(LINES/2 , COLS/2 - strlen("In making doors, loop safety break to prevent infinite loop. Quit and try again")/2, "In making doors, loop safety break to prevent infinite loop. Quit and try again\n\n\n\n");
+                        sleep(2);
+                        refresh();
+                        break;
+                    }
+                } while(y2 < y1);
+                printf("DONE do/while door... \n");
             }
             else if(r2.corner.x > r1.corner.x + r1.length){
                 wall_1 = 1; // south
                 x1 = x_south1;
-                y1 = rand() % (r1.width - 2) + y_west1 + 1;
+                if(y_west2 > y_west1 + 1){
+                    y1 = rand() % (y_west2 - y_west1) + y_west1 + 1;
+                }
+                else{
+                    if(y_east2 < y_east1){
+                        y1 = rand() % (y_east2 - y_west1 - 1) + y_west1 + 1;
+                    }
+                    else{
+                        y1 = rand() % (y_east1 - y_west1 - 1) + y_west1 + 1;
+                    }
+                    // y1 = rand() % (y_west2 + (int)(2*r2.width/3) - y_west1) + y_west1 + 1;
+                }
                 wall_2 = 0; // north
                 x2 = x_north2;
+                int attempts = 0;
+                printf("begin do/while door... \n");
                 do{
-                    y2 = rand() % (r2.width - 2) + y_west2 + 1;
-                } while(y2 <= y1);
+                    y2 = rand() % (r2.width - 1) + y_west2;
+                    attempts++;
+                    if (attempts > 100) { // Safety mechanism to break out of the loop
+                        mvprintw(LINES/2 , COLS/2 - strlen("In making doors, loop safety break to prevent infinite loop. Quit and try again")/2, "In making doors, loop safety break to prevent infinite loop. Quit and try again\n\n\n\n");
+                        sleep(2);
+                        refresh();
+                        break;
+                    }
+                } while(y2 < y1);
+                printf("DONE do/while door... \n");
+
             }
             else if (r2.corner.y + r2.width < r1.corner.y) { // doesn't happen i guess ...
                 wall_1 = 3; // west
@@ -604,13 +733,20 @@ void print_room(room *Room){
         init_pair(0 , COLOR_WHITE , COLOR_BLACK); 
         init_pair(1 , COLOR_RED , COLOR_BLACK); 
         init_pair(2 , COLOR_MAGENTA , COLOR_BLACK); 
-        init_pair(3 , COLOR_YELLOW , COLOR_BLACK); 
+        init_color(70, 1000 , 1000 , 0); // treasure room
+        init_pair(33, 70 , COLOR_BLACK); // treasure room
+        // init_pair(3 , COLOR_YELLOW , COLOR_BLACK); 
         init_pair(4 , COLOR_BLUE , COLOR_BLACK); 
         init_color(76, 990 , 570 , 800); // for food
         init_pair(8, 76 , COLOR_BLACK); // for food
         init_color(77, 1000 , 1000 , 0); // for gold
         init_pair(15, 77 , COLOR_BLACK); // for gold
-        attron(COLOR_PAIR(Room->type));
+        if(Room->type == 3){
+            attron(COLOR_PAIR(33));
+        }
+        else{
+            attron(COLOR_PAIR(Room->type));
+        }
         for (int y = ul_corner.y + 1; y < ul_corner.y + Room->width - 1 ; y++){
             for (int x = ul_corner.x + 1 ; x < ul_corner.x + Room->length - 1 ; x++){
                 mvprintw(x , y , "%c" , floor);
@@ -621,33 +757,45 @@ void print_room(room *Room){
                 mvprintw(Room->trap_x , Room->trap_y , "^");
             }
         }
-        attroff(COLOR_PAIR(Room->type));
-        for (int i = 0 ; i < 2 ; i++){   
-            mvprintw(Room->pillars_x[i],  Room->pillars_y[i] , "O");
+        if(Room->type == 3){
+            attroff(COLOR_PAIR(33));
+        }
+        else{
+            attroff(COLOR_PAIR(Room->type));
         }
 
+        if(Room->type != 3){ // Treasure room is empty of these!
+            // pillars
+            for (int i = 0 ; i < 2 ; i++){   
+                mvprintw(Room->pillars_x[i],  Room->pillars_y[i] , "O");
+            }
+
+            // food
+            attron(COLOR_PAIR(8));
+            for (int i = 0 ; i < Room->n_foods ; i++){   
+                if(Room->picked_foods[i] == 0){
+                    mvprintw(Room->foods_x[i],  Room->foods_y[i] , "f");
+                }
+            }
+            attroff(COLOR_PAIR(8));
+
+            // gold
+            attron(COLOR_PAIR(15));
+            for (int i = 0 ; i < Room->n_golds ; i++){   
+                if(Room->picked_golds[i] == 0){
+                    mvprintw(Room->golds_x[i],  Room->golds_y[i] , "g");
+                }
+            }
+            attroff(COLOR_PAIR(15));
+        }
+        
+        // staircase
         if (Room->room_number == 4){
             // room index 3 (STAIRS!)
             mvprintw(Room->stair_x , Room->stair_y , "<");
         }
 
-        attron(COLOR_PAIR(8));
-        for (int i = 0 ; i < Room->n_foods ; i++){   
-            if(Room->picked_foods[i] == 0){
-                mvprintw(Room->foods_x[i],  Room->foods_y[i] , "f");
-            }
-        }
-        attroff(COLOR_PAIR(8));
-
-        attron(COLOR_PAIR(15));
-
-        for (int i = 0 ; i < Room->n_golds ; i++){   
-            if(Room->picked_golds[i] == 0){
-                mvprintw(Room->golds_x[i],  Room->golds_y[i] , "g");
-            }
-        }
-        attroff(COLOR_PAIR(15));
-
+        // doors
         if (Room->room_number == 1){
             mvprintw(Room->doors_x[0],  Room->doors_y[0] , "+");
         }
@@ -656,9 +804,6 @@ void print_room(room *Room){
                 mvprintw(Room->doors_x[i],  Room->doors_y[i] , "+");
             }  
         }
-
-
-
     } 
 
     else {
@@ -721,7 +866,12 @@ void new_map(int difficulty ,
         room ROOM;
         ROOM.floor_level = level_num;
         ROOM.hide = 0;
-        ROOM.type = room_types[rand() % 10];
+        if (4 == level_num && done_rooms == n_rooms - 1){
+            ROOM.type = 3;
+        }
+        else{
+            ROOM.type = room_types[rand() % 10];
+        }
         ROOM.length = rand() % (max_length - 6) + 7;
         ROOM.width = rand() % (max_width - 6) + 7;
         if(3 == difficulty){

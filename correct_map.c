@@ -67,9 +67,9 @@ int main(){
     new_map(difficulty, n_rooms[2] , &corridors_of_all_levels, 3, &rooms_of_all_levels);
     printf("done making rooms 3 ! :)\n");
     
-    // printf("trying to make rooms 4 ... \n");
-    // new_map(difficulty, n_rooms[3], &corridors_of_all_levels, 4, &rooms_of_all_levels);
-    // printf("done making rooms 4 ! :)\n");
+    printf("trying to make rooms 4 ... \n");
+    new_map(difficulty, n_rooms[3], &corridors_of_all_levels, 4, &rooms_of_all_levels);
+    printf("done making rooms 4 ! :)\n");
 
 
     printf("trying to make doors 1 ... \n");
@@ -84,9 +84,9 @@ int main(){
     add_door_and_window(rooms_of_all_levels + 2 , n_rooms[2]);
     printf("done making doors 3 ! :)\n");
 
-    // printf("trying to make doors 4 ... \n");
-    // add_door_and_window(rooms_of_all_levels + 3 , n_rooms[3]);
-    // printf("done making doors 4 ! :)\n");
+    printf("trying to make doors 4 ... \n");
+    add_door_and_window(rooms_of_all_levels + 3 , n_rooms[3]);
+    printf("done making doors 4 ! :)\n");
 
 
     printf("now go for pillars 1 ... \n");
@@ -101,10 +101,12 @@ int main(){
     add_pillars(rooms_of_all_levels + 2 , n_rooms[2]);
     printf("done with pillars 3 ... \n");
 
-    // printf("now go for pillars 4 ... \n");
-    // add_pillars(rooms_of_all_levels + 3 , n_rooms[3]);
-    // printf("done with pillars 4 ... \n");
+    printf("now go for pillars 4 ... \n");
+    add_pillars(rooms_of_all_levels + 3 , n_rooms[3]);
+    printf("done with pillars 4 ... \n");
     
+    printf("adding foods/golds/traps ... \n");
+
     add_food(rooms_of_all_levels + 0 , n_rooms[0]);
     add_gold(rooms_of_all_levels + 0 , n_rooms[0]);
     add_trap(rooms_of_all_levels + 0 , n_rooms[0]);
@@ -117,16 +119,19 @@ int main(){
     add_gold(rooms_of_all_levels + 2 , n_rooms[2]);
     add_trap(rooms_of_all_levels + 2 , n_rooms[2]);
 
-    // add_food(rooms_of_all_levels + 3 , n_rooms[3]);
-    // add_gold(rooms_of_all_levels + 3 , n_rooms[3]);
-    // add_trap(rooms_of_all_levels + 3 , n_rooms[3]);
+    add_food(rooms_of_all_levels + 3 , n_rooms[3]);
+    add_gold(rooms_of_all_levels + 3 , n_rooms[3]);
+    add_trap(rooms_of_all_levels + 3 , n_rooms[3]);
 
+    printf("done adding foods/golds/traps! \n");
+    printf("building corridors of levels \n");
 
-    build_corr(n_rooms[0] , &corridors_of_all_levels , rooms_of_all_levels , 1 , corr_count + 0);
-    build_corr(n_rooms[1] , &corridors_of_all_levels , rooms_of_all_levels , 2 , corr_count + 1);
-    build_corr(n_rooms[2] , &corridors_of_all_levels , rooms_of_all_levels , 3 , corr_count + 2);
-    // build_corr(n_rooms[3] , &corridors_of_all_levels , rooms_of_all_levels , 4 , corr_count + 3);
+    build_corr2(n_rooms[0] , &corridors_of_all_levels , rooms_of_all_levels , 1 , corr_count + 0);
+    build_corr2(n_rooms[1] , &corridors_of_all_levels , rooms_of_all_levels , 2 , corr_count + 1);
+    build_corr2(n_rooms[2] , &corridors_of_all_levels , rooms_of_all_levels , 3 , corr_count + 2);
+    build_corr2(n_rooms[3] , &corridors_of_all_levels , rooms_of_all_levels , 4 , corr_count + 3);
     
+    printf("done building corridors of levels! \n");
 
     player me;
     me.pos.x =  rooms_of_all_levels[level_num - 1][1].corner.x  + rooms_of_all_levels[level_num - 1][1].length/2;
@@ -153,6 +158,45 @@ int main(){
             print_room(rooms_of_all_levels[level_num - 1] + i);
         }
 
+        // no corr char left unprinted:
+        for (int ro = 0 ; ro < n_rooms[level_num - 1] ; ro++){
+            room ey_baba = rooms_of_all_levels[level_num - 1][ro];
+            for(int door = 0 ; door < 2; door++){
+                int X = ey_baba.doors_x[door];
+                int Y = ey_baba.doors_y[door];
+                char there;
+                int x_c = X;
+                int y_c = Y;
+                if(Y == ey_baba.corner.y){
+                    there = mvinch(X , Y - 1) & A_CHARTEXT;
+                    y_c = Y - 1;
+                }
+                else if (X == ey_baba.corner.x + ey_baba.length - 1){
+                    there = mvinch(X+1 , Y) & A_CHARTEXT;
+                    x_c = X + 1;
+                }
+                else if (X == ey_baba.corner.x){
+                    there = mvinch(X-1 , Y) & A_CHARTEXT;
+                    x_c = X - 1;
+                }
+                // there = mvinch(X , Y - 1) & A_CHARTEXT;
+                if( !(there == '_' || there == '|' || there == '.' || there == '~' || there == '-' || there == ',' || there == '#'|| there == 'O' || there == 'f') ){
+                    init_pair(36, COLOR_YELLOW, COLOR_BLACK);
+                    attron(COLOR_PAIR(36));
+                    mvprintw(x_c , y_c , "#");
+                    // sleep(1);
+                    attroff(COLOR_PAIR(36));
+                }
+            }
+        }
+        
+
+        if(level_num == 4 && rooms_of_all_levels[level_num - 1][in_which_room(rooms_of_all_levels[level_num - 1] , n_rooms[level_num - 1] , me)].type == 3){
+                // Treasure Room!!
+                win();
+        }
+        
+
         print_corridors(corridors_of_all_levels[level_num - 1] , *(corr_count + level_num - 1));
         // int ch = getch();
         // if (ch == 'q'){
@@ -166,7 +210,7 @@ int main(){
         attron(COLOR_PAIR(me.color));
         mvprintw(me.pos.x , me.pos.y , "%c" , 'A');
         int ch = getch();
-        if (ch == 'q') {
+        if (ch == 'q' || ch == 'Q') {
             stop_soundtrack();
             break;  
         }
@@ -182,39 +226,27 @@ int main(){
         else if (ch == '/') {
             nodelay(stdscr, FALSE);
             help();  // Show help screen if '/' key is pressed
-
-            for (int ro = 0 ; ro < n_rooms[level_num - 1] ; ro++){
-                room ey_baba = rooms_of_all_levels[level_num - 1][ro];
-                for(int door = 0 ; door < 2; door++){
-                    int X = ey_baba.doors_x[door];
-                    int Y = ey_baba.doors_y[door];
-                    char there;
-                    int x_c = X;
-                    int y_c = Y;
-                    if(Y == ey_baba.corner.y){
-                        there = mvinch(X , Y - 1) & A_CHARTEXT;
-                        y_c = Y - 1;
-                    }
-                    else if (X == ey_baba.corner.x + ey_baba.length - 1){
-                        there = mvinch(X+1 , Y) & A_CHARTEXT;
-                        x_c = X + 1;
-                    }
-                    else if (X == ey_baba.corner.x){
-                        there = mvinch(X-1 , Y) & A_CHARTEXT;
-                        x_c = X - 1;
-                    }
-                    // there = mvinch(X , Y - 1) & A_CHARTEXT;
-                        if( !(there == '_' || there == '|' || there == '.' || there == '~' || there == '-' || there == ',' || there == '#'|| there == 'O' || there == 'f') ){
-                            init_pair(36, COLOR_YELLOW, COLOR_BLACK);
-                            attron(COLOR_PAIR(36));
-                            mvprintw(x_c , y_c , "#");
-                            // sleep(1);
-                            attroff(COLOR_PAIR(36));
-                        }
+            nodelay(stdscr, TRUE);
+        }
+        else if (ch == 'f' || ch == 'F') {
+            nodelay(stdscr, FALSE);
+            food_list(me);  // Show help screen if '/' key is pressed
+            nodelay(stdscr, TRUE);
+        }
+        else if (ch == 'c' || ch == 'C') {
+            if(me.food_count > 0){
+                me.food_count--;
+                if(me.health <= 14){
+                    me.health += 2; 
+                }
+                else{
+                    me.health = 16;  // maximum of health 
                 }
             }
-            
-            nodelay(stdscr, TRUE);
+            else{
+                snprintf(global_message, sizeof(char) * 100, "You are out of food!                              ");
+            }
+
         }
 
         // char standing_on =  mvinch(me.pos.x , me.pos.y) & A_CHARTEXT;
@@ -248,6 +280,7 @@ int main(){
 
         // movement(PiCk , ch , &me , rooms_of_all_levels + level_num - 1 , n_rooms , global_message);
         movement2(PiCk , ch , &me , rooms_of_all_levels, n_rooms[level_num - 1] , global_message , &level_num);
+        
         attroff(COLOR_PAIR(me.color));
         // print_corridors(corridors_of_all_levels[level_num - 1] , *(corr_count + level_num - 1));
         attron(COLOR_PAIR(me.color));
@@ -270,6 +303,9 @@ int main(){
         //     }
         // }
 
+        if (mvinch(0,0) & A_CHARTEXT != ' '){
+            mvprintw(0,0, "%c" , ' ');
+        }
 
         // print # instead of A if A is not in player's position
         for(int X = 2 ; X < LINES - 1; X++){
