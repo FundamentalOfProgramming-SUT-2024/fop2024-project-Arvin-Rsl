@@ -20,6 +20,7 @@ int x_moves[] = {-1 , +1 , +0 , +0 , -1 , -1 , +1 , +1}; // up , down , right , 
 int y_moves[] = {+0 , +0 , +1 , -1 , +1 , -1 , +1 , -1};
 int valid_move();
 void movement();
+void movement2();
 // void pick();
 void pick(int , int  , int , int , player* , room**  , int );
 int in_which_room();
@@ -146,7 +147,7 @@ void pick(int there, int pick_or_not , int x , int y ,player* hero , room** addr
 // check if the character on (x,y) is valid for passing
 int valid_move(int x , int y ){   
     char there = mvinch(x , y) & A_CHARTEXT ;
-    if (there == '.'  || there == ',' || there == '-' || there == '~' || there == '#' || there == '+' || there == '^' || there == '<'){
+    if (there == '.'  || there == ',' || there == '-' || there == '~' || there == '#' || there == '+' || there == '^' || there == '<' || there == ' '){
         return 1;
     }
     else if(there == 'f' || there == 'g'|| there == 'm'|| there == 'd'|| there == 'w'|| there == 'a'|| there == 's' || there == '^'){
@@ -155,6 +156,7 @@ int valid_move(int x , int y ){
     return 0;
 }
 // checked
+
 
 // technically just a switch/case that changes the players position (if valid) .  
 void movement(int PiCk , int ch , player* hero , room** address_to_rooms_this_level , int n_rooms_this_level , char* address_global_message){ // later in while(1) of the print_map() function: 
@@ -489,6 +491,341 @@ void movement(int PiCk , int ch , player* hero , room** address_to_rooms_this_le
             break;
     } 
 }
+
+
+void movement2(int PiCk , int ch , player* hero , room** rooms_of_all_levels , int n_rooms_this_level , char* address_global_message, int* ptr_level_num){
+    // later in while(1) of the print_map() function:
+    // char ch = getchar();
+    // attron
+    // mvprintw(hero->pos.x , hero->pos.y , "A");
+    // attroff
+
+    keypad(stdscr, TRUE);
+    position current;
+    current.x = hero->pos.x;
+    current.y = hero->pos.y;
+    int x_new;
+    int y_new;
+    char ccc;
+    int room_num = -1;
+
+    switch (ch) {
+        // Up and Down for stairs: (room num here means index)
+        case KEY_UP:
+            room_num = in_which_room(*(rooms_of_all_levels + *ptr_level_num - 1), n_rooms_this_level, *hero);
+            if (*ptr_level_num != 4 && 3 == room_num && hero->pos.x == (*(rooms_of_all_levels + *ptr_level_num - 1))[3].corner.x + 1 && hero->pos.y == (*(rooms_of_all_levels + *ptr_level_num - 1))[3].corner.y + 1){
+                snprintf(address_global_message, sizeof(char) * 100, "Going Upstairs ...                        ");
+                // sleep(1);
+                (*ptr_level_num)++;
+                hero->pos.x = rooms_of_all_levels[*ptr_level_num - 1][3].stair_x;
+                hero->pos.y = rooms_of_all_levels[*ptr_level_num - 1][3].stair_y;
+                clear();
+                refresh();
+            }
+            break;
+        case KEY_DOWN:
+            room_num = in_which_room(*(rooms_of_all_levels + *ptr_level_num - 1), n_rooms_this_level, *hero);
+            if (*ptr_level_num != 1 && 3 == room_num && hero->pos.x == (*(rooms_of_all_levels + *ptr_level_num - 1))[3].corner.x + 1 && hero->pos.y == (*(rooms_of_all_levels + *ptr_level_num - 1))[3].corner.y + 1){
+                snprintf(address_global_message, sizeof(char) * 100, "Going Downstairs ...                       ");
+                // sleep(1);
+                (*ptr_level_num)--;
+                hero->pos.x = rooms_of_all_levels[*ptr_level_num - 1][3].stair_x;
+                hero->pos.y = rooms_of_all_levels[*ptr_level_num - 1][3].stair_y;
+                clear();
+                refresh();
+            }
+            break;
+        // movement
+        case '8': // Up
+        case 'J':
+        case 'j':
+            x_new = current.x + x_moves[0];
+            y_new = current.y + y_moves[0];
+            ccc = mvinch(x_new, y_new) & A_CHARTEXT;
+            room_num = in_which_room(*(rooms_of_all_levels + *ptr_level_num - 1), n_rooms_this_level, *hero);
+
+            // trap
+            if((*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->trap_x){
+                if(x_new == (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->trap_x && y_new == (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->trap_y){
+                    (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->trap_visibility = 1;
+                    trap(hero, address_global_message);
+                    // clear(); // for message
+                }
+            }
+            // food
+            if (ccc == 'f' && room_num >= 0){
+                hero->food_count++;
+                (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->picked_foods[which_food_in_room(x_new, y_new , (*(rooms_of_all_levels + *ptr_level_num - 1))[room_num])] = 1;
+            }
+            // gold
+            else if (ccc == 'g' && room_num >= 0){
+                (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->picked_golds[which_gold_in_room(x_new, y_new , (*(rooms_of_all_levels + *ptr_level_num - 1))[room_num])] = 1;
+                if((*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->picked_golds[which_gold_in_room(x_new, y_new , (*(rooms_of_all_levels + *ptr_level_num - 1))[room_num])] == 1){
+                    hero->gold_count++;
+                    snprintf(address_global_message, sizeof(char) * 100, "+1 Gold!                                                                      ");
+                }
+            }
+            // just move
+            if (valid_move(x_new, y_new) == 1){
+                hero->pos.x = x_new;
+                hero->pos.y = y_new;
+            } 
+            break;
+
+        case '2': // Down
+        case 'K':
+        case 'k':       
+            x_new = current.x + x_moves[1];
+            y_new = current.y + y_moves[1];
+            ccc = mvinch(x_new , y_new) & A_CHARTEXT;
+            room_num = in_which_room(*(rooms_of_all_levels + *ptr_level_num - 1), n_rooms_this_level, *hero);
+            // trap
+            if((*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->trap_x){
+                if(x_new == (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->trap_x && y_new == (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->trap_y){
+                    (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->trap_visibility = 1;
+                    trap(hero , address_global_message);
+
+                }
+            }
+            if (ccc == 'f' && room_num >= 0){
+                hero->food_count++;
+                (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->picked_foods[which_food_in_room(x_new, y_new , (*(rooms_of_all_levels + *ptr_level_num - 1))[room_num])] = 1;
+            }
+            else if (ccc == 'g' && room_num >= 0){
+                (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->picked_golds[which_gold_in_room(x_new, y_new , (*(rooms_of_all_levels + *ptr_level_num - 1))[room_num])] = 1;
+                if((*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->picked_golds[which_gold_in_room(x_new, y_new , (*(rooms_of_all_levels + *ptr_level_num - 1))[room_num])] == 1){
+                    hero->gold_count++;
+                    snprintf(address_global_message, sizeof(char) * 100, "+1 Gold!                                                               ");
+                }
+            }
+            if (valid_move(x_new , y_new) == 1){
+                hero->pos.x = x_new;
+                hero->pos.y = y_new;
+            } 
+            else if(valid_move(x_new , y_new) == 2){
+                // pick(ccc , PiCk ,x_new , y_new, hero ,  rooms_of_all_levels, n_rooms_this_level);
+            }
+            break;
+
+        case '6': // Right
+        case KEY_RIGHT:
+        case 'L':
+        case 'l':
+            x_new = current.x + x_moves[2];
+            y_new = current.y + y_moves[2];
+            ccc = mvinch(x_new , y_new) & A_CHARTEXT;
+            room_num = in_which_room(*(rooms_of_all_levels + *ptr_level_num - 1), n_rooms_this_level, *hero);
+            // trap
+            if((*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->trap_x){
+                if(x_new == (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->trap_x && y_new == (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->trap_y){
+                    (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->trap_visibility = 1;
+                    trap(hero , address_global_message);
+
+                }
+            }
+            if (ccc == 'f' && room_num >= 0){
+                hero->food_count++;
+                (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->picked_foods[which_food_in_room(x_new, y_new , (*(rooms_of_all_levels + *ptr_level_num - 1))[room_num])] = 1;
+            }
+            else if (ccc == 'g' && room_num >= 0){
+                (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->picked_golds[which_gold_in_room(x_new, y_new , (*(rooms_of_all_levels + *ptr_level_num - 1))[room_num])] = 1;
+                if((*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->picked_golds[which_gold_in_room(x_new, y_new , (*(rooms_of_all_levels + *ptr_level_num - 1))[room_num])] == 1){
+                    hero->gold_count++;
+                    snprintf(address_global_message, sizeof(char) * 100, "+1 Gold!                                                                        ");
+                }
+            }
+
+            if (valid_move(x_new , y_new) == 1){
+                hero->pos.x = x_new;
+                hero->pos.y = y_new;
+            } 
+            else if(valid_move(x_new , y_new) == 2){
+                // pick(ccc , PiCk ,x_new , y_new, hero , rooms_of_all_levels, n_rooms_this_level);
+            }
+            break;
+        case '4': // Left
+        case KEY_LEFT:
+        case 'H':
+        case 'h':
+            x_new = current.x + x_moves[3];
+            y_new = current.y + y_moves[3];
+            ccc = mvinch(x_new, y_new) & A_CHARTEXT;
+            room_num = in_which_room(*(rooms_of_all_levels + *ptr_level_num - 1), n_rooms_this_level, *hero);
+            // trap
+            if((*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->trap_x){
+                if(x_new == (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->trap_x && y_new == (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->trap_y){
+                    (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->trap_visibility = 1;
+                    trap(hero, address_global_message);
+                }
+            }
+
+            if (ccc == 'f' && room_num >= 0){
+                hero->food_count++;
+                (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->picked_foods[which_food_in_room(x_new, y_new , (*(rooms_of_all_levels + *ptr_level_num - 1))[room_num])] = 1;
+            }
+            else if (ccc == 'g' && room_num >= 0){
+                (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->picked_golds[which_gold_in_room(x_new, y_new , (*(rooms_of_all_levels + *ptr_level_num - 1))[room_num])] = 1;
+                if((*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->picked_golds[which_gold_in_room(x_new, y_new , (*(rooms_of_all_levels + *ptr_level_num - 1))[room_num])] == 1){
+                    hero->gold_count++;
+                    snprintf(address_global_message, sizeof(char) * 100, "+1 Gold!                                                                  ");
+                }
+            }
+            if (valid_move(x_new, y_new) == 1){
+                hero->pos.x = x_new;
+                hero->pos.y = y_new;
+            } 
+            else if(valid_move(x_new, y_new) == 2){
+                // pick(ccc , PiCk ,x_new , y_new, hero , rooms_of_all_levels, n_rooms_this_level);
+            }
+            break;
+
+        case '9': // Upper right
+        case 'U':
+        case 'u':
+            x_new = current.x + x_moves[4];
+            y_new = current.y + y_moves[4];
+            ccc = mvinch(x_new, y_new) & A_CHARTEXT;
+            room_num = in_which_room(*(rooms_of_all_levels + *ptr_level_num - 1), n_rooms_this_level, *hero);
+            // trap
+            if((*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->trap_x){
+                if(x_new == (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->trap_x && y_new == (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->trap_y){
+                    (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->trap_visibility = 1;
+                    trap(hero , address_global_message);
+                }
+            }
+
+            if (ccc == 'f' && room_num >= 0){
+                hero->food_count++;
+                (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->picked_foods[which_food_in_room(x_new, y_new , (*(rooms_of_all_levels + *ptr_level_num - 1))[room_num])] = 1;
+            }
+            else if (ccc == 'g' && room_num >= 0){
+                (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->picked_golds[which_gold_in_room(x_new, y_new , (*(rooms_of_all_levels + *ptr_level_num - 1))[room_num])] = 1;
+                if((*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->picked_golds[which_gold_in_room(x_new, y_new , (*(rooms_of_all_levels + *ptr_level_num - 1))[room_num])] == 1){
+                    hero->gold_count++;
+                    snprintf(address_global_message, sizeof(char) * 100, "+1 Gold!                                                                                ");
+                }
+            }
+            if (valid_move(x_new, y_new) == 1){
+                hero->pos.x = x_new;
+                hero->pos.y = y_new;
+            } 
+            else if(valid_move(x_new, y_new) == 2){
+                // pick(ccc , PiCk ,x_new , y_new, hero , rooms_of_all_levels, n_rooms_this_level);
+            }
+            break;
+
+        case '7': // Upper left
+        case 'Y':
+        case 'y':
+            x_new = current.x + x_moves[5];
+            y_new = current.y + y_moves[5];
+            ccc = mvinch(x_new , y_new) & A_CHARTEXT;
+            room_num = in_which_room(*(rooms_of_all_levels + *ptr_level_num - 1), n_rooms_this_level, *hero);
+            // trap
+            if((*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->trap_x){
+                if(x_new == (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->trap_x && y_new == (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->trap_y){
+                    (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->trap_visibility = 1;
+                    trap(hero , address_global_message);
+                }
+            }
+
+            if (ccc == 'f' && room_num >= 0){
+                hero->food_count++;
+                (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->picked_foods[which_food_in_room(x_new, y_new , (*(rooms_of_all_levels + *ptr_level_num - 1))[room_num])] = 1;
+            }
+            else if (ccc == 'g' && room_num >= 0){
+                (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->picked_golds[which_gold_in_room(x_new, y_new , (*(rooms_of_all_levels + *ptr_level_num - 1))[room_num])] = 1;
+                if((*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->picked_golds[which_gold_in_room(x_new, y_new , (*(rooms_of_all_levels + *ptr_level_num - 1))[room_num])] == 1){
+                    hero->gold_count++;
+                    snprintf(address_global_message, sizeof(char) * 100, "+1 Gold!                                                                              ");
+                }
+            }
+            if (valid_move(x_new, y_new) == 1){
+                hero->pos.x = x_new;
+                hero->pos.y = y_new;
+            } 
+            else if(valid_move(x_new, y_new) == 2){
+                // pick(ccc , PiCk ,x_new , y_new, hero , rooms_of_all_levels, n_rooms_this_level);
+            }
+            break;
+
+        case '1': // Down left
+        case 'B':
+        case 'b':
+            x_new = current.x + x_moves[7];
+            y_new = current.y + y_moves[7];
+            ccc = mvinch(x_new , y_new) & A_CHARTEXT;
+            room_num = in_which_room(*(rooms_of_all_levels + *ptr_level_num - 1), n_rooms_this_level, *hero);
+            // trap
+            if((*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->trap_x){
+                if(x_new == (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->trap_x && y_new == (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->trap_y){
+                    (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->trap_visibility = 1;
+                    trap(hero , address_global_message);
+                }
+            }
+
+            if (ccc == 'f' && room_num >= 0){
+                hero->food_count++;
+                (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->picked_foods[which_food_in_room(x_new, y_new , (*(rooms_of_all_levels + *ptr_level_num - 1))[room_num])] = 1;
+            }
+            else if (ccc == 'g' && room_num >= 0){
+                (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->picked_golds[which_gold_in_room(x_new, y_new , (*(rooms_of_all_levels + *ptr_level_num - 1))[room_num])] = 1;
+                if((*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->picked_golds[which_gold_in_room(x_new, y_new , (*(rooms_of_all_levels + *ptr_level_num - 1))[room_num])] == 1){
+                    hero->gold_count++;
+                    snprintf(address_global_message, sizeof(char) * 100, "+1 Gold!                                                                                 ");
+                }
+            }
+            if (valid_move(x_new, y_new) == 1){
+                hero->pos.x = x_new;
+                hero->pos.y = y_new;
+            } 
+            else if(valid_move(x_new, y_new) == 2){
+                // pick(ccc, PiCk, x_new, y_new, hero, rooms_of_all_levels, n_rooms_this_level);
+            }
+            break;
+
+        case '3': // Down right
+        case 'N':
+        case 'n':
+            x_new = current.x + x_moves[6];
+            y_new = current.y + y_moves[6];
+            ccc = mvinch(x_new, y_new) & A_CHARTEXT;
+            room_num = in_which_room(*(rooms_of_all_levels + *ptr_level_num - 1), n_rooms_this_level, *hero);
+            // trap
+            if((*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->trap_x){
+                if(x_new == (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->trap_x && y_new == (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->trap_y){
+                    (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->trap_visibility = 1;
+                    trap(hero , address_global_message);
+                }
+            }
+
+            if (ccc == 'f' && room_num >= 0){
+                hero->food_count++;
+                (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->picked_foods[which_food_in_room(x_new, y_new , (*(rooms_of_all_levels + *ptr_level_num - 1))[room_num])] = 1;
+            }
+            else if (ccc == 'g' && room_num >= 0){
+                (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->picked_golds[which_gold_in_room(x_new, y_new , (*(rooms_of_all_levels + *ptr_level_num - 1))[room_num])] = 1;
+                if((*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->picked_golds[which_gold_in_room(x_new, y_new , (*(rooms_of_all_levels + *ptr_level_num - 1))[room_num])] == 1){
+                    hero->gold_count++;
+                    snprintf(address_global_message, sizeof(char) * 100, "+1 Gold!                                                                                    ");
+                }
+            }
+            if (valid_move(x_new, y_new) == 1){
+                hero->pos.x = x_new;
+                hero->pos.y = y_new;
+            } 
+            else if(valid_move(x_new, y_new) == 2){
+                // pick(ccc, PiCk, x_new, y_new, hero, rooms_of_all_levels, n_rooms_this_level);
+            }
+            break;
+    }
+}
+
+
+
+
+
+
 
 /*
 example of movement():
