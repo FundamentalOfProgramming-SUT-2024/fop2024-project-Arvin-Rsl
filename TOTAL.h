@@ -130,6 +130,7 @@ typedef struct
     int pick; // 1 if player has enabled picking up "spells" and "weapons" , 0 otherwise
     int color; // ...
     char username[100];
+    int won; // 1 if reaches treasure room
 
 } player;
 
@@ -148,6 +149,7 @@ void build_corr2(int , position*** , room ** , int , int*);
 void new_map();
 void print_map();
 void print_room();
+void print_room_even_if_hidden();
 void print_corridors();
 void add_door_and_window();
 void add_pillars();
@@ -415,13 +417,20 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
     // Example: user chooses a soundtrack
     choose_soundtrack(current_song);
     int PiCk = 1;
-
+    int print_all_Map = 0;
 
     while(1){
-        for (int i = 0 ; i < n_rooms[level_num - 1] ; i++){
-            print_room(rooms_of_all_levels[level_num - 1] + i);
+        if(!print_all_Map){
+          for (int i = 0 ; i < n_rooms[level_num - 1] ; i++){
+                print_room(rooms_of_all_levels[level_num - 1] + i);
+            }
         }
-
+        else{
+            for (int i = 0 ; i < n_rooms[level_num - 1] ; i++){
+                print_room_even_if_hidden(rooms_of_all_levels[level_num - 1] + i);
+            }
+        }
+  
         // no corr char left unprinted:
         for (int ro = 0 ; ro < n_rooms[level_num - 1] ; ro++){
             room ey_baba = rooms_of_all_levels[level_num - 1][ro];
@@ -454,6 +463,9 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
             }
         }
         
+        if(rooms_of_all_levels[level_num - 1][in_which_room(rooms_of_all_levels[level_num - 1] , n_rooms[level_num - 1] , me)].hide == 1){
+            rooms_of_all_levels[level_num - 1][in_which_room(rooms_of_all_levels[level_num - 1] , n_rooms[level_num - 1] , me)].hide = 0;
+        }
 
         if(current_song != 6 && level_num == 4 && rooms_of_all_levels[level_num - 1][in_which_room(rooms_of_all_levels[level_num - 1] , n_rooms[level_num - 1] , me)].type == 3){
                 // Treasure Room!!
@@ -533,6 +545,15 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
         }
         else if (ch == 'P' || ch == 'p') {
             Pause(rooms_of_all_levels , corridors_of_all_levels , me);
+        }
+        else if (ch == 'm' || ch == 'M') {
+            if(print_all_Map){
+                clear();
+                print_all_Map = 0;
+            }
+            else{
+                print_all_Map = 1;
+            }
         }
         else if (ch == 'c' || ch == 'C') {
             if(me.food_count > 0){
@@ -1077,9 +1098,9 @@ void win(int* ptr_current_song){
     init_audio();
     *ptr_current_song = 6;
     choose_soundtrack(*ptr_current_song);
-    attron(A_BOLD);
+    attron(A_BOLD | COLOR_PAIR(15) );
     mvprintw(1 , COLS/2 - strlen("YOU WON THE GAME!!")/2 , "YOU WON THE GAME!!");
-    attroff(A_BOLD);
+    attroff(A_BOLD | COLOR_PAIR(15));
 }
 
 // fell in trap 
@@ -1103,11 +1124,11 @@ int in_which_room(room* rooms_this_level , int n_rooms , player hero){
     //     (mvinch(hero.pos.x , hero.pos.y-1) & A_CHARTEXT) == 's' || (mvinch(hero.pos.x , hero.pos.y-1) & A_CHARTEXT) == '^' ||
     //     (mvinch(hero.pos.x , hero.pos.y-1) & A_CHARTEXT) == '<' || (mvinch(hero.pos.x , hero.pos.y-1) & A_CHARTEXT) == 'H' ||
     //     (mvinch(hero.pos.x , hero.pos.y-1) & A_CHARTEXT) == '!' || (mvinch(hero.pos.x , hero.pos.y-1) & A_CHARTEXT) == '$'){
-    if ((mvinch(hero.pos.x , hero.pos.y-1) & A_CHARTEXT) != ' ' && (mvinch(hero.pos.x , hero.pos.y-1) & A_CHARTEXT) != '#'){
+    // if ((mvinch(hero.pos.x , hero.pos.y-1) & A_CHARTEXT) != ' ' && (mvinch(hero.pos.x , hero.pos.y-1) & A_CHARTEXT) != '#'){
         int this_room = 0;
         for (int i = 0 ; i < n_rooms ; i++){
             room r = rooms_this_level[i];
-            if( (hero.pos.x >= r.corner.x && hero.pos.x < r.corner.x + r.length) && (hero.pos.y >= r.corner.y && hero.pos.y < r.corner.y + r.width) ){
+            if( (hero.pos.x >= r.corner.x -1 && hero.pos.x <= r.corner.x + r.length) && (hero.pos.y >= r.corner.y -1 && hero.pos.y <= r.corner.y + r.width) ){
                 this_room = r.room_number;
                 mvprintw(LINES - 1 , 3  , "You are in room number %d" , this_room);
                 // sleep(2);
@@ -1115,10 +1136,10 @@ int in_which_room(room* rooms_this_level , int n_rooms , player hero){
                 return this_room - 1;
             }
         }
-    }
-    else{
-        return - 1;
-    }
+    // }
+    // else{
+    //     return - 1;
+    // }
 }
 
 // returns the index of food on position x , y
@@ -4648,7 +4669,8 @@ void add_door_and_window(room** address_rooms_this_level , int n_rooms){
 
 }
 
-void print_room(room *Room){ 
+void print_room_even_if_hidden(room* Room){
+
 
     if (Room == NULL) {
     printf("Error: Room is NULL before print_room\n");
@@ -4662,8 +4684,6 @@ void print_room(room *Room){
     position ul_corner;
     ul_corner.x = Room->corner.x;
     ul_corner.y = Room->corner.y;
-    if (!Room->hide){ // visible
-        // printf("Room is visible\n"); // Debug print
 
         // WALLS
         // northern wall
@@ -4850,6 +4870,213 @@ void print_room(room *Room){
                 mvprintw(Room->doors_x[i],  Room->doors_y[i] , "+");
             }  
         }
+
+}
+
+void print_room(room *Room){ 
+
+    if (Room == NULL) {
+    printf("Error: Room is NULL before print_room\n");
+    return;
+    }
+    // printf("Printing room at position (%d, %d)\n", Room->corner.x, Room->corner.y); // Debug print
+    // setlocale(LC_ALL, "");
+    start_color();
+    // attron(COLOR_BLACK);
+    // attron(COLOR_BLACK);
+    position ul_corner;
+    ul_corner.x = Room->corner.x;
+    ul_corner.y = Room->corner.y;
+    if (!Room->hide){ // visible
+        // printf("Room is visible\n"); // Debug print
+
+        // WALLS
+        // northern wall
+        for (int i = ul_corner.y + 1 ; i < ul_corner.y + Room->width - 1 ; i++){
+            mvprintw(ul_corner.x , i , "_");
+        }
+
+        // southern wall
+        for (int i = ul_corner.y + 1 ; i < ul_corner.y + Room->width - 1 ; i++){
+            mvprintw(ul_corner.x + Room->length - 1 , i , "_");
+        }
+
+        // western wall
+        for (int i = ul_corner.x + 1 ; i < ul_corner.x + Room->length ; i++){
+            mvprintw(i , ul_corner.y , "|");
+        }
+
+        // eastern wall
+        for (int i = ul_corner.x + 1 ; i < ul_corner.x + Room->length ; i++){
+            mvprintw(i , ul_corner.y + Room->width - 1, "|");
+        }
+
+        // FLOOR
+        // determine floor's char
+        char floor;
+        if (Room->type == 0 || Room->type == 1){
+            floor = '.';
+        }
+        else if (Room->type == 2){
+            floor = ',';
+        }
+        else if (Room->type == 3){
+            floor = '-';
+        }
+        else if (Room->type == 4){
+            floor = '~';
+        }
+        // printf floor
+        start_color();
+        init_pair(0 , COLOR_WHITE , COLOR_BLACK); // regular
+        init_pair(1 , COLOR_WHITE , COLOR_BLACK); // battle
+        init_pair(2 , 53 , COLOR_BLACK); // enchant
+        init_color(70, 1000 , 1000 , 0); // treasure room
+        init_pair(33, 70 , COLOR_BLACK); // treasure room
+        // init_pair(3 , COLOR_YELLOW , COLOR_BLACK); 
+        init_pair(4 , COLOR_BLUE , COLOR_BLACK); 
+        init_color(76, 990 , 570 , 800); // for food
+        init_pair(8, 76 , COLOR_BLACK); // for food
+        init_color(77, 1000 , 1000 , 0); // for gold
+        init_pair(15, 77 , COLOR_BLACK); // for gold
+        init_color(78, 700, 700, 0); // for black gold
+        init_pair(16, 78 , COLOR_BLACK); // for black gold
+
+        if(Room->type == 3){
+            attron(COLOR_PAIR(33));
+        }
+        else{
+            attron(COLOR_PAIR(Room->type));
+        }
+        for (int y = ul_corner.y + 1; y < ul_corner.y + Room->width - 1 ; y++){
+            for (int x = ul_corner.x + 1 ; x < ul_corner.x + Room->length - 1 ; x++){
+                mvprintw(x , y , "%c" , floor);
+            }
+        }
+        if(Room->trap_x){ // cannot be zero if there is trap in room
+            if(Room->trap_visibility){
+                mvprintw(Room->trap_x , Room->trap_y , "^");
+            }
+        }
+        if(Room->type == 3){
+            attroff(COLOR_PAIR(33));
+        }
+        else{
+            attroff(COLOR_PAIR(Room->type));
+        }
+
+        if(Room->type != 3){ // Treasure room is empty of these!
+            // pillars
+            for (int i = 0 ; i < 3 ; i++){   
+                mvprintw(Room->pillars_x[i],  Room->pillars_y[i] , "O");
+            }
+
+            if (Room->type !=2 ){// Enchant room is empty of these!
+                // food
+                attron(COLOR_PAIR(8));
+                for (int i = 0 ; i < Room->n_foods ; i++){   
+                    if(Room->picked_foods[i] == 0){
+                        mvprintw(Room->foods_x[i],  Room->foods_y[i] , "f" );
+                    }
+                }
+                attroff(COLOR_PAIR(8));
+
+                // gold
+                attron(COLOR_PAIR(15));
+                for (int i = 0 ; i < Room->n_golds ; i++){   
+                    if(Room->picked_golds[i] == 0){
+                        mvprintw(Room->golds_x[i],  Room->golds_y[i] , "g");
+                    }
+                }
+                attroff(COLOR_PAIR(15));
+
+                // black gold
+                attron(COLOR_PAIR(16));
+                if(Room->black_gold == 1){
+                    mvprintw(Room->black_gold_x,  Room->black_gold_y , "G");
+                }
+                attroff(COLOR_PAIR(16));
+            }
+
+            // weapons
+            init_pair(239 , 239 , COLOR_BLACK);
+            attron(COLOR_PAIR(239) | A_BOLD);
+            for (int Weap = 0 ; Weap < 5 ; Weap++){
+                if(Room->weapons[Weap]){
+
+                    if(Weap == 0){
+                        // mace
+                        mvprintw(Room->weapons_x[Weap] , Room->weapons_y[Weap] , "m");
+                    }
+                    else if(Weap == 1){
+                        // dagger
+                        mvprintw(Room->weapons_x[Weap] , Room->weapons_y[Weap] , "d");
+                    }
+                    else if(Weap == 2){
+                        // wand
+                        mvprintw(Room->weapons_x[Weap] , Room->weapons_y[Weap] , "w");
+                    }
+                    else if(Weap == 3){
+                        // arrow
+                        mvprintw(Room->weapons_x[Weap] , Room->weapons_y[Weap] , "a");
+                    }
+                    else if(Weap == 4){
+                        // sword
+                        mvprintw(Room->weapons_x[Weap] , Room->weapons_y[Weap] , "s");
+                    }
+                }
+            }
+            attroff(COLOR_PAIR(239) | A_BOLD);
+
+
+            // spells
+            init_pair(47 , 47 , COLOR_BLACK); // health
+            init_pair(45 , 45 , COLOR_BLACK); // speed
+            init_pair(209 , 209 , COLOR_BLACK); // damage
+            for (int Weap = 0 ; Weap < 3 ; Weap++){
+                if(Room->spells[Weap] != 0){
+
+                    if(Weap == 0){
+                        // health
+                        attron(COLOR_PAIR(47) | A_BOLD);
+                        mvprintw(Room->spells_x[Weap] , Room->spells_y[Weap] , "H");
+                        attroff(COLOR_PAIR(47) | A_BOLD);
+                    }
+                    else if(Weap == 1){
+                        // speed
+                        if(Room->spells_x[Weap] > 1){
+                            attron(COLOR_PAIR(45) | A_BOLD);
+                            mvprintw(Room->spells_x[Weap] , Room->spells_y[Weap] , "$");
+                            attroff(COLOR_PAIR(45) | A_BOLD);
+                        }
+                    }
+                    else if(Weap == 2){
+                        // damage
+                        attron(COLOR_PAIR(209) | A_BOLD);
+                        mvprintw(Room->spells_x[Weap] , Room->spells_y[Weap] , "!");
+                        attroff(COLOR_PAIR(209) | A_BOLD);
+                    }
+
+                }
+            }
+
+        }
+        
+        // staircase
+        if (Room->room_number == 4){
+            // room index 3 (STAIRS!)
+            mvprintw(Room->stair_x , Room->stair_y , "<");
+        }
+        
+        // doors
+        if (Room->room_number == 1){
+            mvprintw(Room->doors_x[0],  Room->doors_y[0] , "+");
+        }
+        else{
+            for (int i = 0 ; i < 2 ; i++){
+                mvprintw(Room->doors_x[i],  Room->doors_y[i] , "+");
+            }  
+        }
     } 
 
     else {
@@ -4911,7 +5138,7 @@ void new_map(int difficulty ,
     do {
         room ROOM;
         ROOM.floor_level = level_num;
-        ROOM.hide = 0;
+        ROOM.hide = 1;
         if (4 == level_num && done_rooms == n_rooms - 1){
             ROOM.type = 3;
         }
