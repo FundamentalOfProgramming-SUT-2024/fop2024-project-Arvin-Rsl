@@ -34,9 +34,9 @@ typedef struct {
                 // |
     int width;  // ____
     int hide;   // if 0, the Room is visible
-    int number_of_doors;
-    int number_of_windows;
-    int number_of_pillars;
+    int number_of_doors; // fixed 2 or 1
+    int number_of_windows; // not included in code
+    int number_of_pillars; // fixed 3
     position corner; // corner = upper left corner of the room
     int type; // 0 => Regular Room
               // 1 => Battle Room (trap)
@@ -108,7 +108,6 @@ typedef struct
     position pos;
     int gold_count;
     int health;
-    int hunger;
     int food_count;
     int food[4]; // 0 : regular
                  // 1 : ideal
@@ -483,7 +482,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
             current_song = chosen_song;
             init_audio();
             choose_soundtrack(current_song);
-            }
+        }
         
 
         print_corridors(corridors_of_all_levels[level_num - 1] , *(corr_count + level_num - 1));
@@ -1087,7 +1086,7 @@ void win(int* ptr_current_song){
 void trap(player* hero , char* address_global_message){
     hero->health --;
     // attron(COLOR_PAIR(1));
-    snprintf(address_global_message, sizeof(char) * 100, "You fell in Trap!                             ");
+    snprintf(address_global_message, sizeof(char) * 100, "You fell in trap!                             ");
     // sleep(2);
     // attroff(COLOR_PAIR(1));
 }
@@ -1110,7 +1109,7 @@ int in_which_room(room* rooms_this_level , int n_rooms , player hero){
             room r = rooms_this_level[i];
             if( (hero.pos.x >= r.corner.x && hero.pos.x < r.corner.x + r.length) && (hero.pos.y >= r.corner.y && hero.pos.y < r.corner.y + r.width) ){
                 this_room = r.room_number;
-                mvprintw(LINES - 2 , COLS - 20  , "u r in room index %d" , this_room - 1);
+                mvprintw(LINES - 1 , 3  , "You are in room number %d" , this_room);
                 // sleep(2);
                 refresh();
                 return this_room - 1;
@@ -2454,7 +2453,7 @@ void food_list(player hero){
     wattroff(help_win, COLOR_PAIR(8) |A_BOLD);
 
     // print instructions inside the window
-    mvwprintw(help_win, 3, 1, " Regular Food: %d" , hero.food_count);
+    mvwprintw(help_win, 3, 1, " Normal Food: %d" , hero.food_count);
     mvwprintw(help_win, 5, 1, " Ideal Food: %d" , 0);
     mvwprintw(help_win, 7, 1, " Magical Food: %d" , 0);
     mvwprintw(help_win, 9, 1, " Rotten Food: %d" , 0);
@@ -3013,7 +3012,7 @@ void entrance_menu(){
     char* my_username = "GUEST"; // initialize
     int DIFFICULTY = 1;  // initialize
     int HERO_COLOR = 39; // initialize with light blue
-    int song  = 1 ;
+    int song  = 2 ; // default = gole yakh
     int* ptr_difficulty = &DIFFICULTY;
     int* ptr_color = &HERO_COLOR;
     int* ptr_song = &song;
@@ -3573,7 +3572,7 @@ void choose_song(int* ptr_diff , int * ptr_color , int* song , char* my_username
     int highlight = 1;
     int choice = 0;
     int c;
-    char *choices[] = {"Song 1 (default)", "Song 2" , "Song 3" , "None" ,"Back"}; 
+    char *choices[] = {"Song 1", "Song 2 (default)" , "Song 3" , "None" ,"Back"}; 
     init_audio();
     while (1){
         // draw_title(/);
@@ -4743,7 +4742,7 @@ void print_room(room *Room){
 
         if(Room->type != 3){ // Treasure room is empty of these!
             // pillars
-            for (int i = 0 ; i < 2 ; i++){   
+            for (int i = 0 ; i < 3 ; i++){   
                 mvprintw(Room->pillars_x[i],  Room->pillars_y[i] , "O");
             }
 
