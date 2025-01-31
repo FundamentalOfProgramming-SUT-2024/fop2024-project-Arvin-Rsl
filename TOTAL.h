@@ -227,6 +227,7 @@ int in_which_room();
 int which_food_in_room();
 void trap();
 void win();
+void death();
 
 //////// new_user:
 int already_a_username();
@@ -572,10 +573,11 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
                 // there = mvinch(X , Y - 1) & A_CHARTEXT;
                 if( !(there == '_' || there == '|' || there == '.' || there == '~' || there == '-' || there == ',' || there == '#'|| there == 'O' || there == 'f') ){
                     init_pair(36, COLOR_YELLOW, COLOR_BLACK);
-                    attron(COLOR_PAIR(36));
-                    mvprintw(x_c , y_c , "#");
-                    // sleep(1);
-                    attroff(COLOR_PAIR(36));
+                    if(x_c > 2){
+                        attron(COLOR_PAIR(36));
+                        mvprintw(x_c , y_c , "#");
+                        attroff(COLOR_PAIR(36));
+                    }
                 }
             }
         }
@@ -586,11 +588,16 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
 
         if(current_song != 6 && level_num == 4 && rooms_of_all_levels[level_num - 1][in_which_room(rooms_of_all_levels[level_num - 1] , n_rooms[level_num - 1] , me)].type == 3){
                 // Treasure Room!!
-                win(&current_song);
+                win(&current_song , &me);
                 me.won = 1;
                 snprintf(global_message, sizeof(char) * 100, "\xF0\x9F\x8E\x89 \xF0\x9F\x8E\x89 \xF0\x9F\x8E\x89                       ");       
                 // (global_message , "\xF0\x9F\x8E\x89");
                 save_data(me , rooms_of_all_levels , n_rooms , corridors_of_all_levels , corr_count , 4 , difficulty , chosen_song);
+        }
+        else if(me.health <= 0){
+            death();
+            snprintf(global_message, sizeof(char) * 100, "\xF0\x9F\x92\x80 \xF0\x9F\x92\x80 \xF0\x9F\x92\x80                       ");       
+
         }
         else if(current_song != 5 && rooms_of_all_levels[level_num - 1][in_which_room(rooms_of_all_levels[level_num - 1] , n_rooms[level_num - 1] , me)].type == 4){
             // Nightmare Room!!
@@ -1214,19 +1221,32 @@ void create_user(int* ptr_difficulty , int* ptr_color , int* ptr_song ){
 
 
 // player entered the treasure room!
-void win(int* ptr_current_song){
-    // ... show win material 
-    // ... save game
+void win(int* ptr_current_song , player* hero){
+    hero->gold_count += 100;
     stop_soundtrack();
     init_audio();
     *ptr_current_song = 6;
     choose_soundtrack(*ptr_current_song);
     attron(A_BOLD | COLOR_PAIR(15) );
-    mvprintw(0 , COLS/2 - strlen("YOU WON THE GAME!!")/2 , "YOU WON THE GAME!!");
+    mvprintw(0 , COLS/2 - strlen("YOU WON THE GAME !")/2 , "YOU WON THE GAME !");
     attroff(A_BOLD | COLOR_PAIR(15));
     attron(COLOR_PAIR(16));
     mvprintw(2 , COLS/2 - strlen("Game has been saved. Press Q to exit")/2 , "Game has been saved. Press Q to exit");
     attroff(COLOR_PAIR(16));
+}
+
+// player's health = 0
+void death(){
+    // init_color(161 , 161 , COLOR_BLACK);
+    init_pair(246 , 246 , COLOR_BLACK);
+    stop_soundtrack();
+    attron(A_BOLD | COLOR_PAIR(160) );
+    mvprintw(0 , COLS/2 - strlen("GAME OVER !")/2 , "GAME OVER !");
+    attroff(A_BOLD | COLOR_PAIR(160));
+    attron(COLOR_PAIR(246));
+    mvprintw(2 , COLS/2 - strlen("You fought bravely, but your journey ends here.")/2 , "You fought bravely, but your journey ends here.");
+    mvprintw(3 , COLS/2 - strlen("Maybe next time the odds will be in your favor... Press Q to exit.")/2 , "Maybe next time the odds will be in your favor... Press Q to exit.");
+    attroff(COLOR_PAIR(246));   
 }
 
 // fell in trap 
