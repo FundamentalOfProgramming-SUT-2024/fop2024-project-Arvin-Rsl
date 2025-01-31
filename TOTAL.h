@@ -131,6 +131,7 @@ typedef struct
     int color; // ...
     char username[100];
     int won; // 1 if reaches treasure room
+    int floor_level;
 
 } player;
 
@@ -241,6 +242,117 @@ void draw_title(const char*);
 
 /////// save game:
 void Pause(room ** rooms_all_levels , position ** corridors_all_levels , player HERO);
+void save_data(player , room **, int *, position **, int *, int , int , int);
+
+void save_data(player me, room **rooms_of_all_levels, int n_rooms[4], position **corridors_of_all_levels, int corr_count[4], int level_count , int diff , int song) {
+    char filename[150];
+    sprintf(filename, "/home/arvin_rsl/Desktop/FOP_Project/Users_Folder/%s/saved_game.txt", me.username);
+
+    FILE *file = fopen(filename, "w");
+    if (file == NULL) {
+        perror("Error opening file");
+        return;
+    }
+
+    // Save player data
+    fprintf(file, "# Player\n");
+    fprintf(file, "won: %d\n", me.won);
+    fprintf(file, "Gold: %d\n", me.gold_count);
+    fprintf(file, "Health: %d\n", me.health);
+    fprintf(file, "Normal Food: %d\n", me.food_count);
+    fprintf(file, "Ideal Food: %d\n", me.food[1]);
+    fprintf(file, "Magical Food: %d\n", me.food[2]);
+    fprintf(file, "Rotten Food: %d\n", me.food[3]);
+    for (int i = 0; i < 5; i++) {
+        fprintf(file, "%s: %d\n", i == 0 ? "Mace" : i == 1 ? "Dagger" : i == 2 ? "Magic Wand" : i == 3 ? "Normal Arrow" : "Sword", me.weapons[i]);
+    }
+    fprintf(file, "Spell Health: %d\n", me.spells[0]);
+    fprintf(file, "Spell Speed: %d\n", me.spells[1]);
+    fprintf(file, "Spell Damage: %d\n", me.spells[2]);
+    fprintf(file, "X: %d\n", me.pos.x);
+    fprintf(file, "Y: %d\n", me.pos.y);
+    // Assuming Floor Level, Difficulty, Color, and Song are part of player structure
+    fprintf(file, "Floor Level: %d\n", me.floor_level); // Example logic
+    fprintf(file, "Difficulty: %d\n", diff); // Example logic
+    fprintf(file, "Color: %d\n", me.color);
+    fprintf(file, "Song: %d\n", song); // Example logic
+
+    // Save rooms and corridors data
+    fprintf(file, "\n# Rooms\n");
+    for (int i = 0; i < level_count; i++) {
+        fprintf(file, "\nLevel Num: %d\n", i + 1);
+        fprintf(file, "Number of Rooms: %d\n", n_rooms[i]);
+        for (int j = 0; j < n_rooms[i]; j++) {
+            room r = rooms_of_all_levels[i][j];
+            fprintf(file, "\nRoom Number: %d\n", r.room_number);
+            fprintf(file, "Length: %d\n", r.length);
+            fprintf(file, "Width: %d\n", r.width);
+            fprintf(file, "Hide: %d\n", r.hide);
+            fprintf(file, "corner.x: %d\n", r.corner.x);
+            fprintf(file, "corner.y: %d\n", r.corner.y);
+            fprintf(file, "Type: %d\n", r.type);
+            if(r.room_number == 1){
+                fprintf(file, "door0.x: %d\n", r.doors_x[0]);
+                fprintf(file, "door0.y: %d\n", r.doors_y[0]);
+            }
+            else{
+                fprintf(file, "door0.x: %d\n", r.doors_x[0]);
+                fprintf(file, "door1.x: %d\n", r.doors_x[1]);
+                fprintf(file, "door0.y: %d\n", r.doors_y[0]);
+                fprintf(file, "door1.y: %d\n", r.doors_y[1]);
+            }
+
+            fprintf(file, "pillar0.x: %d\n", r.pillars_x[0]);
+            fprintf(file, "pillar1.x: %d\n", r.pillars_x[1]);
+            fprintf(file, "pillar2.x: %d\n", r.pillars_x[2]);
+            fprintf(file, "pillar0.y: %d\n", r.pillars_y[0]);
+            fprintf(file, "pillar1.y: %d\n", r.pillars_y[1]);
+            fprintf(file, "pillar2.y: %d\n", r.pillars_y[2]);
+            fprintf(file, "n_foods: %d\n", r.n_foods);
+            for (int k = 0; k < r.n_foods; k++) {
+                fprintf(file, "food%d.x: %d\n", k, r.foods_x[k]);
+                fprintf(file, "food%d.y: %d\n", k, r.foods_y[k]);
+                fprintf(file, "picked_foods%d: %d\n", k, r.picked_foods[k]);
+            }
+            fprintf(file, "n_golds: %d\n", r.n_golds);
+            for (int k = 0; k < r.n_golds; k++) {
+                fprintf(file, "gold%d.x: %d\n", k, r.golds_x[k]);
+                fprintf(file, "gold%d.y: %d\n", k, r.golds_y[k]);
+                fprintf(file, "picked_golds%d: %d\n", k, r.picked_golds[k]);
+            }
+            fprintf(file, "trap_visibility: %d\n", r.trap_visibility);
+            fprintf(file, "trap.x: %d\n", r.trap_x);
+            fprintf(file, "trap.y: %d\n", r.trap_y);
+            fprintf(file, "stair_x: %d\n", r.stair_x);
+            fprintf(file, "stair_y: %d\n", r.stair_y);
+            fprintf(file, "black_gold: %d\n", r.black_gold);
+            fprintf(file, "black_gold_x: %d\n", r.black_gold_x);
+            fprintf(file, "black_gold_y: %d\n", r.black_gold_y);
+            for (int k = 0; k < 5; k++) {
+                fprintf(file, "weapons%d: %d\n", k, r.weapons[k]);
+                fprintf(file, "weapons_x%d: %d\n", k, r.weapons_x[k]);
+                fprintf(file, "weapons_y%d: %d\n", k, r.weapons_y[k]);
+            }
+            for (int k = 0; k < 3; k++) {
+                fprintf(file, "spells%d: %d\n", k, r.spells[k]);
+                fprintf(file, "spells_x%d: %d\n", k, r.spells_x[k]);
+                fprintf(file, "spells_y%d: %d\n", k, r.spells_y[k]);
+            }
+        }
+
+    }
+        
+    fprintf(file, "\n# Corridors\n");
+    for (int i = 0; i < level_count; i++) {
+        fprintf(file, "\nLevel Num: %d\n", i + 1);
+        fprintf(file, "Corr_Count: %d\n", corr_count[i]);
+        for (int j = 0; j < corr_count[i]; j++) {
+            fprintf(file, "(%d,%d)\n", corridors_of_all_levels[i][j].x, corridors_of_all_levels[i][j].y);
+        }
+    }
+    fclose(file);
+}
+
 
 //////////////////// NEW_GAME:
 void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
@@ -385,10 +497,15 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
     me.pos.x =  rooms_of_all_levels[level_num - 1][1].corner.x  + rooms_of_all_levels[level_num - 1][1].length/2;
     me.pos.y =  rooms_of_all_levels[level_num - 1][1].corner.y  + rooms_of_all_levels[level_num - 1][1].width/2;
     me.food_count = 0;
+    me.food[0] = 0;
+    me.food[1] = 0;
+    me.food[2] = 0;
+    me.food[3] = 0;
     me.gold_count = 0;
-    me.health = 13;
+    me.health = 16;
     me.color = CoLoR; 
     me.pick = 0;  
+    me.floor_level = 1;
     strcpy(me.username , username);
     me.current_weapon = 3; // 0 : Mace (m)
                         // 1 : Dagger (d)
@@ -470,6 +587,10 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
         if(current_song != 6 && level_num == 4 && rooms_of_all_levels[level_num - 1][in_which_room(rooms_of_all_levels[level_num - 1] , n_rooms[level_num - 1] , me)].type == 3){
                 // Treasure Room!!
                 win(&current_song);
+                me.won = 1;
+                snprintf(global_message, sizeof(char) * 100, "\xF0\x9F\x8E\x89 \xF0\x9F\x8E\x89 \xF0\x9F\x8E\x89                       ");       
+                // (global_message , "\xF0\x9F\x8E\x89");
+                save_data(me , rooms_of_all_levels , n_rooms , corridors_of_all_levels , corr_count , 4 , difficulty , chosen_song);
         }
         else if(current_song != 5 && rooms_of_all_levels[level_num - 1][in_which_room(rooms_of_all_levels[level_num - 1] , n_rooms[level_num - 1] , me)].type == 4){
             // Nightmare Room!!
@@ -575,34 +696,6 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
                 snprintf(global_message, sizeof(char) * 100, "Out of food!                                            ");
             }
 
-        }
-
-        // char standing_on =  mvinch(me.pos.x , me.pos.y) & A_CHARTEXT;
-        if (ch == 'p' || ch == 'P') {
-        //     clear();
-        //     if(PiCk == 0){
-        //         // clear();
-        //         // mvprintw(LINES - 2 , 3 , "You can pick now!");
-        //         PiCk = 1;
-        //         attron(COLOR_PAIR(0));
-        //         // char message2[] = "You can pick now!";
-        //         // print_top_message(message2);
-        //         print_corridors(corridors_of_all_levels[level_num - 1] , corr_count_this_level );
-        //         attroff(COLOR_PAIR(0));
-        //         refresh();
-        //     }
-        //     else{
-        //         // clear();
-        //         // mvprintw(LINES - 2 , 3 , "You can not pick now!");
-        //         char message2[] = "You can not pick now!";
-        //         PiCk = 0;
-        //         attron(COLOR_PAIR(1));
-        //         // print_top_message(message2);
-        //         attroff(COLOR_PAIR(1));
-        //         print_corridors(corridors_of_all_levels[level_num - 1] , corr_count_this_level );
-        //         refresh();
-
-        //     }
         }
 
 
@@ -757,6 +850,16 @@ void Pause(room ** rooms_all_levels , position ** corridors_all_levels , player 
             }
             else if (WHAT == 'E'|| WHAT == 'e'){
                 stop_soundtrack();
+                for (int i = 0; i < 4; i++) {
+                    free(corridors_all_levels[i]);
+                }
+                free(corridors_all_levels);
+
+                // Free memory for rooms
+                for (int i = 0; i < 4; i++) {
+                    free(rooms_all_levels[i]);
+                }
+                free(rooms_all_levels);
                 pregame_menu(HERO.username);
                 break;
             }
@@ -1099,8 +1202,11 @@ void win(int* ptr_current_song){
     *ptr_current_song = 6;
     choose_soundtrack(*ptr_current_song);
     attron(A_BOLD | COLOR_PAIR(15) );
-    mvprintw(1 , COLS/2 - strlen("YOU WON THE GAME!!")/2 , "YOU WON THE GAME!!");
+    mvprintw(0 , COLS/2 - strlen("YOU WON THE GAME!!")/2 , "YOU WON THE GAME!!");
     attroff(A_BOLD | COLOR_PAIR(15));
+    attron(COLOR_PAIR(16));
+    mvprintw(2 , COLS/2 - strlen("Game has been saved. Press Q to exit")/2 , "Game has been saved. Press Q to exit");
+    attroff(COLOR_PAIR(16));
 }
 
 // fell in trap 
@@ -1265,6 +1371,7 @@ void movement2(int PiCk , int ch , player* hero , room** rooms_of_all_levels , i
                     (*ptr_level_num)++;
                     hero->pos.x = rooms_of_all_levels[*ptr_level_num - 1][3].stair_x;
                     hero->pos.y = rooms_of_all_levels[*ptr_level_num - 1][3].stair_y;
+                    hero->floor_level++;
                     clear();
                     refresh();
                 }
@@ -1282,6 +1389,7 @@ void movement2(int PiCk , int ch , player* hero , room** rooms_of_all_levels , i
                     (*ptr_level_num)--;
                     hero->pos.x = rooms_of_all_levels[*ptr_level_num - 1][3].stair_x;
                     hero->pos.y = rooms_of_all_levels[*ptr_level_num - 1][3].stair_y;
+                    hero->floor_level--;
                     clear();
                     refresh();
                 }
@@ -4839,9 +4947,11 @@ void print_room_even_if_hidden(room* Room){
                     }
                     else if(Weap == 1){
                         // speed
-                        attron(COLOR_PAIR(45) | A_BOLD);
-                        mvprintw(Room->spells_x[Weap] , Room->spells_y[Weap] , "$");
-                        attroff(COLOR_PAIR(45) | A_BOLD);
+                        if(Room->spells_x[Weap] > 1){
+                            attron(COLOR_PAIR(45) | A_BOLD);
+                            mvprintw(Room->spells_x[Weap] , Room->spells_y[Weap] , "$");
+                            attroff(COLOR_PAIR(45) | A_BOLD);
+                        }
                     }
                     else if(Weap == 2){
                         // damage
@@ -5079,9 +5189,6 @@ void print_room(room *Room){
         }
     } 
 
-    else {
-        // printf("Room is hidden\n"); // Debug print
-    }
 }
  
 // function to print corridors 
@@ -5174,6 +5281,17 @@ void new_map(int difficulty ,
         ROOM.black_gold = 0;
         ROOM.black_gold_x = 0;
         ROOM.black_gold_y = 0;
+        for (int W = 0 ; W < 5 ; W++){
+            ROOM.weapons[W] = 0;
+            ROOM.weapons_x[W] = 0;
+            ROOM.weapons_y[W] = 0;
+        }
+        for (int S = 0 ; S<3 ;S++){
+            ROOM.spells[S] = 0;
+            ROOM.spells_x[S] = 0;
+            ROOM.spells_y[S] = 0;
+        }
+
         if (room_valid(ROOM , address_rooms_of_all_levels , level_num , done_rooms)){
             done_rooms++;
             ROOM.room_number = done_rooms;
