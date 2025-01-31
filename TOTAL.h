@@ -241,7 +241,7 @@ void draw_borders(int);
 void draw_title(const char*);
 
 /////// save game:
-void Pause(room ** rooms_all_levels , position ** corridors_all_levels , player HERO);
+void Pause(room **  , position **  , player  , int* , int*  , int  , int );
 void save_data(player , room **, int *, position **, int *, int , int , int);
 
 void save_data(player me, room **rooms_of_all_levels, int n_rooms[4], position **corridors_of_all_levels, int corr_count[4], int level_count , int diff , int song) {
@@ -665,7 +665,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
             nodelay(stdscr, TRUE);
         }
         else if (ch == 'P' || ch == 'p') {
-            Pause(rooms_of_all_levels , corridors_of_all_levels , me);
+            Pause(rooms_of_all_levels , corridors_of_all_levels , me , n_rooms , corr_count , difficulty , chosen_song);
         }
         else if (ch == 'm' || ch == 'M') {
             if(print_all_Map){
@@ -765,7 +765,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
 
 
 //////////////////////////////SAVE GAME
-void Pause(room ** rooms_all_levels , position ** corridors_all_levels , player HERO){
+void Pause(room ** rooms_all_levels , position ** corridors_all_levels , player HERO , int* n_rooms , int* corr_count , int diff , int song){
     initscr();
     start_color();
     // init_pair(1, COLOR_WHITE, COLOR_BLACK);
@@ -826,7 +826,27 @@ void Pause(room ** rooms_all_levels , position ** corridors_all_levels , player 
     }
     else if (choice == 2){
         clear();
-        // save_game_messages(rooms_all_levels , corridors_all_levels , HERO );
+        save_data(HERO , rooms_all_levels , n_rooms , corridors_all_levels , corr_count , 4 , diff , song);
+        attron(COLOR_PAIR(3) |A_BOLD);
+        // draw_borders(12);
+        mvprintw (LINES/2 -1, (COLS - strlen("Game successfully saved!")) /2 , "Game successfully saved!");
+        mvprintw (LINES/2 +1 , (COLS - strlen("Going back to pregame menu ... ")) /2 , "Going back to pregame menu ... ");
+        refresh();
+        sleep(2);
+        attroff(COLOR_PAIR(3)|A_BOLD);
+
+        stop_soundtrack();
+        for (int i = 0; i < 4; i++) {
+            free(corridors_all_levels[i]);
+        }
+        free(corridors_all_levels);
+
+        // Free memory for rooms
+        for (int i = 0; i < 4; i++) {
+            free(rooms_all_levels[i]);
+        }
+        free(rooms_all_levels);
+        pregame_menu(HERO.username);
     }
 
 
