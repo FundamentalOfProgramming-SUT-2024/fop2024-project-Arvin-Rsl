@@ -1,3 +1,5 @@
+// Arvin Rasulzadeh  --  4 0 3 1 1 0 4 2 2  -- FOP Project Phase 1
+
 #ifndef TOTAL_H
 #define TOTAL_H
 #include <locale.h>
@@ -374,6 +376,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
     init_pair(220 , 220 , COLOR_BLACK);
     init_pair(205 , 205 , COLOR_BLACK);
     init_pair(39 , 39 , COLOR_BLACK);
+    init_pair(24 , COLOR_CYAN , COLOR_BLACK);
     // int difficulty = 1;
     // int n_rooms1 = number_of_rooms(difficulty);
     // int n_rooms2 = number_of_rooms(difficulty);
@@ -508,7 +511,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
     me.pick = 0;  
     me.floor_level = 1;
     strcpy(me.username , username);
-    me.current_weapon = 3; // 0 : Mace (m)
+    me.current_weapon = 0; // 0 : Mace (m)
                         // 1 : Dagger (d)
                         // 2 : Magic Wand (w)
                         // 3 : Normal Arrow (a)
@@ -519,6 +522,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
     for (int w = 0 ; w < 5 ; w++){
         me.weapons[w] = 0;
     }
+    me.weapons[0] = 1;
     for (int s = 0 ; s < 3 ; s++){
         me.spells[s] = 0;
     }
@@ -537,6 +541,14 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
     int PiCk = 1;
     int print_all_Map = 0;
 
+    // int hits_loop_counter = 0;
+    // int near_deamon = 0;
+    // int near_fire_breathing_monster = 0;
+    // int near_giant = 0;
+    // int near_snake = 0;
+    // int near_undeed = 0;
+    // int x_show_loop_counter = 0;
+
     while(1){
         if(!print_all_Map){
           for (int i = 0 ; i < n_rooms[level_num - 1] ; i++){
@@ -548,7 +560,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
                 print_room_even_if_hidden(rooms_of_all_levels[level_num - 1] + i);
             }
         }
-  
+        
         // no corr char left unprinted:
         for (int ro = 0 ; ro < n_rooms[level_num - 1] ; ro++){
             room ey_baba = rooms_of_all_levels[level_num - 1][ro];
@@ -582,31 +594,34 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
             }
         }
         
+        // room exploration
         if(rooms_of_all_levels[level_num - 1][in_which_room(rooms_of_all_levels[level_num - 1] , n_rooms[level_num - 1] , me)].hide == 1){
             rooms_of_all_levels[level_num - 1][in_which_room(rooms_of_all_levels[level_num - 1] , n_rooms[level_num - 1] , me)].hide = 0;
         }
-
+                
+        // Treasure Room!!
         if(current_song != 6 && level_num == 4 && rooms_of_all_levels[level_num - 1][in_which_room(rooms_of_all_levels[level_num - 1] , n_rooms[level_num - 1] , me)].type == 3){
-                // Treasure Room!!
                 win(&current_song , &me);
                 me.won = 1;
                 snprintf(global_message, sizeof(char) * 100, "\xF0\x9F\x8E\x89 \xF0\x9F\x8E\x89 \xF0\x9F\x8E\x89                       ");       
                 // (global_message , "\xF0\x9F\x8E\x89");
                 save_data(me , rooms_of_all_levels , n_rooms , corridors_of_all_levels , corr_count , 4 , difficulty , chosen_song);
         }
+        // Death!!
         else if(me.health <= 0){
             death();
             snprintf(global_message, sizeof(char) * 100, "\xF0\x9F\x92\x80 \xF0\x9F\x92\x80 \xF0\x9F\x92\x80                       ");       
 
         }
+        // Nightmare Room song
         else if(current_song != 5 && rooms_of_all_levels[level_num - 1][in_which_room(rooms_of_all_levels[level_num - 1] , n_rooms[level_num - 1] , me)].type == 4){
-            // Nightmare Room!!
             // Stop current soundtrack
             stop_soundtrack();
             current_song = 5;
             init_audio();
             choose_soundtrack(current_song);
         }
+        // Enchant Room song
         else if(current_song!=4 && rooms_of_all_levels[level_num - 1][in_which_room(rooms_of_all_levels[level_num - 1] , n_rooms[level_num - 1] , me)].type == 2){
             // Enchant Room!!
             stop_soundtrack();
@@ -614,6 +629,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
             init_audio();
             choose_soundtrack(current_song);
         }
+        // Regular room song
         if(current_song != chosen_song
             && rooms_of_all_levels[level_num - 1][in_which_room(rooms_of_all_levels[level_num - 1] , n_rooms[level_num - 1] , me)].type != 2
             && rooms_of_all_levels[level_num - 1][in_which_room(rooms_of_all_levels[level_num - 1] , n_rooms[level_num - 1] , me)].type != 3
@@ -624,18 +640,17 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
             choose_soundtrack(current_song);
         }
         
-
         print_corridors(corridors_of_all_levels[level_num - 1] , *(corr_count + level_num - 1));
-        // int ch = getch();
-        // if (ch == 'q'){
-        //     break;
-        // }
+
         print_top_message(global_message);
         
         print_bottom_message(&me , level_num);
 
-        init_pair(24 , COLOR_CYAN , COLOR_BLACK);
-        attron(COLOR_PAIR(me.color));
+
+
+
+
+        attron(COLOR_PAIR(me.color) );
         mvprintw(me.pos.x , me.pos.y , "%c" , 'A');
         int ch = getch();
         if (ch == 'q' || ch == 'Q') {
@@ -713,7 +728,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
         // print_corridors(corridors_of_all_levels[level_num - 1] , *(corr_count + level_num - 1));
         attron(COLOR_PAIR(me.color));
         mvprintw(me.pos.x , me.pos.y , "%c" , 'A');
-        attroff(COLOR_PAIR(me.color));
+        attroff(COLOR_PAIR(me.color) );
 
 
         // for (int ro = 0 ; ro < n_rooms ; ro++){
@@ -751,6 +766,17 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
             }
         }
 
+
+        // if(hits_loop_counter <= 9000){
+        //     hits_loop_counter++;
+        // }
+        // else{
+        //     mvprintw(x_show_loop_counter , COLS/2 - strlen("loop counter = 9000")/2 , "loop counter = 9000");
+        //     hits_loop_counter = 0;
+        //     x_show_loop_counter++;
+        //     // sleep(1);
+        //     // clear();
+        // }
 
         refresh();
         // refresh();
@@ -3971,6 +3997,9 @@ void add_weapon(room** address_rooms_this_level , int n_rooms){
             int y_east1 = r1.corner.y + r1.width - 1;
             for (int W = 0 ; W < 5 ; W++){
                 r1.weapons[W] = rand() % 2;
+                if(W == 0){
+                    r1.weapons[W] = 0; // mace cannot be collected (we just have one in hand by default)
+                }
                 (*address_rooms_this_level)[i].weapons[W] = r1.weapons[W] ;
             }
             
