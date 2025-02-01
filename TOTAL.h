@@ -1,4 +1,4 @@
-// Arvin Rasulzadeh  --  4 0 3 1 1 0 4 2 2  -- FOP Project Phase 1
+// Arvin Rasulzadeh  --  4 0 3 1 1 0 4 2 2  -- FOP Project Phase 2
 
 #ifndef TOTAL_H
 #define TOTAL_H
@@ -24,6 +24,26 @@ typedef struct {
     int x; // row
     int y; // col
 } position;
+
+typedef struct{
+    int exists_in_room;
+    position pos;
+    int hit_strength;
+    /// hits strength (damage to player)
+    // 1 : Deamon       (D)
+    // 2 : Fire-Breath  (F)
+    // 3 : Giant        (G)
+    // 1 : Snake        (S)
+    // 5 : Undeed       (U)
+
+    int remained_health; // if 0, the enemy vanishes (exists_in_room = 0)
+    /// initial health: 
+    // 5  : Deamon       (D)
+    // 10 : Fire-Breath  (F)
+    // 15 : Giant        (G)
+    // 20 : Snake        (S)
+    // 30 : Undeed       (U)
+} enemy;
 
 // room
 typedef struct {
@@ -53,38 +73,43 @@ typedef struct {
     Nightmare Room        O                 ~                   Blue                  4
 
 */
+
+/// Door(s)
     int doors_x[2];
     int doors_y[2];
-    
-    // int windows_y[2]; // the first two for windows and the rest for pillars
-    // int windows_x[2]; // the first two for windows and the rest for pillars
+
+/// Pillars  
     // int n_pillars; /// always 3 pillars
     int pillars_x[3];
     int pillars_y[3];
     
+/// Foods
     int n_foods;
     int picked_foods[3]; // 1 if food is picked (don't print it anymore); 0 otherwise
     int foods_x[3];
     int foods_y[3];
 
+/// Golds
     int n_golds;
     int picked_golds[3]; // 1 if food is picked (don't print it anymore); 0 otherwise
     int golds_x[3];
     int golds_y[3];
 
+/// Trap
     int trap_visibility;
     int trap_x;
     int trap_y;
 
+/// Staircase
 // staircase is always in room index 3 (4th room). 
     int stair_x; 
     int stair_y;
-
+/// Black Gold
 // We either have 1 black gold in room index 0 (room number 1) on each floor level, or we don't have any on that level
     int black_gold; // 0 if no black gold, 1 if there is one
     int black_gold_x;
     int black_gold_y;
-
+/// Weapons
 // each element in this array shows the number of the corresponding weapon in room (which is either 0 or 1)
     int weapons[5]; // 0 : Mace (m)
                     // 1 : Dagger (d)
@@ -93,7 +118,7 @@ typedef struct {
                     // 4 : Sword (s)
     int weapons_x[5]; 
     int weapons_y[5]; 
-
+/// Spells
 // each element in this array shows the number of the corresponding spell in enchant room (which is either 0 or 1)
     int spells[3];// 0 : Health  → H
                   // 1 : Speed   → $
@@ -101,7 +126,34 @@ typedef struct {
     int spells_x[3];
     int spells_y[3];
     
-    
+/// Enemies:
+// each element in this array shows the number of the corresponding enemy in room (which is either 0 or 1)
+    int enemies[5];
+    int enemies_x[5];
+    int enemies_y[5];
+    // 0 : Deamon       (D)
+    // 1 : Fire-Breath  (F)
+    // 2 : Giant        (G)
+    // 3 : Snake        (S)
+    // 4 : Undeed       (U)
+    // int Deamon_x;
+    // int Deamon_y;
+    // int Fire_Breath_x;
+    // int Fire_Breath_y;
+    // int Giant_x;
+    // int Giant_y;
+    // int Snake_x;
+    // int Snake_y;
+    // int Undeed_x;
+    // int Undeed_y;
+    // enemy Deamon;
+    // enemy Fire_Breath;
+    // enemy Giant;
+    // enemy Snake;
+    // enemy Undeed;
+    // enemy* test;
+    // int test_enemy_ptr;
+
 } room;
 
 
@@ -161,6 +213,9 @@ void add_gold();
 void add_black_gold();
 void add_trap();
 void add_weapon();
+void add_enemy();
+void add_enemy2(room**  , int );
+void enemy_test_ptr();
 void add_spell();
 int number_of_rooms();
 int room_valid();
@@ -223,7 +278,6 @@ int y_moves[] = {+0 , +0 , +1 , -1 , +1 , -1 , +1 , -1};
 int valid_move();
 void movement();
 void movement2();
-// void pick();
 void pick(int , int  , int , int , player* , room**  , int );
 int in_which_room();
 int which_food_in_room();
@@ -243,119 +297,16 @@ void create_user_data_file();
 void draw_borders(int);
 void draw_title(const char*);
 
+///////////////// Enemy 
+int near_deamon(player );
+int near_fire_breathing_monster (player );
+int near_giant (room* , int , player ); // check for room index
+int near_snake (player );
+int near_undeed (player );
+
 /////// save game:
 void Pause(room **  , position **  , player  , int* , int*  , int  , int );
 void save_data(player , room **, int *, position **, int *, int , int , int);
-
-void save_data(player me, room **rooms_of_all_levels, int n_rooms[4], position **corridors_of_all_levels, int corr_count[4], int level_count , int diff , int song) {
-    char filename[150];
-    sprintf(filename, "/home/arvin_rsl/Desktop/FOP_Project/Users_Folder/%s/saved_game.txt", me.username);
-
-    FILE *file = fopen(filename, "w");
-    if (file == NULL) {
-        perror("Error opening file");
-        return;
-    }
-
-    // Save player data
-    fprintf(file, "# Player\n");
-    fprintf(file, "won: %d\n", me.won);
-    fprintf(file, "Gold: %d\n", me.gold_count);
-    fprintf(file, "Health: %d\n", me.health);
-    fprintf(file, "Normal Food: %d\n", me.food_count);
-    fprintf(file, "Ideal Food: %d\n", me.food[1]);
-    fprintf(file, "Magical Food: %d\n", me.food[2]);
-    fprintf(file, "Rotten Food: %d\n", me.food[3]);
-    for (int i = 0; i < 5; i++) {
-        fprintf(file, "%s: %d\n", i == 0 ? "Mace" : i == 1 ? "Dagger" : i == 2 ? "Magic Wand" : i == 3 ? "Normal Arrow" : "Sword", me.weapons[i]);
-    }
-    fprintf(file, "Spell Health: %d\n", me.spells[0]);
-    fprintf(file, "Spell Speed: %d\n", me.spells[1]);
-    fprintf(file, "Spell Damage: %d\n", me.spells[2]);
-    fprintf(file, "X: %d\n", me.pos.x);
-    fprintf(file, "Y: %d\n", me.pos.y);
-    // Assuming Floor Level, Difficulty, Color, and Song are part of player structure
-    fprintf(file, "Floor Level: %d\n", me.floor_level); // Example logic
-    fprintf(file, "Difficulty: %d\n", diff); // Example logic
-    fprintf(file, "Color: %d\n", me.color);
-    fprintf(file, "Song: %d\n", song); // Example logic
-
-    // Save rooms and corridors data
-    fprintf(file, "\n# Rooms\n");
-    for (int i = 0; i < level_count; i++) {
-        fprintf(file, "\nLevel Num: %d\n", i + 1);
-        fprintf(file, "Number of Rooms: %d\n", n_rooms[i]);
-        for (int j = 0; j < n_rooms[i]; j++) {
-            room r = rooms_of_all_levels[i][j];
-            fprintf(file, "\nRoom Number: %d\n", r.room_number);
-            fprintf(file, "Length: %d\n", r.length);
-            fprintf(file, "Width: %d\n", r.width);
-            fprintf(file, "Hide: %d\n", r.hide);
-            fprintf(file, "corner.x: %d\n", r.corner.x);
-            fprintf(file, "corner.y: %d\n", r.corner.y);
-            fprintf(file, "Type: %d\n", r.type);
-            if(r.room_number == 1){
-                fprintf(file, "door0.x: %d\n", r.doors_x[0]);
-                fprintf(file, "door0.y: %d\n", r.doors_y[0]);
-            }
-            else{
-                fprintf(file, "door0.x: %d\n", r.doors_x[0]);
-                fprintf(file, "door1.x: %d\n", r.doors_x[1]);
-                fprintf(file, "door0.y: %d\n", r.doors_y[0]);
-                fprintf(file, "door1.y: %d\n", r.doors_y[1]);
-            }
-
-            fprintf(file, "pillar0.x: %d\n", r.pillars_x[0]);
-            fprintf(file, "pillar1.x: %d\n", r.pillars_x[1]);
-            fprintf(file, "pillar2.x: %d\n", r.pillars_x[2]);
-            fprintf(file, "pillar0.y: %d\n", r.pillars_y[0]);
-            fprintf(file, "pillar1.y: %d\n", r.pillars_y[1]);
-            fprintf(file, "pillar2.y: %d\n", r.pillars_y[2]);
-            fprintf(file, "n_foods: %d\n", r.n_foods);
-            for (int k = 0; k < r.n_foods; k++) {
-                fprintf(file, "food%d.x: %d\n", k, r.foods_x[k]);
-                fprintf(file, "food%d.y: %d\n", k, r.foods_y[k]);
-                fprintf(file, "picked_foods%d: %d\n", k, r.picked_foods[k]);
-            }
-            fprintf(file, "n_golds: %d\n", r.n_golds);
-            for (int k = 0; k < r.n_golds; k++) {
-                fprintf(file, "gold%d.x: %d\n", k, r.golds_x[k]);
-                fprintf(file, "gold%d.y: %d\n", k, r.golds_y[k]);
-                fprintf(file, "picked_golds%d: %d\n", k, r.picked_golds[k]);
-            }
-            fprintf(file, "trap_visibility: %d\n", r.trap_visibility);
-            fprintf(file, "trap.x: %d\n", r.trap_x);
-            fprintf(file, "trap.y: %d\n", r.trap_y);
-            fprintf(file, "stair_x: %d\n", r.stair_x);
-            fprintf(file, "stair_y: %d\n", r.stair_y);
-            fprintf(file, "black_gold: %d\n", r.black_gold);
-            fprintf(file, "black_gold_x: %d\n", r.black_gold_x);
-            fprintf(file, "black_gold_y: %d\n", r.black_gold_y);
-            for (int k = 0; k < 5; k++) {
-                fprintf(file, "weapons%d: %d\n", k, r.weapons[k]);
-                fprintf(file, "weapons_x%d: %d\n", k, r.weapons_x[k]);
-                fprintf(file, "weapons_y%d: %d\n", k, r.weapons_y[k]);
-            }
-            for (int k = 0; k < 3; k++) {
-                fprintf(file, "spells%d: %d\n", k, r.spells[k]);
-                fprintf(file, "spells_x%d: %d\n", k, r.spells_x[k]);
-                fprintf(file, "spells_y%d: %d\n", k, r.spells_y[k]);
-            }
-        }
-
-    }
-        
-    fprintf(file, "\n# Corridors\n");
-    for (int i = 0; i < level_count; i++) {
-        fprintf(file, "\nLevel Num: %d\n", i + 1);
-        fprintf(file, "Corr_Count: %d\n", corr_count[i]);
-        for (int j = 0; j < corr_count[i]; j++) {
-            fprintf(file, "(%d,%d)\n", corridors_of_all_levels[i][j].x, corridors_of_all_levels[i][j].y);
-        }
-    }
-    fclose(file);
-}
-
 
 //////////////////// NEW_GAME:
 void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
@@ -463,6 +414,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
     add_black_gold(rooms_of_all_levels + 0 , n_rooms[0]);
     add_weapon(rooms_of_all_levels + 0 , n_rooms[0]);
     add_spell(rooms_of_all_levels + 0 , n_rooms[0]);
+    add_enemy2(rooms_of_all_levels + 0 , n_rooms[0]);
 
 
     add_food(rooms_of_all_levels + 1 , n_rooms[1]);
@@ -471,6 +423,8 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
     add_black_gold(rooms_of_all_levels + 0 , n_rooms[1]);
     add_weapon(rooms_of_all_levels + 1 , n_rooms[1]);
     add_spell(rooms_of_all_levels + 1 , n_rooms[1]);
+    add_enemy2(rooms_of_all_levels + 1 , n_rooms[1]);
+
 
     add_food(rooms_of_all_levels + 2 , n_rooms[2]);
     add_gold(rooms_of_all_levels + 2 , n_rooms[2]);
@@ -478,6 +432,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
     add_black_gold(rooms_of_all_levels + 0 , n_rooms[2]);
     add_weapon(rooms_of_all_levels + 2 , n_rooms[2]);
     add_spell(rooms_of_all_levels + 2 , n_rooms[2]);
+    add_enemy2(rooms_of_all_levels + 2 , n_rooms[2]);
 
     add_food(rooms_of_all_levels + 3 , n_rooms[3]);
     add_gold(rooms_of_all_levels + 3 , n_rooms[3]);
@@ -485,7 +440,8 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
     add_black_gold(rooms_of_all_levels + 0 , n_rooms[3]);
     add_weapon(rooms_of_all_levels + 3 , n_rooms[3]);
     add_spell(rooms_of_all_levels + 3 , n_rooms[3]);
-
+    add_enemy2(rooms_of_all_levels + 3 , n_rooms[3]);
+    // enemy_test_ptr(rooms_of_all_levels + 3 , n_rooms[3]);
 
     printf("done adding foods/golds/traps! \n");
     printf("building corridors of levels \n");
@@ -541,13 +497,20 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
     int PiCk = 1;
     int print_all_Map = 0;
 
-    // int hits_loop_counter = 0;
-    // int near_deamon = 0;
-    // int near_fire_breathing_monster = 0;
-    // int near_giant = 0;
-    // int near_snake = 0;
-    // int near_undeed = 0;
-    // int x_show_loop_counter = 0;
+    // For calculating hits and damage, we work with a loop counter
+    int hits_loop_counter = 0;
+    int rate_hits;
+    if(difficulty == 1){
+        rate_hits = 17000;
+    }
+    else if(difficulty == 2){
+        rate_hits = 11000;
+    }
+    else if(difficulty == 3){
+        rate_hits = 9000;
+    }
+
+    int x_show_loop_counter = 0;
 
     while(1){
         if(!print_all_Map){
@@ -603,14 +566,17 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
         if(current_song != 6 && level_num == 4 && rooms_of_all_levels[level_num - 1][in_which_room(rooms_of_all_levels[level_num - 1] , n_rooms[level_num - 1] , me)].type == 3){
                 win(&current_song , &me);
                 me.won = 1;
-                snprintf(global_message, sizeof(char) * 100, "\xF0\x9F\x8E\x89 \xF0\x9F\x8E\x89 \xF0\x9F\x8E\x89                       ");       
+                snprintf(global_message, sizeof(char) * 100, "\xF0\x9F\x8E\x89 \xF0\x9F\x8E\x89 \xF0\x9F\x8E\x89                               ");       
                 // (global_message , "\xF0\x9F\x8E\x89");
-                save_data(me , rooms_of_all_levels , n_rooms , corridors_of_all_levels , corr_count , 4 , difficulty , chosen_song);
+                if (strcmp(me.username , "GUEST") != 0) {
+                    save_data(me , rooms_of_all_levels , n_rooms , corridors_of_all_levels , corr_count , 4 , difficulty , chosen_song);
+                }
         }
+
         // Death!!
         else if(me.health <= 0){
             death();
-            snprintf(global_message, sizeof(char) * 100, "\xF0\x9F\x92\x80 \xF0\x9F\x92\x80 \xF0\x9F\x92\x80                       ");       
+            snprintf(global_message, sizeof(char) * 100, "\xF0\x9F\x92\x80 \xF0\x9F\x92\x80 \xF0\x9F\x92\x80                                   ");       
 
         }
         // Nightmare Room song
@@ -766,17 +732,61 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
             }
         }
 
-
-        // if(hits_loop_counter <= 9000){
-        //     hits_loop_counter++;
-        // }
-        // else{
-        //     mvprintw(x_show_loop_counter , COLS/2 - strlen("loop counter = 9000")/2 , "loop counter = 9000");
-        //     hits_loop_counter = 0;
-        //     x_show_loop_counter++;
-        //     // sleep(1);
-        //     // clear();
-        // }
+        if(near_deamon(me)){
+            snprintf(global_message, sizeof(char) * 100, "\U0001F47F Deamon is hitting you!                          ");
+           
+            if(hits_loop_counter <= rate_hits){ // 10,000 loops
+                hits_loop_counter++;
+            }
+            else{
+                me.health--; // 1 health loss
+                hits_loop_counter = 0;
+            }
+        }
+        if(near_fire_breathing_monster(me)){
+            snprintf(global_message, sizeof(char) * 100, "\U0001F409 Fire-Breathing Monster is hitting you!                  ");
+           
+            if(hits_loop_counter <= rate_hits){ // 10,000 loops
+                hits_loop_counter++;
+            }
+            else{
+                me.health-=2; // 2 health loss
+                hits_loop_counter = 0;
+            }
+        }
+        if(near_giant(rooms_of_all_levels[level_num - 1] , n_rooms[level_num - 1] , me)){
+            snprintf(global_message, sizeof(char) * 100, "\U0001F479 Giant is hitting you!                               ");
+           
+            if(hits_loop_counter <= rate_hits){ // 10,000 loops
+                hits_loop_counter++;
+            }
+            else{
+                me.health-=3; // 3 health loss
+                hits_loop_counter = 0;
+            }
+        }
+        if(near_snake(me)){
+            snprintf(global_message, sizeof(char) * 100, "\U0001F40D Snake is hitting you!                               ");
+           
+            if(hits_loop_counter <= rate_hits){ // 10,000 loops
+                hits_loop_counter++;
+            }
+            else{
+                me.health --; // 1 health loss
+                hits_loop_counter = 0;
+            }
+        }
+        if(near_undeed(me)){ ///// bro :|  it's undead!
+            snprintf(global_message, sizeof(char) * 100, "\U0001F9DF Undead is hitting you!                               ");
+           
+            if(hits_loop_counter <= rate_hits){ // 10,000 loops
+                hits_loop_counter++;
+            }
+            else{
+                me.health -= 5; // 1 health loss
+                hits_loop_counter = 0;
+            }
+        }
 
         refresh();
         // refresh();
@@ -797,7 +807,178 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
 }
 
 
+
+int near_deamon(player me){
+    for(int i = 0 ; i < 8 ; i++){
+        int X = me.pos.x + x_moves[i];
+        int Y = me.pos.y + y_moves[i];
+        char there = mvinch(X , Y) & A_CHARTEXT ;
+        if (there == 'D'){
+            return 1;
+        }
+    }
+    return 0;
+}
+
+int near_fire_breathing_monster(player me){
+    for(int i = 0 ; i < 8 ; i++){
+        int X = me.pos.x + x_moves[i];
+        int Y = me.pos.y + y_moves[i];
+        char there = mvinch(X , Y) & A_CHARTEXT ;
+        if (there == 'F'){
+            return 1;
+        }
+    }
+    return 0;
+}
+
+int near_giant(room* rooms_this_level , int n_rooms , player me){ // no Giant in room index 0 (black gold in room index 0)
+    for(int i = 0 ; i < 8 ; i++){
+        int X = me.pos.x + x_moves[i];
+        int Y = me.pos.y + y_moves[i];
+        char there = mvinch(X , Y) & A_CHARTEXT ;
+        if (there == 'G' && in_which_room(rooms_this_level , n_rooms , me) != 0){
+            return 1;
+        }
+    }
+    return 0;
+}
+
+int near_snake(player me){
+    for(int i = 0 ; i < 8 ; i++){
+        int X = me.pos.x + x_moves[i];
+        int Y = me.pos.y + y_moves[i];
+        char there = mvinch(X , Y) & A_CHARTEXT ;
+        if (there == 'S'){
+            return 1;
+        }
+    }
+    return 0;
+}
+
+int near_undeed(player me){
+    for(int i = 0 ; i < 8 ; i++){
+        int X = me.pos.x + x_moves[i];
+        int Y = me.pos.y + y_moves[i];
+        char there = mvinch(X , Y) & A_CHARTEXT ;
+        if (there == 'U'){
+            return 1;
+        }
+    }
+    return 0;
+}
+
 //////////////////////////////SAVE GAME
+
+void save_data(player me, room **rooms_of_all_levels, int n_rooms[4], position **corridors_of_all_levels, int corr_count[4], int level_count , int diff , int song) {
+    char filename[150];
+    sprintf(filename, "/home/arvin_rsl/Desktop/FOP_Project/Users_Folder/%s/saved_game.txt", me.username);
+
+    FILE *file = fopen(filename, "w");
+    if (file == NULL) {
+        perror("Error opening file");
+        return;
+    }
+
+    // Save player data
+    fprintf(file, "# Player\n");
+    fprintf(file, "won: %d\n", me.won);
+    fprintf(file, "Gold: %d\n", me.gold_count);
+    fprintf(file, "Health: %d\n", me.health);
+    fprintf(file, "Normal Food: %d\n", me.food_count);
+    fprintf(file, "Ideal Food: %d\n", me.food[1]);
+    fprintf(file, "Magical Food: %d\n", me.food[2]);
+    fprintf(file, "Rotten Food: %d\n", me.food[3]);
+    for (int i = 0; i < 5; i++) {
+        fprintf(file, "%s: %d\n", i == 0 ? "Mace" : i == 1 ? "Dagger" : i == 2 ? "Magic Wand" : i == 3 ? "Normal Arrow" : "Sword", me.weapons[i]);
+    }
+    fprintf(file, "Spell Health: %d\n", me.spells[0]);
+    fprintf(file, "Spell Speed: %d\n", me.spells[1]);
+    fprintf(file, "Spell Damage: %d\n", me.spells[2]);
+    fprintf(file, "X: %d\n", me.pos.x);
+    fprintf(file, "Y: %d\n", me.pos.y);
+    // Assuming Floor Level, Difficulty, Color, and Song are part of player structure
+    fprintf(file, "Floor Level: %d\n", me.floor_level); // Example logic
+    fprintf(file, "Difficulty: %d\n", diff); // Example logic
+    fprintf(file, "Color: %d\n", me.color);
+    fprintf(file, "Song: %d\n", song); // Example logic
+
+    // Save rooms and corridors data
+    fprintf(file, "\n# Rooms\n");
+    for (int i = 0; i < level_count; i++) {
+        fprintf(file, "\nLevel Num: %d\n", i + 1);
+        fprintf(file, "Number of Rooms: %d\n", n_rooms[i]);
+        for (int j = 0; j < n_rooms[i]; j++) {
+            room r = rooms_of_all_levels[i][j];
+            fprintf(file, "\nRoom Number: %d\n", r.room_number);
+            fprintf(file, "Length: %d\n", r.length);
+            fprintf(file, "Width: %d\n", r.width);
+            fprintf(file, "Hide: %d\n", r.hide);
+            fprintf(file, "corner.x: %d\n", r.corner.x);
+            fprintf(file, "corner.y: %d\n", r.corner.y);
+            fprintf(file, "Type: %d\n", r.type);
+            if(r.room_number == 1){
+                fprintf(file, "door0.x: %d\n", r.doors_x[0]);
+                fprintf(file, "door0.y: %d\n", r.doors_y[0]);
+            }
+            else{
+                fprintf(file, "door0.x: %d\n", r.doors_x[0]);
+                fprintf(file, "door1.x: %d\n", r.doors_x[1]);
+                fprintf(file, "door0.y: %d\n", r.doors_y[0]);
+                fprintf(file, "door1.y: %d\n", r.doors_y[1]);
+            }
+
+            fprintf(file, "pillar0.x: %d\n", r.pillars_x[0]);
+            fprintf(file, "pillar1.x: %d\n", r.pillars_x[1]);
+            fprintf(file, "pillar2.x: %d\n", r.pillars_x[2]);
+            fprintf(file, "pillar0.y: %d\n", r.pillars_y[0]);
+            fprintf(file, "pillar1.y: %d\n", r.pillars_y[1]);
+            fprintf(file, "pillar2.y: %d\n", r.pillars_y[2]);
+            fprintf(file, "n_foods: %d\n", r.n_foods);
+            for (int k = 0; k < r.n_foods; k++) {
+                fprintf(file, "food%d.x: %d\n", k, r.foods_x[k]);
+                fprintf(file, "food%d.y: %d\n", k, r.foods_y[k]);
+                fprintf(file, "picked_foods%d: %d\n", k, r.picked_foods[k]);
+            }
+            fprintf(file, "n_golds: %d\n", r.n_golds);
+            for (int k = 0; k < r.n_golds; k++) {
+                fprintf(file, "gold%d.x: %d\n", k, r.golds_x[k]);
+                fprintf(file, "gold%d.y: %d\n", k, r.golds_y[k]);
+                fprintf(file, "picked_golds%d: %d\n", k, r.picked_golds[k]);
+            }
+            fprintf(file, "trap_visibility: %d\n", r.trap_visibility);
+            fprintf(file, "trap.x: %d\n", r.trap_x);
+            fprintf(file, "trap.y: %d\n", r.trap_y);
+            fprintf(file, "stair_x: %d\n", r.stair_x);
+            fprintf(file, "stair_y: %d\n", r.stair_y);
+            fprintf(file, "black_gold: %d\n", r.black_gold);
+            fprintf(file, "black_gold_x: %d\n", r.black_gold_x);
+            fprintf(file, "black_gold_y: %d\n", r.black_gold_y);
+            for (int k = 0; k < 5; k++) {
+                fprintf(file, "weapons%d: %d\n", k, r.weapons[k]);
+                fprintf(file, "weapons_x%d: %d\n", k, r.weapons_x[k]);
+                fprintf(file, "weapons_y%d: %d\n", k, r.weapons_y[k]);
+            }
+            for (int k = 0; k < 3; k++) {
+                fprintf(file, "spells%d: %d\n", k, r.spells[k]);
+                fprintf(file, "spells_x%d: %d\n", k, r.spells_x[k]);
+                fprintf(file, "spells_y%d: %d\n", k, r.spells_y[k]);
+            }
+        }
+
+    }
+        
+    fprintf(file, "\n# Corridors\n");
+    for (int i = 0; i < level_count; i++) {
+        fprintf(file, "\nLevel Num: %d\n", i + 1);
+        fprintf(file, "Corr_Count: %d\n", corr_count[i]);
+        for (int j = 0; j < corr_count[i]; j++) {
+            fprintf(file, "(%d,%d)\n", corridors_of_all_levels[i][j].x, corridors_of_all_levels[i][j].y);
+        }
+    }
+    fclose(file);
+}
+
 void Pause(room ** rooms_all_levels , position ** corridors_all_levels , player HERO , int* n_rooms , int* corr_count , int diff , int song){
     initscr();
     start_color();
@@ -1257,7 +1438,14 @@ void win(int* ptr_current_song , player* hero){
     mvprintw(0 , COLS/2 - strlen("YOU WON THE GAME !")/2 , "YOU WON THE GAME !");
     attroff(A_BOLD | COLOR_PAIR(15));
     attron(COLOR_PAIR(16));
-    mvprintw(2 , COLS/2 - strlen("Game has been saved. Press Q to exit")/2 , "Game has been saved. Press Q to exit");
+    if(strcmp( hero->username , "GUEST") != 0 ){
+        mvprintw(2 , COLS/2 - strlen("Congratulations! You've conquered the dungeon and emerged victorious!")/2 , "Congratulations! You've conquered the dungeon and emerged victorious!");
+        mvprintw(3 , COLS/2 - strlen("\U0001F6E1 Your game has been saved. Press Q to exit.")/2 , "\U0001F6E1 Your game has been saved. Press Q to exit.");
+    }
+    else{
+        mvprintw(2 , COLS/2 - strlen("Congratulations! You've conquered the dungeon and emerged victorious!")/2 , "Congratulations! You've conquered the dungeon and emerged victorious!");
+        mvprintw(3 , COLS/2 - strlen("\U00002694 What a shame, the game you won is not saved as you are playing as a guest. Press Q to exit.")/2 , "\U00002694 What a shame, the game you won is not saved as you are playing as a guest. Press Q to exit.");
+    }
     attroff(COLOR_PAIR(16));
 }
 
@@ -2688,9 +2876,9 @@ void weapon_list(player* ptr_to_hero){
     int title_y = (width - 11) / 2; // length of "WEAPON MENU" = 11
 
     // Print WEAPON MENU centered
-    wattron(help_win, COLOR_PAIR(1) | A_BOLD);
+    wattron(help_win, COLOR_PAIR(160) | A_BOLD);
     mvwprintw(help_win, 1, title_y, "WEAPON MENU");
-    wattroff(help_win, COLOR_PAIR(1) | A_BOLD);
+    wattroff(help_win, COLOR_PAIR(160) | A_BOLD);
 
     char CH = 'm';
     // CH = wgetch(help_win);
@@ -3984,6 +4172,355 @@ void add_spell(room** address_rooms_this_level , int n_rooms){
 
 }
 
+
+
+
+void add_enemy2(room** address_rooms_this_level , int n_rooms){
+    srand(time(NULL));
+    for (int i = 0 ; i < n_rooms ; i++){
+        /// Index:
+        // 0 : Deamon       (D)
+        // 1 : Fire-Breath  (F)
+        // 2 : Giant        (G)
+        // 3 : Snake        (S)
+        // 4 : Undeed       (U)
+        /// Hit Strength:
+        // 1 : Deamon       (D)
+        // 2 : Fire-Breath  (F)
+        // 3 : Giant        (G)
+        // 1 : Snake        (S)
+        // 5 : Undeed       (U)
+        /// Initial Health: 
+        // 5  : Deamon       (D)
+        // 10 : Fire-Breath  (F)
+        // 15 : Giant        (G)
+        // 20 : Snake        (S)
+        // 30 : Undeed       (U)
+        room r1 = (*address_rooms_this_level)[i];
+        if (r1.type != 2 && r1.room_number != 2){
+            int x_north1 = r1.corner.x;
+            int x_south1 = r1.corner.x + r1.length - 1;
+            int y_west1 = r1.corner.y;
+            int y_east1 = r1.corner.y + r1.width - 1;
+            for (int E = 0 ; E < 5 ; E++){
+                r1.enemies[E] = rand() % 2;
+                if(r1.room_number == 1){ // no 'G'iant in room index 0 because of black 'G'old
+                    r1.enemies[2] = 0;
+                }
+                (*address_rooms_this_level)[i].enemies[E] = r1.enemies[E];
+            }
+            
+            int k0 = 0; // D
+            int k1 = 0; // F
+            int k2 = 0; // G (Never in Room Index 0)
+            int k3 = 0; // S
+            int k4 = 0; // U
+
+
+            while (k0 != r1.enemies[0]){
+                int x = rand() % (x_south1 - x_north1 - 3) + x_north1 + 2;
+                int y = rand() % (y_east1 - y_west1 - 3) + y_west1 + 2;
+
+                int overlap = 0;
+                for (int P = 0 ; P < 3 ; P++){
+                    if(x == r1.pillars_x[P] && y == r1.pillars_y[P]){
+                        // the random location overlaps with a pillar
+                        overlap = 1;
+                    }
+                }
+                for (int F = 0 ; F < r1.n_foods ; F++){
+                    if(x == r1.foods_x[F] && y == r1.foods_y[F]){
+                        // the random location overlaps with a food
+                        overlap = 1;
+                    }
+                }
+                for (int G = 0 ; G < r1.n_golds ; G++){
+                    if(x == r1.golds_x[G] && y == r1.golds_y[G]){
+                        // the random location overlaps with a gold
+                        overlap = 1;
+                    }
+                }
+                if(r1.black_gold){
+                    if(x == r1.black_gold_x && y == r1.black_gold_y){
+                        // the random location overlaps with a black gold
+                        overlap = 1;
+                    }
+                }
+                for (int ww = 0 ; ww < 5 ; ww++){
+                    if(r1.weapons[ww]){
+                        if(x == r1.weapons_x[ww] && y == r1.weapons_y[ww]){
+                            // the random location overlaps with a weapon
+                            overlap = 1;
+                        }
+                    }
+                }
+                if(!overlap){
+                    // (*address_rooms_this_level)[i].Deamon.exists_in_room = 1;
+                    // (*address_rooms_this_level)[i].Deamon.remained_health = 5;
+                    // (*address_rooms_this_level)[i].Deamon.hit_strength = 1;
+                    (*address_rooms_this_level)[i].enemies_x[0]= x;
+                    (*address_rooms_this_level)[i].enemies_y[0]= y;
+                    // r1.Deamon.exists_in_room = 1;
+                    // r1.Deamon.remained_health = 5;
+                    // r1.Deamon.hit_strength = 1;
+                    r1.enemies_x[0] = x;
+                    r1.enemies_y[0] = y;
+                    k0 = r1.enemies[0];
+                }
+
+            }
+
+            while (k1 != r1.enemies[1]){
+                int x = rand() % (x_south1 - x_north1 - 3) + x_north1 + 2;
+                int y = rand() % (y_east1 - y_west1 - 3) + y_west1 + 2;
+
+                int overlap = 0;
+                if(x == r1.enemies_x[0] && y == r1.enemies_y[0]){
+                    overlap = 1;
+                }
+                for (int P = 0 ; P < 3 ; P++){
+                    if(x == r1.pillars_x[P] && y == r1.pillars_y[P]){
+                        // the random location overlaps with a pillar
+                        overlap = 1;
+                    }
+                }
+                for (int F = 0 ; F < r1.n_foods ; F++){
+                    if(x == r1.foods_x[F] && y == r1.foods_y[F]){
+                        // the random location overlaps with a food
+                        overlap = 1;
+                    }
+                }
+                for (int G = 0 ; G < r1.n_golds ; G++){
+                    if(x == r1.golds_x[G] && y == r1.golds_y[G]){
+                        // the random location overlaps with a gold
+                        overlap = 1;
+                    }
+                }
+                if(r1.black_gold){
+                    if(x == r1.black_gold_x && y == r1.black_gold_y){
+                        // the random location overlaps with a black gold
+                        overlap = 1;
+                    }
+                }
+                for (int ww = 0 ; ww < 5 ; ww++){
+                    if(r1.weapons[ww]){
+                        if(x == r1.weapons_x[ww] && y == r1.weapons_y[ww]){
+                            // the random location overlaps with a weapon
+                            overlap = 1;
+                        }
+                    }
+                }
+                if(!overlap){
+                    //////////////change deamon after dinner:
+                    // (*address_rooms_this_level)[i].Fire_Breath.exists_in_room = 1;
+                    // (*address_rooms_this_level)[i].Fire_Breath.remained_health = 10;
+                    // (*address_rooms_this_level)[i].Fire_Breath.hit_strength = 2;
+                    (*address_rooms_this_level)[i].enemies_x[1]= x;
+                    (*address_rooms_this_level)[i].enemies_y[1]= y;
+                    r1.enemies_x[1]= x;
+                    r1.enemies_y[1] = y;
+                    // r1.Fire_Breath.exists_in_room = 1;
+                    // r1.Fire_Breath.remained_health = 10;
+                    // r1.Fire_Breath.hit_strength = 2;
+                    // r1.Fire_Breath.pos.x = x;
+                    // r1.Fire_Breath.pos.y = y;
+                    k1 = r1.enemies[1];
+                }
+
+            }
+
+            while (k2 != r1.enemies[2]){
+                int x = rand() % (x_south1 - x_north1 - 3) + x_north1 + 2;
+                int y = rand() % (y_east1 - y_west1 - 3) + y_west1 + 2;
+
+                int overlap = 0;
+                if(x == r1.enemies_x[0] && y == r1.enemies_y[0]){
+                    overlap = 1;
+                }
+                if(x == r1.enemies_x[1] && y == r1.enemies_y[1]){
+                    overlap = 1;
+                }
+                for (int P = 0 ; P < 3 ; P++){
+                    if(x == r1.pillars_x[P] && y == r1.pillars_y[P]){
+                        // the random location overlaps with a pillar
+                        overlap = 1;
+                    }
+                }
+                for (int F = 0 ; F < r1.n_foods ; F++){
+                    if(x == r1.foods_x[F] && y == r1.foods_y[F]){
+                        // the random location overlaps with a food
+                        overlap = 1;
+                    }
+                }
+                for (int G = 0 ; G < r1.n_golds ; G++){
+                    if(x == r1.golds_x[G] && y == r1.golds_y[G]){
+                        // the random location overlaps with a gold
+                        overlap = 1;
+                    }
+                }
+                if(r1.black_gold){
+                    if(x == r1.black_gold_x && y == r1.black_gold_y){
+                        // the random location overlaps with a black gold
+                        overlap = 1;
+                    }
+                }
+                for (int ww = 0 ; ww < 5 ; ww++){
+                    if(r1.weapons[ww]){
+                        if(x == r1.weapons_x[ww] && y == r1.weapons_y[ww]){
+                            // the random location overlaps with a weapon
+                            overlap = 1;
+                        }
+                    }
+                }
+                if(!overlap){
+                    //////////////change deamon after dinner:
+                    // (*address_rooms_this_level)[i].Giant.exists_in_room = 1;
+                    // (*address_rooms_this_level)[i].Giant.remained_health = 15;
+                    // (*address_rooms_this_level)[i].Giant.hit_strength = 3;
+                    (*address_rooms_this_level)[i].enemies_x[2] = x;
+                    (*address_rooms_this_level)[i].enemies_y[2] = y;
+                    // r1.Giant.exists_in_room = 1;
+                    // r1.Giant.remained_health = 15;
+                    // r1.Giant.hit_strength = 3;
+                    r1.enemies_x[2]= x;
+                    r1.enemies_y[2] = y;
+                    k2 = r1.enemies[2];
+                }
+
+            }
+
+            while (k3 != r1.enemies[3]){
+                int x = rand() % (x_south1 - x_north1 - 3) + x_north1 + 2;
+                int y = rand() % (y_east1 - y_west1 - 3) + y_west1 + 2;
+
+                int overlap = 0;
+                if(x == r1.enemies_x[0] && y == r1.enemies_y[0]){
+                    overlap = 1;
+                }
+                if(x == r1.enemies_x[1] && y == r1.enemies_y[1]){
+                    overlap = 1;
+                }
+                if(x == r1.enemies_x[2] && y == r1.enemies_y[2]){
+                    overlap = 1;
+                }
+                for (int P = 0 ; P < 3 ; P++){
+                    if(x == r1.pillars_x[P] && y == r1.pillars_y[P]){
+                        // the random location overlaps with a pillar
+                        overlap = 1;
+                    }
+                }
+                for (int F = 0 ; F < r1.n_foods ; F++){
+                    if(x == r1.foods_x[F] && y == r1.foods_y[F]){
+                        // the random location overlaps with a food
+                        overlap = 1;
+                    }
+                }
+                for (int G = 0 ; G < r1.n_golds ; G++){
+                    if(x == r1.golds_x[G] && y == r1.golds_y[G]){
+                        // the random location overlaps with a gold
+                        overlap = 1;
+                    }
+                }
+                if(r1.black_gold){
+                    if(x == r1.black_gold_x && y == r1.black_gold_y){
+                        // the random location overlaps with a black gold
+                        overlap = 1;
+                    }
+                }
+                for (int ww = 0 ; ww < 5 ; ww++){
+                    if(r1.weapons[ww]){
+                        if(x == r1.weapons_x[ww] && y == r1.weapons_y[ww]){
+                            // the random location overlaps with a weapon
+                            overlap = 1;
+                        }
+                    }
+                }
+                if(!overlap){
+                    //////////////change deamon after dinner:
+                    // (*address_rooms_this_level)[i].Snake.exists_in_room = 1;
+                    // (*address_rooms_this_level)[i].Snake.remained_health = 20;
+                    // (*address_rooms_this_level)[i].Snake.hit_strength = 1;
+                    (*address_rooms_this_level)[i].enemies_x[3] = x;
+                    (*address_rooms_this_level)[i].enemies_y[3] = y;
+                    // r1.Snake.exists_in_room = 1;
+                    // r1.Snake.remained_health = 20;
+                    // r1.Snake.hit_strength = 1;
+                    r1.enemies_x[3] = x;
+                    r1.enemies_y[3] = y;
+                    k3 = r1.enemies[3];
+                }
+
+            }
+
+            while (k4 != r1.enemies[4]){
+                int x = rand() % (x_south1 - x_north1 - 3) + x_north1 + 2;
+                int y = rand() % (y_east1 - y_west1 - 3) + y_west1 + 2;
+
+                int overlap = 0;
+                if(x == r1.enemies_x[0] && y == r1.enemies_y[0]){
+                    overlap = 1;
+                }
+                if(x == r1.enemies_x[1] && y == r1.enemies_y[1]){
+                    overlap = 1;
+                }
+                if(x == r1.enemies_x[2] && y == r1.enemies_y[2]){
+                    overlap = 1;
+                }
+                if(x == r1.enemies_x[3] && y == r1.enemies_y[3]){
+                    overlap = 1;
+                }
+                for (int P = 0 ; P < 3 ; P++){
+                    if(x == r1.pillars_x[P] && y == r1.pillars_y[P]){
+                        // the random location overlaps with a pillar
+                        overlap = 1;
+                    }
+                }
+                for (int F = 0 ; F < r1.n_foods ; F++){
+                    if(x == r1.foods_x[F] && y == r1.foods_y[F]){
+                        // the random location overlaps with a food
+                        overlap = 1;
+                    }
+                }
+                for (int G = 0 ; G < r1.n_golds ; G++){
+                    if(x == r1.golds_x[G] && y == r1.golds_y[G]){
+                        // the random location overlaps with a gold
+                        overlap = 1;
+                    }
+                }
+                if(r1.black_gold){
+                    if(x == r1.black_gold_x && y == r1.black_gold_y){
+                        // the random location overlaps with a black gold
+                        overlap = 1;
+                    }
+                }
+                for (int ww = 0 ; ww < 5 ; ww++){
+                    if(r1.weapons[ww]){
+                        if(x == r1.weapons_x[ww] && y == r1.weapons_y[ww]){
+                            // the random location overlaps with a weapon
+                            overlap = 1;
+                        }
+                    }
+                }
+                if(!overlap){
+                    //////////////change deamon after dinner:
+                    // (*address_rooms_this_level)[i].Undeed.exists_in_room = 1;
+                    // (*address_rooms_this_level)[i].Undeed.remained_health = 30;
+                    // (*address_rooms_this_level)[i].Undeed.hit_strength = 5;
+                    (*address_rooms_this_level)[i].enemies_x[4] = x;
+                    (*address_rooms_this_level)[i].enemies_y[4] = y;
+                    // r1.Undeed.exists_in_room = 1;
+                    // r1.Undeed.remained_health = 30;
+                    // r1.Undeed.hit_strength = 5;
+                    // r1.Undeed_x = x;
+                    // r1.Undeed_y = y;
+                    k4 = r1.enemies[4];
+                }
+            }
+        }   
+    }
+}
+
+
 // function to add weapons to room (1 or 0 of each weapon) -- if the room is not enchant room
 void add_weapon(room** address_rooms_this_level , int n_rooms){
     srand(time(NULL));
@@ -5033,7 +5570,29 @@ void print_room_even_if_hidden(room* Room){
             }
 
         }
-        
+        if(Room->enemies[0]){
+            attron(COLOR_PAIR(160) | A_ITALIC);
+            mvprintw(Room->enemies_x[0],  Room->enemies_y[0] , "D");
+
+        }
+        if(Room->enemies[1]){
+            mvprintw(Room->enemies_x[1],  Room->enemies_y[1] , "F");
+
+        }
+        if(Room->enemies[2]){
+            mvprintw(Room->enemies_x[2],  Room->enemies_y[2] , "G");
+
+        }
+        if(Room->enemies[3]){
+            mvprintw(Room->enemies_x[3],  Room->enemies_y[3] , "S");
+
+        }
+        if(Room->enemies[4]){
+            mvprintw(Room->enemies_x[4],  Room->enemies_y[4] , "U");
+
+        }
+        attroff(COLOR_PAIR(160) | A_ITALIC);
+
         // staircase
         if (Room->room_number == 4){
             // room index 3 (STAIRS!)
@@ -5066,6 +5625,7 @@ void print_room(room *Room){
     position ul_corner;
     ul_corner.x = Room->corner.x;
     ul_corner.y = Room->corner.y;
+
     if (!Room->hide){ // visible
         // printf("Room is visible\n"); // Debug print
 
@@ -5120,6 +5680,7 @@ void print_room(room *Room){
         init_pair(15, 77 , COLOR_BLACK); // for gold
         init_color(78, 700, 700, 0); // for black gold
         init_pair(16, 78 , COLOR_BLACK); // for black gold
+        init_pair(160, 160 , COLOR_BLACK); // for black gold
 
         if(Room->type == 3){
             attron(COLOR_PAIR(33));
@@ -5143,6 +5704,7 @@ void print_room(room *Room){
         else{
             attroff(COLOR_PAIR(Room->type));
         }
+        attroff(COLOR_PAIR(Room->type));
 
         if(Room->type != 3){ // Treasure room is empty of these!
             // pillars
@@ -5256,6 +5818,36 @@ void print_room(room *Room){
                 mvprintw(Room->doors_x[i],  Room->doors_y[i] , "+");
             }  
         }
+
+        // // enemies
+        attron(COLOR_PAIR(160) | A_ITALIC);
+        if(Room->enemies[0]){
+            attron(COLOR_PAIR(160) | A_ITALIC);
+            mvprintw(Room->enemies_x[0],  Room->enemies_y[0] , "D");
+
+        }
+        if(Room->enemies[1]){
+            attron(COLOR_PAIR(160) | A_ITALIC);
+            mvprintw(Room->enemies_x[1],  Room->enemies_y[1] , "F");
+
+        }
+        if(Room->enemies[2]){
+            attron(COLOR_PAIR(160) | A_ITALIC);
+            mvprintw(Room->enemies_x[2],  Room->enemies_y[2] , "G");
+
+        }
+        if(Room->enemies[3]){
+            attron(COLOR_PAIR(160) | A_ITALIC);
+            mvprintw(Room->enemies_x[3],  Room->enemies_y[3] , "S");
+
+        }
+        if(Room->enemies[4]){
+            attron(COLOR_PAIR(160) | A_ITALIC);
+            mvprintw(Room->enemies_x[4],  Room->enemies_y[4] , "U");
+
+        }
+        attroff(COLOR_PAIR(160) | A_ITALIC);
+
     } 
 
 }
@@ -5352,6 +5944,11 @@ void new_map(int difficulty ,
         ROOM.black_gold_y = 0;
         for (int W = 0 ; W < 5 ; W++){
             ROOM.weapons[W] = 0;
+            ROOM.weapons_x[W] = 0;
+            ROOM.weapons_y[W] = 0;
+        }
+        for (int W = 0 ; W < 5 ; W++){
+            ROOM.enemies[W] = 0;
             ROOM.weapons_x[W] = 0;
             ROOM.weapons_y[W] = 0;
         }
