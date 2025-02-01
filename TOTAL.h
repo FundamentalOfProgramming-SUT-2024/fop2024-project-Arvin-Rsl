@@ -512,6 +512,8 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
         rate_hits = 9000;
     }
 
+    int damage_coeff = 1;
+
     int x_show_loop_counter = 0;
 
     while(1){
@@ -614,10 +616,6 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
         
         print_bottom_message(&me , level_num);
 
-
-
-
-
         attron(COLOR_PAIR(me.color) );
         mvprintw(me.pos.x , me.pos.y , "%c" , 'A');
         int ch = getch();
@@ -707,6 +705,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
                 /// Close range
                 case 0:
                     // mace
+                    int Damage_Mace = damage_coeff * 5;
                     if(near_deamon(me)){
                         int alive_before;
                         int alive_now;
@@ -717,7 +716,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
                             alive_before =0;
                         }
 
-                        rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[0] -= 5;
+                        rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[0] -= Damage_Mace;
 
                         if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[0] > 0){
                             alive_now = 1;
@@ -742,7 +741,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
                             alive_before =0;
                         }
 
-                        rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[1] -= 5;
+                        rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[1] -= Damage_Mace;
 
                         if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[1] > 0){
                             alive_now = 1;
@@ -767,7 +766,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
                             alive_before =0;
                         }
 
-                        rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[2] -= 5;
+                        rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[2] -= Damage_Mace;
 
                         if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[2] > 0){
                             alive_now = 1;
@@ -793,7 +792,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
                             alive_before =0;
                         }
 
-                        rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[3] -= 5;
+                        rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[3] -= Damage_Mace;
 
                         if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[3] > 0){
                             alive_now = 1;
@@ -819,7 +818,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
                             alive_before =0;
                         }
 
-                        rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[4] -= 5;
+                        rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[4] -= Damage_Mace;
 
                         if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[4] > 0){
                             alive_now = 1;
@@ -839,6 +838,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
 
                 case 4:
                     // sword
+                    int Damage_Sword = damage_coeff * 10;
                     if(near_deamon(me)){
                         int alive_before;
                         int alive_now;
@@ -849,7 +849,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
                             alive_before =0;
                         }
 
-                        rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[0] -= 10;
+                        rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[0] -= Damage_Sword;
 
                         if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[0] > 0){
                             alive_now = 1;
@@ -874,7 +874,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
                             alive_before =0;
                         }
 
-                        rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[1] -= 10;
+                        rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[1] -= Damage_Sword;
 
                         if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[1] > 0){
                             alive_now = 1;
@@ -900,7 +900,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
                             alive_before =0;
                         }
 
-                        rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[2] -= 10;
+                        rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[2] -= Damage_Sword;
 
                         if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[2] > 0){
                             alive_now = 1;
@@ -926,7 +926,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
                             alive_before =0;
                         }
 
-                        rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[3] -= 10;
+                        rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[3] -= Damage_Sword;
 
                         if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[3] > 0){
                             alive_now = 1;
@@ -952,7 +952,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
                             alive_before =0;
                         }
 
-                        rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[4] -= 10;
+                        rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[4] -= Damage_Sword;
 
                         if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[4] > 0){
                             alive_now = 1;
@@ -974,6 +974,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
         
                 case 1:
                     // dagger
+                    int Damage_Dagger = damage_coeff * 12;
                     range = 5;
                     throw_direction = '0';
                     while (! (throw_direction == '8' || throw_direction == 'j' || throw_direction == 'J'
@@ -1039,7 +1040,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
                                     alive_before =0;
                                 }
 
-                                rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[0] -= 12;
+                                rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[0] -= Damage_Dagger;
 
                                 if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[0] > 0){
                                     alive_now = 1;
@@ -1067,7 +1068,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
                                     alive_before =0;
                                 }
 
-                                rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[1] -= 12;
+                                rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[1] -= Damage_Dagger;
 
                                 if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[1] > 0){
                                     alive_now = 1;
@@ -1095,7 +1096,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
                                     alive_before =0;
                                 }
 
-                                rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[2] -= 12;
+                                rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[2] -= Damage_Dagger;
 
                                 if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[2] > 0){
                                     alive_now = 1;
@@ -1123,7 +1124,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
                                     alive_before =0;
                                 }
 
-                                rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[3] -= 12;
+                                rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[3] -= Damage_Dagger;
 
                                 if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[3] > 0){
                                     alive_now = 1;
@@ -1150,7 +1151,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
                                     alive_before =0;
                                 }
 
-                                rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[4] -= 12;
+                                rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[4] -= Damage_Dagger;
 
                                 if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[4] > 0){
                                     alive_now = 1;
@@ -1184,6 +1185,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
 
                 case 3:
                     // arrow
+                    int Damage_Arrow = damage_coeff * 5;
                     range = 5; // برد پرتاب
                     throw_direction = '0';
                     while (! (throw_direction == '8' || throw_direction == 'j' || throw_direction == 'J'
@@ -1249,7 +1251,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
                                     alive_before =0;
                                 }
 
-                                rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[0] -= 5;
+                                rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[0] -= Damage_Arrow;
 
                                 if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[0] > 0){
                                     alive_now = 1;
@@ -1277,7 +1279,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
                                     alive_before =0;
                                 }
 
-                                rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[1] -= 5;
+                                rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[1] -= Damage_Arrow;
 
                                 if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[1] > 0){
                                     alive_now = 1;
@@ -1305,7 +1307,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
                                     alive_before =0;
                                 }
 
-                                rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[2] -= 5;
+                                rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[2] -= Damage_Arrow;
 
                                 if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[2] > 0){
                                     alive_now = 1;
@@ -1333,7 +1335,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
                                     alive_before =0;
                                 }
 
-                                rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[3] -= 5;
+                                rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[3] -= Damage_Arrow;
 
                                 if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[3] > 0){
                                     alive_now = 1;
@@ -1360,7 +1362,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
                                     alive_before =0;
                                 }
 
-                                rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[4] -= 5;
+                                rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[4] -= Damage_Arrow;
 
                                 if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[4] > 0){
                                     alive_now = 1;
@@ -1398,6 +1400,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
 
                 case 2:
                     // wand
+                    int Wand_Damage = damage_coeff * 15;
                     range = 10; // برد پرتاب
                     throw_direction = '0';
                     while (! (throw_direction == '8' || throw_direction == 'j' || throw_direction == 'J'
@@ -1464,7 +1467,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
                                     alive_before =0;
                                 }
 
-                                rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[0] -= 15;
+                                rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[0] -= Wand_Damage;
                                 rooms_of_all_levels[level_num - 1][room_index].can_enemy_move[0] = 0;
 
                                 if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[0] > 0){
@@ -1493,7 +1496,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
                                     alive_before =0;
                                 }
 
-                                rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[1] -= 15;
+                                rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[1] -= Wand_Damage;
                                 rooms_of_all_levels[level_num - 1][room_index].can_enemy_move[1] = 0;
 
 
@@ -1523,7 +1526,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
                                     alive_before =0;
                                 }
 
-                                rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[2] -= 15;
+                                rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[2] -= Wand_Damage;
                                 rooms_of_all_levels[level_num - 1][room_index].can_enemy_move[2] = 0;
 
 
@@ -1553,7 +1556,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
                                     alive_before =0;
                                 }
 
-                                rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[3] -= 15;
+                                rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[3] -= Wand_Damage;
                                 rooms_of_all_levels[level_num - 1][room_index].can_enemy_move[3] = 0;
 
                                 if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[3] > 0){
@@ -1581,7 +1584,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
                                     alive_before =0;
                                 }
 
-                                rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[4] -= 15;
+                                rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[4] -= Wand_Damage;
                                 rooms_of_all_levels[level_num - 1][room_index].can_enemy_move[4] = 0;
 
                                 if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[4] > 0){
@@ -1628,6 +1631,38 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
                 }
             }
 
+        }
+        else if (ch == 'Z' || ch == 'z') {
+            // using spells
+            // 0 : Health → H
+            // 1 : Speed   → $
+            // 2 : Damage  → !
+            switch (me.current_spell)
+            {
+                case 0:
+                    // health
+                    break;
+                case 1:
+                    // speed
+                    break;
+                case 2:
+                    // damage
+                    if (me.spells[2] > 0){
+                        me.spells[2]--;
+                        clear();
+                        snprintf(global_message, sizeof(char) * 100, "Damage spell activated! Your hits are now 2x stronger                   "); 
+                        damage_coeff = 2;
+                    }
+                    else{
+                        me.spells[2] = 0;
+                        clear();
+                        snprintf(global_message, sizeof(char) * 100, "\xE2\x9D\x97 You are out of Damage Spells                              ");  
+                    }
+
+                    break;
+                default:
+                    break;
+            }
         }
 
         // movement(PiCk , ch , &me , rooms_of_all_levels + level_num - 1 , n_rooms , global_message);
