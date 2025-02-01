@@ -162,8 +162,10 @@ typedef struct {
 typedef struct 
 {
     position pos;
+    int health; // MAX = 16
+    int how_full; // max: least hungry  ,  min: most hungry (dead)
+                // MAX = 5
     int gold_count;
-    int health;
     int food_count;
     int food[4]; // 0 : regular
                  // 1 : ideal
@@ -465,6 +467,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
     me.food[3] = 0;
     me.gold_count = 0;
     me.health = 16;
+    me.how_full = 5;
     me.color = CoLoR; 
     me.pick = 0;  
     me.floor_level = 1;
@@ -514,9 +517,14 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
 
     int damage_coeff = 1;
     int speed = 1; // doubles if we use speed spell
-    int x_show_loop_counter = 0;
-
-
+    int spell_loop_counter = 0;
+    int time_unit = 8000;
+    int n_t_units_spell_active = 15;
+    int coeff_health = 1;
+    int rate_health = 4000;
+    int health_loop_count = 0;
+    int rate_get_hungry = 110000;
+    int hunger_loop_count = 0;
     while(1){
         if(!print_all_Map){
           for (int i = 0 ; i < n_rooms[level_num - 1] ; i++){
@@ -667,18 +675,18 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
         }
         else if (ch == 'c' || ch == 'C') {
             if(me.food_count > 0){
-                if(me.health != 16){ // don't consume if health is full
+                if(me.how_full != 5){ // don't consume if health is full
                     me.food_count--;
                 }
                 else{
-                    snprintf(global_message, sizeof(char) * 100, "Health is already maximum!                           ");
+                    snprintf(global_message, sizeof(char) * 100, "You are already full \U0001F922                                      ");
                 }
 
-                if(me.health <= 14){
-                    me.health += 2; 
+                if(me.how_full <= 4){
+                    me.how_full++; 
                 }
                 else{
-                    me.health = 16;  // maximum of health 
+                    me.how_full = 5;  // maximum of health 
                 }
             }
             else{
@@ -1662,6 +1670,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
                         speed = 2;
                         clear();
                         snprintf(global_message, sizeof(char) * 100, "\U0001F9EA Speed spell activated! You are now 2x faster \u26A1                      "); 
+                        spell_loop_counter = 0;
                         // damage_coeff = 2;
                         //////////////////////////////////////////////////////////////////////////
                     }
@@ -1679,6 +1688,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
                         clear();
                         snprintf(global_message, sizeof(char) * 100, "\U0001F9EA  Damage spell activated! Your hits are now 2x stronger \U0001F4A5                  "); 
                         damage_coeff = 2;
+                        spell_loop_counter = 0;
                     }
                     else{
                         me.spells[2] = 0;
@@ -1692,7 +1702,19 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
             }
         }
 
-        // movement(PiCk , ch , &me , rooms_of_all_levels + level_num - 1 , n_rooms , global_message);
+        if ((speed != 1 || damage_coeff != 1)&& spell_loop_counter/time_unit < n_t_units_spell_active){
+            spell_loop_counter++;
+            attron(COLOR_PAIR(160));
+            mvprintw(LINES - 1 , COLS - 1 - strlen("00:00") , "00:%d " , n_t_units_spell_active - spell_loop_counter/time_unit);
+            attroff(COLOR_PAIR(160));
+        }
+        else if ((speed != 1 || damage_coeff != 1)){
+            clear();
+            spell_loop_counter = 0;
+            speed = 1;
+            damage_coeff = 1;
+        }
+
         movement2(PiCk , ch , &me , rooms_of_all_levels, n_rooms[level_num - 1] , global_message , &level_num , speed);
         
         attroff(COLOR_PAIR(me.color));
@@ -1700,22 +1722,6 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
         attron(COLOR_PAIR(me.color));
         mvprintw(me.pos.x , me.pos.y , "%c" , 'A');
         attroff(COLOR_PAIR(me.color) );
-
-
-        // for (int ro = 0 ; ro < n_rooms ; ro++){
-        //     room ey_baba = rooms_of_all_levels[level_num - 1][ro];
-        //     for(int door = 0 ; door < 2; door++){
-        //         int X = ey_baba.doors_x[door];
-        //         int Y = ey_baba.doors_y[door] - 1;
-        //         char there = mvinch(X , Y - 1) & A_CHARTEXT;
-        //             if( !(there == '_' || there == '|' || there == '.' || there == '~' || there == '-' || there == ',' || there == '#'|| there == 'O' || there == 'f') ){
-        //                 init_pair(36, COLOR_YELLOW, COLOR_BLACK);
-        //                 attron(COLOR_PAIR(36));
-        //                 mvprintw(X , Y , "#");
-        //                 attroff(COLOR_PAIR(36));
-        //             }
-        //     }
-        // }
 
         if (mvinch(0,0) & A_CHARTEXT != ' '){
             mvprintw(0,0, "%c" , ' ');
@@ -1792,6 +1798,19 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
                 hits_loop_counter = 0;
             }
         }
+
+        // get hungry!
+        if (hunger_loop_count < rate_get_hungry){
+            hunger_loop_count++;
+        }
+        else{
+            hunger_loop_count = 0;
+            if(me.how_full > 0){
+                me.how_full--;
+            }
+            clear();
+        }
+
 
         refresh();
         // refresh();
@@ -4147,9 +4166,13 @@ void print_top_message(char * message){
 void print_bottom_message(player* hero , int level_num){
 
     // int start_col = 0;
-    int start_col = (COLS - (14 + 7 + 7 + 8 + 16  +  3*10) )/ 2;
+    int start_col = (COLS - (14 + 7 + 7 + 16 + 16 + 5 +  4*10) )/ 2;
 
     // level number
+    init_color(93, 730, 1000, 300); // Light green
+    init_color(94, 1000, 750, 650);   // Peach
+    init_pair(93 , 93 , COLOR_BLACK);
+    init_pair(94 , 94 , COLOR_BLACK);
     init_pair(73 , COLOR_CYAN , COLOR_BLACK);
     attron(COLOR_PAIR(73));
     mvprintw(LINES - 1 , start_col , "Floor Level: "); // 13 chars
@@ -4183,9 +4206,9 @@ void print_bottom_message(player* hero , int level_num){
     else if (hero->health <= 5){
         init_pair(3 , COLOR_RED , COLOR_BLACK);
     }
-    attron(COLOR_CYAN);
+    attron(COLOR_PAIR(93));
     mvprintw(LINES - 1, 3*10 + start_col + 14 + 7 + 7 , "Health: "); // 8 chars
-    attroff(COLOR_CYAN);
+    attron(COLOR_PAIR(93));
     attron(COLOR_PAIR(3));
     for (int i = 0 ; i < 16 ; i++){ // maximum: 16 chars
 
@@ -4197,6 +4220,29 @@ void print_bottom_message(player* hero , int level_num){
         // mvprintw(LINES - 1, 3*10 + start_col + 14 + 7 + 7 + 8 + i, "%c" , '*');
     }
     attroff(COLOR_PAIR(3));
+    attron(COLOR_PAIR(94));
+    mvprintw(LINES - 1, 4*10 + start_col + 14 + 7 + 7 + 8 + 16, "Hunger: "); // 8 chars
+    attroff(COLOR_PAIR(94));
+    if (hero->how_full > 3){
+        init_pair(99 , COLOR_GREEN , COLOR_BLACK);
+    }
+    else if (2 < hero->how_full)
+    {
+        init_pair(99 , COLOR_YELLOW , COLOR_BLACK);
+    }
+    else if (hero->how_full <= 2){
+        init_pair(99 , COLOR_RED , COLOR_BLACK);
+    }
+    attron(COLOR_PAIR(99));
+    for (int i = 0 ; i < 5 ; i++){ // maximum: 5 chars
+        if (i < hero->how_full) {
+            mvprintw(LINES - 1, 4*10 + start_col + 14 + 7 + 7 + 16 + 16 + i, "\u269C"); /// \U0001F357?
+        } else {
+            mvprintw(LINES - 1, 4*10 + start_col + 14 + 7 + 7 + 16 + 16 + i, " ");
+        }
+    }
+    attroff(COLOR_PAIR(99));
+    
 }
 
 
