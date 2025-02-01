@@ -986,6 +986,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
                         || throw_direction == '1' || throw_direction == 'b' || throw_direction == 'B') ){
                             throw_direction = getch();
                     }
+
                     direction = 0;
                     x_next = me.pos.x;
                     y_next = me.pos.y;
@@ -1004,7 +1005,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
                         direction =3;
                     }
                     else if (throw_direction == '9' || throw_direction == 'y' || throw_direction == 'Y'){
-                        direction - 4;
+                        direction = 4;
                     }
                     else if (throw_direction == '7' || throw_direction == 'u' || throw_direction == 'U'){
                         direction = 5;
@@ -1081,7 +1082,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
                                 }
                                 break;
                             }
-                            else if (There == 'G'){
+                            else if (There == 'G' && room_index != 0){
                                 clear();
                                 snprintf(global_message, sizeof(char) * 100, "Dagger hit the Giant                                        "); 
                             
@@ -1171,6 +1172,13 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
                             }
                         }
                     }
+                    if (me.weapons[1] <= 0){
+                        clear();
+                        snprintf(global_message, sizeof(char) * 100, "\xE2\x9D\x97 You are out of Daggers                                       "); 
+                    }
+                    else{
+                        me.weapons[1]--;
+                    }
 
                     break;
 
@@ -1188,6 +1196,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
                         || throw_direction == '1' || throw_direction == 'b' || throw_direction == 'B') ){
                             throw_direction = getch();
                     }
+
                     direction = 0;
                     x_next = me.pos.x;
                     y_next = me.pos.y;
@@ -1206,7 +1215,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
                         direction =3;
                     }
                     else if (throw_direction == '9' || throw_direction == 'y' || throw_direction == 'Y'){
-                        direction - 4;
+                        direction = 4;
                     }
                     else if (throw_direction == '7' || throw_direction == 'u' || throw_direction == 'U'){
                         direction = 5;
@@ -1283,7 +1292,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
                                 }
                                 break;
                             }
-                            else if (There == 'G'){
+                            else if (There == 'G' && room_index != 0){
                                 clear();
                                 snprintf(global_message, sizeof(char) * 100, "Arrow hit the Giant                                        "); 
                             
@@ -1368,24 +1377,246 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
                             }
                             else if(There == '.' || There == '~' || There == '-' ||There == ',' || There == '+' || There == '<') {
                                 clear();
-                                snprintf(global_message, sizeof(char) * 100, "Dagger didn't hit anything!                                    "); 
+                                snprintf(global_message, sizeof(char) * 100, "Arrow didn't hit anything!                                    "); 
                                 break;
                             }
                             else{
                                 clear();
-                                snprintf(global_message, sizeof(char) * 100, "Dagger didn't hit anything!                                    "); 
+                                snprintf(global_message, sizeof(char) * 100, "Arrow didn't hit anything!                                    "); 
                                 break;
                             }
                         }
+                    }
+                    if (me.weapons[3] <= 0){
+                        clear();
+                        snprintf(global_message, sizeof(char) * 100, "\xE2\x9D\x97 You are out of Arrows                                        "); 
+                    }
+                    else{
+                        me.weapons[3]--;
                     }
                     break;
 
                 case 2:
                     // wand
+                    range = 10; // برد پرتاب
+                    throw_direction = '0';
+                    while (! (throw_direction == '8' || throw_direction == 'j' || throw_direction == 'J'
+                        || throw_direction == '2' || throw_direction == 'k' || throw_direction == 'K'
+                        || throw_direction == '6' || throw_direction == 'l' || throw_direction == 'L'
+                        || throw_direction == '4' || throw_direction == 'h' || throw_direction == 'H'
+                        || throw_direction == '9' || throw_direction == 'y' || throw_direction == 'Y'
+                        || throw_direction == '7' || throw_direction == 'u' || throw_direction == 'U'
+                        || throw_direction == '3' || throw_direction == 'n' || throw_direction == 'N'
+                        || throw_direction == '1' || throw_direction == 'b' || throw_direction == 'B') ){
+                            throw_direction = getch();
+                    }
                     
+
+                    direction = 0;
+                    x_next = me.pos.x;
+                    y_next = me.pos.y;
+                    // int x_moves[] = {-1 , +1 , +0 , +0 , -1 , -1 , +1 , +1}; // up , down , right , left , up-right , up-left , down-right , down-left
+                    // int y_moves[] = {+0 , +0 , +1 , -1 , +1 , -1 , +1 , -1};
+                    if (throw_direction == '8' || throw_direction == 'j' || throw_direction == 'J'){
+                        direction = 0;
+                    }
+                    else if (throw_direction == '2' || throw_direction == 'k' || throw_direction == 'K'){
+                        direction = 1;
+                    }
+                    else if (throw_direction == '6' || throw_direction == 'l' || throw_direction == 'L'){
+                        direction = 2;
+                    }
+                    else if (throw_direction == '4' || throw_direction == 'h' || throw_direction == 'H'){
+                        direction =3;
+                    }
+                    else if (throw_direction == '9' || throw_direction == 'y' || throw_direction == 'Y'){
+                        direction - 4;
+                    }
+                    else if (throw_direction == '7' || throw_direction == 'u' || throw_direction == 'U'){
+                        direction = 5;
+                    }
+                    else if (throw_direction == '3' || throw_direction == 'n' || throw_direction == 'N'){
+                        direction = 6;
+                    }
+                    else if (throw_direction == '1' || throw_direction == 'b' || throw_direction == 'B'){
+                        direction = 7;
+                    }
+                    
+                    for(int go = 0 ; go < range ; go++){
+                        x_next += x_moves[direction];
+                        y_next += y_moves[direction];
+                        char There = mvinch(x_next , y_next) & A_CHARTEXT;
+                        if (valid_move(x_next , y_next) && There != 'G' && There != '+' && There != '<'){
+                            continue;
+                        }
+                        else{
+
+                            if(There == 'D'){
+                                clear();
+                                snprintf(global_message, sizeof(char) * 100, "Magic Wand hit the Deamon                                        "); 
+                            
+                                int alive_before;
+                                int alive_now;
+                                if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[0] > 0){
+                                    alive_before = 1;
+                                }
+                                else{
+                                    alive_before =0;
+                                }
+
+                                rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[0] -= 15;
+                                rooms_of_all_levels[level_num - 1][room_index].can_enemy_move[0] = 0;
+
+                                if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[0] > 0){
+                                    alive_now = 1;
+                                }
+                                else{
+                                    alive_now =0;
+                                }
+
+                                if(alive_before && !alive_now){
+                                    clear();
+                                    snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Deamon was killed!                                      "); 
+                                }
+                                break;
+                            }
+                            else if (There == 'F'){
+                                clear();
+                                snprintf(global_message, sizeof(char) * 100, "Magic Wand hit the Fire-Breathin Monster                                        "); 
+                            
+                                int alive_before;
+                                int alive_now;
+                                if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[1] > 0){
+                                    alive_before = 1;
+                                }
+                                else{
+                                    alive_before =0;
+                                }
+
+                                rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[1] -= 15;
+                                rooms_of_all_levels[level_num - 1][room_index].can_enemy_move[1] = 0;
+
+
+                                if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[1] > 0){
+                                    alive_now = 1;
+                                }
+                                else{
+                                    alive_now =0;
+                                }
+
+                                if(alive_before && !alive_now){
+                                    clear();
+                                    snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Fire-Breathing Monster was killed!                                  "); 
+                                }
+                                break;
+                            }
+                            else if (There == 'G' && room_index != 0){
+                                clear();
+                                snprintf(global_message, sizeof(char) * 100, "Magic Wand hit the Giant                                        "); 
+                            
+                                int alive_before;
+                                int alive_now;
+                                if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[2] > 0){
+                                    alive_before = 1;
+                                }
+                                else{
+                                    alive_before =0;
+                                }
+
+                                rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[2] -= 15;
+                                rooms_of_all_levels[level_num - 1][room_index].can_enemy_move[2] = 0;
+
+
+                                if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[2] > 0){
+                                    alive_now = 1;
+                                }
+                                else{
+                                    alive_now =0;
+                                }
+
+                                if(alive_before && !alive_now){
+                                    clear();
+                                    snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Giant was killed!                                          "); 
+                                }
+                                break;
+                            }
+                            else if (There == 'S'){
+                                clear();
+                                snprintf(global_message, sizeof(char) * 100, "Magic Wand hit the Snake                                        "); 
+                            
+                                int alive_before;
+                                int alive_now;
+                                if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[3] > 0){
+                                    alive_before = 1;
+                                }
+                                else{
+                                    alive_before =0;
+                                }
+
+                                rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[3] -= 15;
+                                rooms_of_all_levels[level_num - 1][room_index].can_enemy_move[3] = 0;
+
+                                if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[3] > 0){
+                                    alive_now = 1;
+                                }
+                                else{
+                                    alive_now =0;
+                                }
+
+                                if(alive_before && !alive_now){
+                                    clear();
+                                    snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Snake was killed!                                          "); 
+                                }
+                                break;
+                            }
+                            else if (There == 'U'){
+                                clear();
+                                snprintf(global_message, sizeof(char) * 100, "Magic Wand hit the Undead                                        "); 
+                                int alive_before;
+                                int alive_now;
+                                if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[4] > 0){
+                                    alive_before = 1;
+                                }
+                                else{
+                                    alive_before =0;
+                                }
+
+                                rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[4] -= 15;
+                                rooms_of_all_levels[level_num - 1][room_index].can_enemy_move[4] = 0;
+
+                                if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[4] > 0){
+                                    alive_now = 1;
+                                }
+                                else{
+                                    alive_now =0;
+                                }
+
+                                if(alive_before && !alive_now){
+                                    clear();
+                                    snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Undead is now very much dead ! :)                                      "); 
+                                }
+                                break;
+                            }
+                            else if(There == '.' || There == '~' || There == '-' ||There == ',' || There == '+' || There == '<') {
+                                clear();
+                                snprintf(global_message, sizeof(char) * 100, "Magic Wand didn't hit anything!                                    "); 
+                                break;
+                            }
+                            else{
+                                clear();
+                                snprintf(global_message, sizeof(char) * 100, "Magic Wand didn't hit anything!                                    "); 
+                                break;
+                            }
+                        }
+                    }
+                    if (me.weapons[2] <= 0){
+                        clear();
+                        snprintf(global_message, sizeof(char) * 100, "\xE2\x9D\x97 You are out of Magic Wands                                   "); 
+                    }
+                    else{
+                        me.weapons[2]--;
+                    }
                     break;
-
-
                 
                 default:
                     break;
