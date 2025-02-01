@@ -520,8 +520,8 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
     int spell_loop_counter = 0;
     int time_unit = 8000;
     int n_t_units_spell_active = 15;
-    int coeff_health = 1;
-    int rate_health = 4000;
+    int healing_coeff = 1;
+    int rate_heal = 50000;
     int health_loop_count = 0;
     int rate_get_hungry = 110000;
     int hunger_loop_count = 0;
@@ -1654,7 +1654,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
                         me.spells[0]--;
                         clear();
                         snprintf(global_message, sizeof(char) * 100, "\U0001F9EA Health spell activated! You now heal 2x faster \U0001F33F                "); 
-                        // damage_coeff = 2;
+                        healing_coeff = 2;
                         //////////////////////////////////////////////////////////////////////////
                     }
                     else{
@@ -1702,17 +1702,19 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
             }
         }
 
-        if ((speed != 1 || damage_coeff != 1)&& spell_loop_counter/time_unit < n_t_units_spell_active){
+        // spell time limit :))
+        if ((speed != 1 || damage_coeff != 1 || healing_coeff != 1)&& spell_loop_counter/time_unit < n_t_units_spell_active){
             spell_loop_counter++;
             attron(COLOR_PAIR(160));
             mvprintw(LINES - 1 , COLS - 1 - strlen("00:00") , "00:%d " , n_t_units_spell_active - spell_loop_counter/time_unit);
             attroff(COLOR_PAIR(160));
         }
-        else if ((speed != 1 || damage_coeff != 1)){
+        else if ((speed != 1 || damage_coeff != 1 || healing_coeff != 1)){
             clear();
             spell_loop_counter = 0;
             speed = 1;
             damage_coeff = 1;
+            healing_coeff = 1;
         }
 
         movement2(PiCk , ch , &me , rooms_of_all_levels, n_rooms[level_num - 1] , global_message , &level_num , speed);
@@ -1811,6 +1813,17 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
             clear();
         }
 
+        // get healed!
+        if (me.how_full == 5){
+            if(health_loop_count < rate_heal/healing_coeff){
+                health_loop_count++;
+            }
+            else{
+                health_loop_count = 0;
+                me.health++;
+                clear();
+            }
+        }
 
         refresh();
         // refresh();
@@ -4169,7 +4182,7 @@ void print_bottom_message(player* hero , int level_num){
     int start_col = (COLS - (14 + 7 + 7 + 16 + 16 + 5 +  4*10) )/ 2;
 
     // level number
-    init_color(93, 730, 1000, 300); // Light green
+    init_color(93, 697, 1000, 300); // Light green
     init_color(94, 1000, 750, 650);   // Peach
     init_pair(93 , 93 , COLOR_BLACK);
     init_pair(94 , 94 , COLOR_BLACK);
