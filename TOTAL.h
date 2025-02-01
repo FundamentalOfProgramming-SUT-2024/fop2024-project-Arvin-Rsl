@@ -1641,22 +1641,47 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
             {
                 case 0:
                     // health
+                    if (me.spells[0] > 0){
+                        me.spells[0]--;
+                        clear();
+                        snprintf(global_message, sizeof(char) * 100, "\U0001F9EA Health spell activated! You now heal 2x faster \U0001F33F                "); 
+                        // damage_coeff = 2;
+                        //////////////////////////////////////////////////////////////////////////
+                    }
+                    else{
+                        me.spells[0] = 0;
+                        clear();
+                        snprintf(global_message, sizeof(char) * 100, "\xE2\x9D\x97 You are out of Health spells                              ");  
+                    }
                     break;
                 case 1:
                     // speed
+                    if (me.spells[1] > 0){
+                        me.spells[1]--;
+                        clear();
+                        snprintf(global_message, sizeof(char) * 100, "\U0001F9EA Speed spell activated! You are now 2x faster \u26A1                      "); 
+                        // damage_coeff = 2;
+                        //////////////////////////////////////////////////////////////////////////
+                    }
+                    else{
+                        me.spells[1] = 0;
+                        clear();
+                        snprintf(global_message, sizeof(char) * 100, "\xE2\x9D\x97 You are out of Speed spells                              ");  
+                    }
+
                     break;
                 case 2:
                     // damage
                     if (me.spells[2] > 0){
                         me.spells[2]--;
                         clear();
-                        snprintf(global_message, sizeof(char) * 100, "Damage spell activated! Your hits are now 2x stronger                   "); 
+                        snprintf(global_message, sizeof(char) * 100, "\U0001F9EA  Damage spell activated! Your hits are now 2x stronger \U0001F4A5                  "); 
                         damage_coeff = 2;
                     }
                     else{
                         me.spells[2] = 0;
                         clear();
-                        snprintf(global_message, sizeof(char) * 100, "\xE2\x9D\x97 You are out of Damage Spells                              ");  
+                        snprintf(global_message, sizeof(char) * 100, "\xE2\x9D\x97 You are out of Damage spells                              ");  
                     }
 
                     break;
