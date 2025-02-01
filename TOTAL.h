@@ -513,8 +513,9 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
     }
 
     int damage_coeff = 1;
-
+    int speed = 1; // doubles if we use speed spell
     int x_show_loop_counter = 0;
+
 
     while(1){
         if(!print_all_Map){
@@ -1658,6 +1659,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
                     // speed
                     if (me.spells[1] > 0){
                         me.spells[1]--;
+                        speed = 2;
                         clear();
                         snprintf(global_message, sizeof(char) * 100, "\U0001F9EA Speed spell activated! You are now 2x faster \u26A1                      "); 
                         // damage_coeff = 2;
@@ -1691,7 +1693,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
         }
 
         // movement(PiCk , ch , &me , rooms_of_all_levels + level_num - 1 , n_rooms , global_message);
-        movement2(PiCk , ch , &me , rooms_of_all_levels, n_rooms[level_num - 1] , global_message , &level_num);
+        movement2(PiCk , ch , &me , rooms_of_all_levels, n_rooms[level_num - 1] , global_message , &level_num , speed);
         
         attroff(COLOR_PAIR(me.color));
         // print_corridors(corridors_of_all_levels[level_num - 1] , *(corr_count + level_num - 1));
@@ -2601,12 +2603,7 @@ int valid_move(int x , int y ){
 
 
 // technically just a switch/case that changes the players position (if valid) .  
-void movement2(int PiCk , int ch , player* hero , room** rooms_of_all_levels , int n_rooms_this_level , char* address_global_message, int* ptr_level_num){
-    // later in while(1) of the print_map() function:
-    // char ch = getchar();
-    // attron
-    // mvprintw(hero->pos.x , hero->pos.y , "A");
-    // attroff
+void movement2(int PiCk , int ch , player* hero , room** rooms_of_all_levels , int n_rooms_this_level , char* address_global_message, int* ptr_level_num , int speed){
 
     keypad(stdscr, TRUE);
     position current;
@@ -2659,8 +2656,14 @@ void movement2(int PiCk , int ch , player* hero , room** rooms_of_all_levels , i
         case '8': // Up
         case 'J':
         case 'j':
-            x_new = current.x + x_moves[0];
-            y_new = current.y + y_moves[0];
+            if (valid_move(current.x + speed*x_moves[0] , current.y + speed*y_moves[0])){
+                x_new = current.x + speed*x_moves[0];
+                y_new = current.y + speed*y_moves[0];
+                }
+            else{
+                x_new = current.x + x_moves[0];
+                y_new = current.y + y_moves[0];
+            }
             ccc = mvinch(x_new, y_new) & A_CHARTEXT;
             room_num = in_which_room(*(rooms_of_all_levels + *ptr_level_num - 1), n_rooms_this_level, *hero);
 
@@ -2803,8 +2806,14 @@ void movement2(int PiCk , int ch , player* hero , room** rooms_of_all_levels , i
         case '2': // Down
         case 'K':
         case 'k':       
-            x_new = current.x + x_moves[1];
-            y_new = current.y + y_moves[1];
+            if (valid_move(current.x + speed*x_moves[1] , current.y + speed*y_moves[1])){
+                x_new = current.x + speed*x_moves[1];
+                y_new = current.y + speed*y_moves[1];
+                }
+            else{
+                x_new = current.x + x_moves[1];
+                y_new = current.y + y_moves[1];
+            }
             ccc = mvinch(x_new , y_new) & A_CHARTEXT;
             room_num = in_which_room(*(rooms_of_all_levels + *ptr_level_num - 1), n_rooms_this_level, *hero);
             // trap
@@ -2947,8 +2956,14 @@ void movement2(int PiCk , int ch , player* hero , room** rooms_of_all_levels , i
         case KEY_RIGHT:
         case 'L':
         case 'l':
-            x_new = current.x + x_moves[2];
-            y_new = current.y + y_moves[2];
+            if (valid_move(current.x + speed*x_moves[1] , current.y + speed*y_moves[2])){
+                x_new = current.x + speed*x_moves[2];
+                y_new = current.y + speed*y_moves[2];
+                }
+            else{
+                x_new = current.x + x_moves[2];
+                y_new = current.y + y_moves[2];
+            }
             ccc = mvinch(x_new , y_new) & A_CHARTEXT;
             room_num = in_which_room(*(rooms_of_all_levels + *ptr_level_num - 1), n_rooms_this_level, *hero);
             // trap
@@ -3090,8 +3105,14 @@ void movement2(int PiCk , int ch , player* hero , room** rooms_of_all_levels , i
         case KEY_LEFT:
         case 'H':
         case 'h':
-            x_new = current.x + x_moves[3];
-            y_new = current.y + y_moves[3];
+            if (valid_move(current.x + speed*x_moves[3] , current.y + speed*y_moves[3])){
+                x_new = current.x + speed*x_moves[3];
+                y_new = current.y + speed*y_moves[3];
+                }
+            else{
+                x_new = current.x + x_moves[3];
+                y_new = current.y + y_moves[3];
+            }
             ccc = mvinch(x_new, y_new) & A_CHARTEXT;
             room_num = in_which_room(*(rooms_of_all_levels + *ptr_level_num - 1), n_rooms_this_level, *hero);
             // trap
@@ -3233,8 +3254,14 @@ void movement2(int PiCk , int ch , player* hero , room** rooms_of_all_levels , i
         case '9': // Upper right
         case 'U':
         case 'u':
-            x_new = current.x + x_moves[4];
-            y_new = current.y + y_moves[4];
+            if (valid_move(current.x + speed*x_moves[4] , current.y + speed*y_moves[4])){
+                x_new = current.x + speed*x_moves[4];
+                y_new = current.y + speed*y_moves[4];
+                }
+            else{
+                x_new = current.x + x_moves[4];
+                y_new = current.y + y_moves[4];
+            }
             ccc = mvinch(x_new, y_new) & A_CHARTEXT;
             room_num = in_which_room(*(rooms_of_all_levels + *ptr_level_num - 1), n_rooms_this_level, *hero);
             // trap
@@ -3376,8 +3403,14 @@ void movement2(int PiCk , int ch , player* hero , room** rooms_of_all_levels , i
         case '7': // Upper left
         case 'Y':
         case 'y':
-            x_new = current.x + x_moves[5];
-            y_new = current.y + y_moves[5];
+            if (valid_move(current.x + speed*x_moves[5] , current.y + speed*y_moves[5])){
+                x_new = current.x + speed*x_moves[5];
+                y_new = current.y + speed*y_moves[5];
+                }
+            else{
+                x_new = current.x + x_moves[5];
+                y_new = current.y + y_moves[5];
+            }
             ccc = mvinch(x_new , y_new) & A_CHARTEXT;
             room_num = in_which_room(*(rooms_of_all_levels + *ptr_level_num - 1), n_rooms_this_level, *hero);
             // trap
@@ -3519,8 +3552,14 @@ void movement2(int PiCk , int ch , player* hero , room** rooms_of_all_levels , i
         case '1': // Down left
         case 'B':
         case 'b':
-            x_new = current.x + x_moves[7];
-            y_new = current.y + y_moves[7];
+            if (valid_move(current.x + speed*x_moves[7] , current.y + speed*y_moves[7])){
+                x_new = current.x + speed*x_moves[7];
+                y_new = current.y + speed*y_moves[7];
+                }
+            else{
+                x_new = current.x + x_moves[7];
+                y_new = current.y + y_moves[7];
+            }
             ccc = mvinch(x_new , y_new) & A_CHARTEXT;
             room_num = in_which_room(*(rooms_of_all_levels + *ptr_level_num - 1), n_rooms_this_level, *hero);
             // trap
@@ -3661,8 +3700,14 @@ void movement2(int PiCk , int ch , player* hero , room** rooms_of_all_levels , i
         case '3': // Down right
         case 'N':
         case 'n':
-            x_new = current.x + x_moves[6];
-            y_new = current.y + y_moves[6];
+            if (valid_move(current.x + speed*x_moves[6] , current.y + speed*y_moves[6])){
+                x_new = current.x + speed*x_moves[6];
+                y_new = current.y + speed*y_moves[6];
+                }
+            else{
+                x_new = current.x + x_moves[6];
+                y_new = current.y + y_moves[6];
+            }
             ccc = mvinch(x_new, y_new) & A_CHARTEXT;
             room_num = in_which_room(*(rooms_of_all_levels + *ptr_level_num - 1), n_rooms_this_level, *hero);
             // trap
