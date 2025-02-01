@@ -26,8 +26,8 @@ typedef struct {
 } position;
 
 typedef struct{
-    int exists_in_room;
-    position pos;
+    // int exists_in_room;
+    // position pos;
     int hit_strength;
     /// hits strength (damage to player)
     // 1 : Deamon       (D)
@@ -131,6 +131,7 @@ typedef struct {
     int enemies[5];
     int enemies_x[5];
     int enemies_y[5];
+    int enemies_remained_health[5];
     // 0 : Deamon       (D)
     // 1 : Fire-Breath  (F)
     // 2 : Giant        (G)
@@ -150,7 +151,7 @@ typedef struct {
     // enemy Fire_Breath;
     // enemy Giant;
     // enemy Snake;
-    // enemy Undeed;
+    // enemy Undead;
     // enemy* test;
     // int test_enemy_ptr;
 
@@ -627,7 +628,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
             // Stop current soundtrack
             stop_soundtrack();
 
-            // Switch to the next song
+            // Switch to the next song (don't switch)
             current_song = 3;
             init_audio();
             choose_soundtrack(current_song);
@@ -685,7 +686,310 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
             }
 
         }
+        else if (ch == ' ') {
+            // attack with current weapon in hand
 
+            int room_index = in_which_room(rooms_of_all_levels[level_num - 1] , n_rooms[level_num - 1] , me);
+                // 0 : Mace (m)
+                // 1 : Dagger (d)
+                // 2 : Magic Wand (w)
+                // 3 : Normal Arrow (a)
+                // 4 : Sword (s)
+            
+            switch (me.current_weapon)
+            {
+            /// Close range
+            case 0:
+                // mace
+                if(near_deamon(me)){
+                    int alive_before;
+                    int alive_now;
+                    if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[0] > 0){
+                        alive_before = 1;
+                    }
+                    else{
+                        alive_before =0;
+                    }
+
+                    rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[0] -= 5;
+
+                    if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[0] > 0){
+                        alive_now = 1;
+                    }
+                    else{
+                        alive_now =0;
+                    }
+
+                    if(alive_before && !alive_now){
+                        clear();
+                        snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Deamon was killed!                                      "); 
+                    }
+                    break;
+                }
+                else if(near_fire_breathing_monster(me)){
+                    int alive_before;
+                    int alive_now;
+                    if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[1] > 0){
+                        alive_before = 1;
+                    }
+                    else{
+                        alive_before =0;
+                    }
+
+                    rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[1] -= 5;
+
+                    if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[1] > 0){
+                        alive_now = 1;
+                    }
+                    else{
+                        alive_now =0;
+                    }
+
+                    if(alive_before && !alive_now){
+                        clear();
+                        snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Fire-Breathing Monster was killed!                             "); 
+                    }
+                    break;
+                }
+                else if(near_giant(rooms_of_all_levels[level_num - 1] , n_rooms[level_num - 1] , me)){
+                    int alive_before;
+                    int alive_now;
+                    if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[2] > 0){
+                        alive_before = 1;
+                    }
+                    else{
+                        alive_before =0;
+                    }
+
+                    rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[2] -= 5;
+
+                    if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[2] > 0){
+                        alive_now = 1;
+                    }
+                    else{
+                        alive_now =0;
+                    }
+
+                    if(alive_before && !alive_now){
+                        clear();
+
+                        snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Giant was killed!                                        "); 
+                    }
+                    break;
+                }
+                else if(near_snake(me)){
+                    int alive_before;
+                    int alive_now;
+                    if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[3] > 0){
+                        alive_before = 1;
+                    }
+                    else{
+                        alive_before =0;
+                    }
+
+                    rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[3] -= 5;
+
+                    if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[3] > 0){
+                        alive_now = 1;
+                    }
+                    else{
+                        alive_now =0;
+                    }
+
+                    if(alive_before && !alive_now){
+                        clear();
+
+                        snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Snake was killed!                                            "); 
+                    }
+                    break;
+                }
+                else if(near_undeed(me)){
+                    int alive_before;
+                    int alive_now;
+                    if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[4] > 0){
+                        alive_before = 1;
+                    }
+                    else{
+                        alive_before =0;
+                    }
+
+                    rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[4] -= 5;
+
+                    if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[4] > 0){
+                        alive_now = 1;
+                    }
+                    else{
+                        alive_now =0;
+                    }
+
+                    if(alive_before && !alive_now){
+                        clear();
+
+                        snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Undead is now very much dead ! :)                                      "); 
+                    }
+                    break;
+                }
+                break;
+
+            case 4:
+                // sword
+                if(near_deamon(me)){
+                    int alive_before;
+                    int alive_now;
+                    if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[0] > 0){
+                        alive_before = 1;
+                    }
+                    else{
+                        alive_before =0;
+                    }
+
+                    rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[0] -= 10;
+
+                    if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[0] > 0){
+                        alive_now = 1;
+                    }
+                    else{
+                        alive_now =0;
+                    }
+
+                    if(alive_before && !alive_now){
+                        clear();
+                        snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Deamon was killed!                                      "); 
+                    }
+                    break;
+                }
+                else if(near_fire_breathing_monster(me)){
+                    int alive_before;
+                    int alive_now;
+                    if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[1] > 0){
+                        alive_before = 1;
+                    }
+                    else{
+                        alive_before =0;
+                    }
+
+                    rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[1] -= 10;
+
+                    if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[1] > 0){
+                        alive_now = 1;
+                    }
+                    else{
+                        alive_now =0;
+                    }
+
+                    if(alive_before && !alive_now){
+                        clear();
+
+                        snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Fire-Breathing Monster was killed!                             "); 
+                    }
+                    break;
+                }
+                else if(near_giant(rooms_of_all_levels[level_num - 1] , n_rooms[level_num - 1] , me)){
+                    int alive_before;
+                    int alive_now;
+                    if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[2] > 0){
+                        alive_before = 1;
+                    }
+                    else{
+                        alive_before =0;
+                    }
+
+                    rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[2] -= 10;
+
+                    if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[2] > 0){
+                        alive_now = 1;
+                    }
+                    else{
+                        alive_now =0;
+                    }
+
+                    if(alive_before && !alive_now){
+                        clear();
+
+                        snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Giant was killed!                                        "); 
+                    }
+                    break;
+                }
+                else if(near_snake(me)){
+                    int alive_before;
+                    int alive_now;
+                    if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[3] > 0){
+                        alive_before = 1;
+                    }
+                    else{
+                        alive_before =0;
+                    }
+
+                    rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[3] -= 10;
+
+                    if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[3] > 0){
+                        alive_now = 1;
+                    }
+                    else{
+                        alive_now =0;
+                    }
+
+                    if(alive_before && !alive_now){
+                        clear();
+
+                        snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Snake was killed!                                            "); 
+                    }
+                    break;
+                }
+                else if(near_undeed(me)){
+                    int alive_before;
+                    int alive_now;
+                    if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[4] > 0){
+                        alive_before = 1;
+                    }
+                    else{
+                        alive_before =0;
+                    }
+
+                    rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[4] -= 10;
+
+                    if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[4] > 0){
+                        alive_now = 1;
+                    }
+                    else{
+                        alive_now =0;
+                    }
+
+                    if(alive_before && !alive_now){
+                        clear();
+
+                        snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Undead is now very much dead ! :)                                      "); 
+                    }
+                    break;
+                }
+                break;
+            
+            /// Far range
+    
+            case 1:
+                // dagger
+                
+                break;
+            case 2:
+                // wand
+                
+                break;
+            case 3:
+                // arrow
+                
+                break;
+            
+            default:
+                break;
+            }
+
+            for (int enem = 0 ; enem < 5 ; enem++){
+                if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[enem] <= 0){
+                    rooms_of_all_levels[level_num - 1][room_index].enemies[enem] = 0; // vanish
+                }
+            }
+
+        }
 
         // movement(PiCk , ch , &me , rooms_of_all_levels + level_num - 1 , n_rooms , global_message);
         movement2(PiCk , ch , &me , rooms_of_all_levels, n_rooms[level_num - 1] , global_message , &level_num);
@@ -1688,7 +1992,7 @@ void movement2(int PiCk , int ch , player* hero , room** rooms_of_all_levels , i
                     }
                 }
             }
-            else if (ccc == 'G' && room_num >= 0){
+            else if (ccc == 'G' && room_num == 0){
                 (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->black_gold = 0;
                 if(!(*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->black_gold && rooms_of_all_levels[*ptr_level_num - 1][room_num].type != 4){
                     hero->gold_count += 15;
@@ -1706,14 +2010,14 @@ void movement2(int PiCk , int ch , player* hero , room** rooms_of_all_levels , i
                     }
                 }
             }
-            // dagger 
+             // dagger 
             else if (ccc == 'd' && room_num >= 0 && hero->pick){
                 (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->weapons[1] = 0;
                 if(!(*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->weapons[1]){
                     if(rooms_of_all_levels[*ptr_level_num - 1][room_num].type != 4){
                         // not nightmare room
-                        hero->weapons[1]++;
-                        snprintf(address_global_message, sizeof(char) * 100, "Dagger added to pack                                                                       ");
+                        hero->weapons[1]+=10;
+                        snprintf(address_global_message, sizeof(char) * 100, "10 Daggers added to pack                                                                       ");
                     }
                 }
             }
@@ -1723,8 +2027,8 @@ void movement2(int PiCk , int ch , player* hero , room** rooms_of_all_levels , i
                 if(!(*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->weapons[2]){
                     if(rooms_of_all_levels[*ptr_level_num - 1][room_num].type != 4){
                         // not nightmare room
-                        hero->weapons[2]++;
-                        snprintf(address_global_message, sizeof(char) * 100, "Magic Wand added to pack                                                                       ");
+                        hero->weapons[2]+=8;
+                        snprintf(address_global_message, sizeof(char) * 100, "8 Magic Wands added to pack                                                                       ");
                     }
                 }
             }
@@ -1734,8 +2038,8 @@ void movement2(int PiCk , int ch , player* hero , room** rooms_of_all_levels , i
                 if(!(*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->weapons[3]){
                     if(rooms_of_all_levels[*ptr_level_num - 1][room_num].type != 4){
                         // not nightmare room
-                        hero->weapons[3]++;
-                        snprintf(address_global_message, sizeof(char) * 100, "Normal Arrow added to pack                                                                       ");
+                        hero->weapons[3]+=20;
+                        snprintf(address_global_message, sizeof(char) * 100, "20 Normal Arrows added to pack                                                                       ");
                     }
                 }
             }
@@ -1745,11 +2049,17 @@ void movement2(int PiCk , int ch , player* hero , room** rooms_of_all_levels , i
                 if(!(*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->weapons[4]){
                     if(rooms_of_all_levels[*ptr_level_num - 1][room_num].type != 4){
                         // not nightmare room
-                        hero->weapons[4]++;
-                        snprintf(address_global_message, sizeof(char) * 100, "Sword added to pack                                                                       ");
+                        if(hero->weapons[4] >= 1){
+                            snprintf(address_global_message, sizeof(char) * 100, "You already have a sword                                                                      ");
+                        }
+                        else{
+                            hero->weapons[4] = 1;
+                            snprintf(address_global_message, sizeof(char) * 100, "Sword added to pack                                                                       ");
+                        }
                     }
                 }
             }
+            
             // Health Spell 
             else if (ccc == 'H' && room_num >= 0 && hero->pick){
                 (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->spells[0] = 0;
@@ -1823,7 +2133,7 @@ void movement2(int PiCk , int ch , player* hero , room** rooms_of_all_levels , i
                     }
                 }
             }
-            else if (ccc == 'G' && room_num >= 0){
+            else if (ccc == 'G' && room_num == 0){
                 (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->black_gold = 0;
                 if(!(*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->black_gold && rooms_of_all_levels[*ptr_level_num - 1][room_num].type != 4){
                     hero->gold_count += 15;
@@ -1847,8 +2157,8 @@ void movement2(int PiCk , int ch , player* hero , room** rooms_of_all_levels , i
                 if(!(*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->weapons[1]){
                     if(rooms_of_all_levels[*ptr_level_num - 1][room_num].type != 4){
                         // not nightmare room
-                        hero->weapons[1]++;
-                        snprintf(address_global_message, sizeof(char) * 100, "Dagger added to pack                                                                       ");
+                        hero->weapons[1]+=10;
+                        snprintf(address_global_message, sizeof(char) * 100, "10 Daggers added to pack                                                                       ");
                     }
                 }
             }
@@ -1858,8 +2168,8 @@ void movement2(int PiCk , int ch , player* hero , room** rooms_of_all_levels , i
                 if(!(*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->weapons[2]){
                     if(rooms_of_all_levels[*ptr_level_num - 1][room_num].type != 4){
                         // not nightmare room
-                        hero->weapons[2]++;
-                        snprintf(address_global_message, sizeof(char) * 100, "Magic Wand added to pack                                                                       ");
+                        hero->weapons[2]+=8;
+                        snprintf(address_global_message, sizeof(char) * 100, "8 Magic Wands added to pack                                                                       ");
                     }
                 }
             }
@@ -1869,8 +2179,8 @@ void movement2(int PiCk , int ch , player* hero , room** rooms_of_all_levels , i
                 if(!(*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->weapons[3]){
                     if(rooms_of_all_levels[*ptr_level_num - 1][room_num].type != 4){
                         // not nightmare room
-                        hero->weapons[3]++;
-                        snprintf(address_global_message, sizeof(char) * 100, "Normal Arrow added to pack                                                                       ");
+                        hero->weapons[3]+=20;
+                        snprintf(address_global_message, sizeof(char) * 100, "20 Normal Arrows added to pack                                                                       ");
                     }
                 }
             }
@@ -1880,11 +2190,17 @@ void movement2(int PiCk , int ch , player* hero , room** rooms_of_all_levels , i
                 if(!(*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->weapons[4]){
                     if(rooms_of_all_levels[*ptr_level_num - 1][room_num].type != 4){
                         // not nightmare room
-                        hero->weapons[4]++;
-                        snprintf(address_global_message, sizeof(char) * 100, "Sword added to pack                                                                       ");
+                        if(hero->weapons[4] >= 1){
+                            snprintf(address_global_message, sizeof(char) * 100, "You already have a sword                                                                      ");
+                        }
+                        else{
+                            hero->weapons[4] = 1;
+                            snprintf(address_global_message, sizeof(char) * 100, "Sword added to pack                                                                       ");
+                        }
                     }
                 }
             }
+            
             // Health Spell 
             else if (ccc == 'H' && room_num >= 0 && hero->pick){
                 (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->spells[0] = 0;
@@ -1961,7 +2277,7 @@ void movement2(int PiCk , int ch , player* hero , room** rooms_of_all_levels , i
                     }    
                 }
             }
-            else if (ccc == 'G' && room_num >= 0){
+            else if (ccc == 'G' && room_num == 0){
                 (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->black_gold = 0;
                 if(!(*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->black_gold && rooms_of_all_levels[*ptr_level_num - 1][room_num].type != 4){
                     hero->gold_count += 15;
@@ -1979,14 +2295,14 @@ void movement2(int PiCk , int ch , player* hero , room** rooms_of_all_levels , i
                     }
                 }
             }
-            // dagger 
+             // dagger 
             else if (ccc == 'd' && room_num >= 0 && hero->pick){
                 (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->weapons[1] = 0;
                 if(!(*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->weapons[1]){
                     if(rooms_of_all_levels[*ptr_level_num - 1][room_num].type != 4){
                         // not nightmare room
-                        hero->weapons[1]++;
-                        snprintf(address_global_message, sizeof(char) * 100, "Dagger added to pack                                                                       ");
+                        hero->weapons[1]+=10;
+                        snprintf(address_global_message, sizeof(char) * 100, "10 Daggers added to pack                                                                       ");
                     }
                 }
             }
@@ -1996,8 +2312,8 @@ void movement2(int PiCk , int ch , player* hero , room** rooms_of_all_levels , i
                 if(!(*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->weapons[2]){
                     if(rooms_of_all_levels[*ptr_level_num - 1][room_num].type != 4){
                         // not nightmare room
-                        hero->weapons[2]++;
-                        snprintf(address_global_message, sizeof(char) * 100, "Magic Wand added to pack                                                                       ");
+                        hero->weapons[2]+=8;
+                        snprintf(address_global_message, sizeof(char) * 100, "8 Magic Wands added to pack                                                                       ");
                     }
                 }
             }
@@ -2007,8 +2323,8 @@ void movement2(int PiCk , int ch , player* hero , room** rooms_of_all_levels , i
                 if(!(*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->weapons[3]){
                     if(rooms_of_all_levels[*ptr_level_num - 1][room_num].type != 4){
                         // not nightmare room
-                        hero->weapons[3]++;
-                        snprintf(address_global_message, sizeof(char) * 100, "Normal Arrow added to pack                                                                       ");
+                        hero->weapons[3]+=20;
+                        snprintf(address_global_message, sizeof(char) * 100, "20 Normal Arrows added to pack                                                                       ");
                     }
                 }
             }
@@ -2018,11 +2334,17 @@ void movement2(int PiCk , int ch , player* hero , room** rooms_of_all_levels , i
                 if(!(*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->weapons[4]){
                     if(rooms_of_all_levels[*ptr_level_num - 1][room_num].type != 4){
                         // not nightmare room
-                        hero->weapons[4]++;
-                        snprintf(address_global_message, sizeof(char) * 100, "Sword added to pack                                                                       ");
+                        if(hero->weapons[4] >= 1){
+                            snprintf(address_global_message, sizeof(char) * 100, "You already have a sword                                                                      ");
+                        }
+                        else{
+                            hero->weapons[4] = 1;
+                            snprintf(address_global_message, sizeof(char) * 100, "Sword added to pack                                                                       ");
+                        }
                     }
                 }
             }
+            
             // Health Spell 
             else if (ccc == 'H' && room_num >= 0 && hero->pick){
                 (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->spells[0] = 0;
@@ -2098,7 +2420,7 @@ void movement2(int PiCk , int ch , player* hero , room** rooms_of_all_levels , i
                     }
                 }
             }
-            else if (ccc == 'G' && room_num >= 0){
+            else if (ccc == 'G' && room_num == 0){
                 (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->black_gold = 0;
                 if(!(*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->black_gold && rooms_of_all_levels[*ptr_level_num - 1][room_num].type != 4){
                     hero->gold_count += 15;
@@ -2116,14 +2438,14 @@ void movement2(int PiCk , int ch , player* hero , room** rooms_of_all_levels , i
                     }
                 }
             }
-            // dagger 
+             // dagger 
             else if (ccc == 'd' && room_num >= 0 && hero->pick){
                 (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->weapons[1] = 0;
                 if(!(*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->weapons[1]){
                     if(rooms_of_all_levels[*ptr_level_num - 1][room_num].type != 4){
                         // not nightmare room
-                        hero->weapons[1]++;
-                        snprintf(address_global_message, sizeof(char) * 100, "Dagger added to pack                                                                       ");
+                        hero->weapons[1]+=10;
+                        snprintf(address_global_message, sizeof(char) * 100, "10 Daggers added to pack                                                                       ");
                     }
                 }
             }
@@ -2133,8 +2455,8 @@ void movement2(int PiCk , int ch , player* hero , room** rooms_of_all_levels , i
                 if(!(*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->weapons[2]){
                     if(rooms_of_all_levels[*ptr_level_num - 1][room_num].type != 4){
                         // not nightmare room
-                        hero->weapons[2]++;
-                        snprintf(address_global_message, sizeof(char) * 100, "Magic Wand added to pack                                                                       ");
+                        hero->weapons[2]+=8;
+                        snprintf(address_global_message, sizeof(char) * 100, "8 Magic Wands added to pack                                                                       ");
                     }
                 }
             }
@@ -2144,8 +2466,8 @@ void movement2(int PiCk , int ch , player* hero , room** rooms_of_all_levels , i
                 if(!(*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->weapons[3]){
                     if(rooms_of_all_levels[*ptr_level_num - 1][room_num].type != 4){
                         // not nightmare room
-                        hero->weapons[3]++;
-                        snprintf(address_global_message, sizeof(char) * 100, "Normal Arrow added to pack                                                                       ");
+                        hero->weapons[3]+=20;
+                        snprintf(address_global_message, sizeof(char) * 100, "20 Normal Arrows added to pack                                                                       ");
                     }
                 }
             }
@@ -2155,11 +2477,17 @@ void movement2(int PiCk , int ch , player* hero , room** rooms_of_all_levels , i
                 if(!(*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->weapons[4]){
                     if(rooms_of_all_levels[*ptr_level_num - 1][room_num].type != 4){
                         // not nightmare room
-                        hero->weapons[4]++;
-                        snprintf(address_global_message, sizeof(char) * 100, "Sword added to pack                                                                       ");
+                        if(hero->weapons[4] >= 1){
+                            snprintf(address_global_message, sizeof(char) * 100, "You already have a sword                                                                      ");
+                        }
+                        else{
+                            hero->weapons[4] = 1;
+                            snprintf(address_global_message, sizeof(char) * 100, "Sword added to pack                                                                       ");
+                        }
                     }
                 }
             }
+            
             // Health Spell 
             else if (ccc == 'H' && room_num >= 0 && hero->pick){
                 (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->spells[0] = 0;
@@ -2235,7 +2563,7 @@ void movement2(int PiCk , int ch , player* hero , room** rooms_of_all_levels , i
                     }
                 }
             }
-            else if (ccc == 'G' && room_num >= 0){
+            else if (ccc == 'G' && room_num == 0){
                 (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->black_gold = 0;
                 if(!(*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->black_gold && rooms_of_all_levels[*ptr_level_num - 1][room_num].type != 4){
                     hero->gold_count += 15;
@@ -2253,14 +2581,14 @@ void movement2(int PiCk , int ch , player* hero , room** rooms_of_all_levels , i
                     }
                 }
             }
-            // dagger 
+             // dagger 
             else if (ccc == 'd' && room_num >= 0 && hero->pick){
                 (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->weapons[1] = 0;
                 if(!(*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->weapons[1]){
                     if(rooms_of_all_levels[*ptr_level_num - 1][room_num].type != 4){
                         // not nightmare room
-                        hero->weapons[1]++;
-                        snprintf(address_global_message, sizeof(char) * 100, "Dagger added to pack                                                                       ");
+                        hero->weapons[1]+=10;
+                        snprintf(address_global_message, sizeof(char) * 100, "10 Daggers added to pack                                                                       ");
                     }
                 }
             }
@@ -2270,8 +2598,8 @@ void movement2(int PiCk , int ch , player* hero , room** rooms_of_all_levels , i
                 if(!(*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->weapons[2]){
                     if(rooms_of_all_levels[*ptr_level_num - 1][room_num].type != 4){
                         // not nightmare room
-                        hero->weapons[2]++;
-                        snprintf(address_global_message, sizeof(char) * 100, "Magic Wand added to pack                                                                       ");
+                        hero->weapons[2]+=8;
+                        snprintf(address_global_message, sizeof(char) * 100, "8 Magic Wands added to pack                                                                       ");
                     }
                 }
             }
@@ -2281,8 +2609,8 @@ void movement2(int PiCk , int ch , player* hero , room** rooms_of_all_levels , i
                 if(!(*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->weapons[3]){
                     if(rooms_of_all_levels[*ptr_level_num - 1][room_num].type != 4){
                         // not nightmare room
-                        hero->weapons[3]++;
-                        snprintf(address_global_message, sizeof(char) * 100, "Normal Arrow added to pack                                                                       ");
+                        hero->weapons[3]+=20;
+                        snprintf(address_global_message, sizeof(char) * 100, "20 Normal Arrows added to pack                                                                       ");
                     }
                 }
             }
@@ -2292,11 +2620,17 @@ void movement2(int PiCk , int ch , player* hero , room** rooms_of_all_levels , i
                 if(!(*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->weapons[4]){
                     if(rooms_of_all_levels[*ptr_level_num - 1][room_num].type != 4){
                         // not nightmare room
-                        hero->weapons[4]++;
-                        snprintf(address_global_message, sizeof(char) * 100, "Sword added to pack                                                                       ");
+                        if(hero->weapons[4] >= 1){
+                            snprintf(address_global_message, sizeof(char) * 100, "You already have a sword                                                                      ");
+                        }
+                        else{
+                            hero->weapons[4] = 1;
+                            snprintf(address_global_message, sizeof(char) * 100, "Sword added to pack                                                                       ");
+                        }
                     }
                 }
             }
+            
             // Health Spell 
             else if (ccc == 'H' && room_num >= 0 && hero->pick){
                 (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->spells[0] = 0;
@@ -2372,7 +2706,7 @@ void movement2(int PiCk , int ch , player* hero , room** rooms_of_all_levels , i
                     }
                 }
             }
-            else if (ccc == 'G' && room_num >= 0){
+            else if (ccc == 'G' && room_num == 0){
                 (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->black_gold = 0;
                 if(!(*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->black_gold && rooms_of_all_levels[*ptr_level_num - 1][room_num].type != 4){
                     hero->gold_count += 15;
@@ -2390,14 +2724,14 @@ void movement2(int PiCk , int ch , player* hero , room** rooms_of_all_levels , i
                     }
                 }
             }
-            // dagger 
+             // dagger 
             else if (ccc == 'd' && room_num >= 0 && hero->pick){
                 (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->weapons[1] = 0;
                 if(!(*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->weapons[1]){
                     if(rooms_of_all_levels[*ptr_level_num - 1][room_num].type != 4){
                         // not nightmare room
-                        hero->weapons[1]++;
-                        snprintf(address_global_message, sizeof(char) * 100, "Dagger added to pack                                                                       ");
+                        hero->weapons[1]+=10;
+                        snprintf(address_global_message, sizeof(char) * 100, "10 Daggers added to pack                                                                       ");
                     }
                 }
             }
@@ -2407,8 +2741,8 @@ void movement2(int PiCk , int ch , player* hero , room** rooms_of_all_levels , i
                 if(!(*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->weapons[2]){
                     if(rooms_of_all_levels[*ptr_level_num - 1][room_num].type != 4){
                         // not nightmare room
-                        hero->weapons[2]++;
-                        snprintf(address_global_message, sizeof(char) * 100, "Magic Wand added to pack                                                                       ");
+                        hero->weapons[2]+=8;
+                        snprintf(address_global_message, sizeof(char) * 100, "8 Magic Wands added to pack                                                                       ");
                     }
                 }
             }
@@ -2418,8 +2752,8 @@ void movement2(int PiCk , int ch , player* hero , room** rooms_of_all_levels , i
                 if(!(*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->weapons[3]){
                     if(rooms_of_all_levels[*ptr_level_num - 1][room_num].type != 4){
                         // not nightmare room
-                        hero->weapons[3]++;
-                        snprintf(address_global_message, sizeof(char) * 100, "Normal Arrow added to pack                                                                       ");
+                        hero->weapons[3]+=20;
+                        snprintf(address_global_message, sizeof(char) * 100, "20 Normal Arrows added to pack                                                                       ");
                     }
                 }
             }
@@ -2429,11 +2763,17 @@ void movement2(int PiCk , int ch , player* hero , room** rooms_of_all_levels , i
                 if(!(*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->weapons[4]){
                     if(rooms_of_all_levels[*ptr_level_num - 1][room_num].type != 4){
                         // not nightmare room
-                        hero->weapons[4]++;
-                        snprintf(address_global_message, sizeof(char) * 100, "Sword added to pack                                                                       ");
+                        if(hero->weapons[4] >= 1){
+                            snprintf(address_global_message, sizeof(char) * 100, "You already have a sword                                                                      ");
+                        }
+                        else{
+                            hero->weapons[4] = 1;
+                            snprintf(address_global_message, sizeof(char) * 100, "Sword added to pack                                                                       ");
+                        }
                     }
                 }
             }
+            
             // Health Spell 
             else if (ccc == 'H' && room_num >= 0 && hero->pick){
                 (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->spells[0] = 0;
@@ -2509,7 +2849,7 @@ void movement2(int PiCk , int ch , player* hero , room** rooms_of_all_levels , i
                     }
                 }
             }
-            else if (ccc == 'G' && room_num >= 0){
+            else if (ccc == 'G' && room_num == 0){
                 (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->black_gold = 0;
                 if(!(*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->black_gold && rooms_of_all_levels[*ptr_level_num - 1][room_num].type != 4){
                     hero->gold_count += 15;
@@ -2533,8 +2873,8 @@ void movement2(int PiCk , int ch , player* hero , room** rooms_of_all_levels , i
                 if(!(*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->weapons[1]){
                     if(rooms_of_all_levels[*ptr_level_num - 1][room_num].type != 4){
                         // not nightmare room
-                        hero->weapons[1]++;
-                        snprintf(address_global_message, sizeof(char) * 100, "Dagger added to pack                                                                       ");
+                        hero->weapons[1]+=10;
+                        snprintf(address_global_message, sizeof(char) * 100, "10 Daggers added to pack                                                                       ");
                     }
                 }
             }
@@ -2544,8 +2884,8 @@ void movement2(int PiCk , int ch , player* hero , room** rooms_of_all_levels , i
                 if(!(*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->weapons[2]){
                     if(rooms_of_all_levels[*ptr_level_num - 1][room_num].type != 4){
                         // not nightmare room
-                        hero->weapons[2]++;
-                        snprintf(address_global_message, sizeof(char) * 100, "Magic Wand added to pack                                                                       ");
+                        hero->weapons[2]+=8;
+                        snprintf(address_global_message, sizeof(char) * 100, "8 Magic Wands added to pack                                                                       ");
                     }
                 }
             }
@@ -2555,8 +2895,8 @@ void movement2(int PiCk , int ch , player* hero , room** rooms_of_all_levels , i
                 if(!(*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->weapons[3]){
                     if(rooms_of_all_levels[*ptr_level_num - 1][room_num].type != 4){
                         // not nightmare room
-                        hero->weapons[3]++;
-                        snprintf(address_global_message, sizeof(char) * 100, "Normal Arrow added to pack                                                                       ");
+                        hero->weapons[3]+=20;
+                        snprintf(address_global_message, sizeof(char) * 100, "20 Normal Arrows added to pack                                                                       ");
                     }
                 }
             }
@@ -2566,8 +2906,13 @@ void movement2(int PiCk , int ch , player* hero , room** rooms_of_all_levels , i
                 if(!(*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->weapons[4]){
                     if(rooms_of_all_levels[*ptr_level_num - 1][room_num].type != 4){
                         // not nightmare room
-                        hero->weapons[4]++;
-                        snprintf(address_global_message, sizeof(char) * 100, "Sword added to pack                                                                       ");
+                        if(hero->weapons[4] >= 1){
+                            snprintf(address_global_message, sizeof(char) * 100, "You already have a sword                                                                      ");
+                        }
+                        else{
+                            hero->weapons[4] = 1;
+                            snprintf(address_global_message, sizeof(char) * 100, "Sword added to pack                                                                       ");
+                        }
                     }
                 }
             }
@@ -2646,7 +2991,7 @@ void movement2(int PiCk , int ch , player* hero , room** rooms_of_all_levels , i
                     }
                 }
             }
-            else if (ccc == 'G' && room_num >= 0){
+            else if (ccc == 'G' && room_num == 0){
                 (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->black_gold = 0;
                 if(!(*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->black_gold && rooms_of_all_levels[*ptr_level_num - 1][room_num].type != 4){
                     hero->gold_count += 15;
@@ -2670,8 +3015,8 @@ void movement2(int PiCk , int ch , player* hero , room** rooms_of_all_levels , i
                 if(!(*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->weapons[1]){
                     if(rooms_of_all_levels[*ptr_level_num - 1][room_num].type != 4){
                         // not nightmare room
-                        hero->weapons[1]++;
-                        snprintf(address_global_message, sizeof(char) * 100, "Dagger added to pack                                                                       ");
+                        hero->weapons[1]+=10;
+                        snprintf(address_global_message, sizeof(char) * 100, "10 Daggers added to pack                                                                       ");
                     }
                 }
             }
@@ -2681,8 +3026,8 @@ void movement2(int PiCk , int ch , player* hero , room** rooms_of_all_levels , i
                 if(!(*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->weapons[2]){
                     if(rooms_of_all_levels[*ptr_level_num - 1][room_num].type != 4){
                         // not nightmare room
-                        hero->weapons[2]++;
-                        snprintf(address_global_message, sizeof(char) * 100, "Magic Wand added to pack                                                                       ");
+                        hero->weapons[2]+=8;
+                        snprintf(address_global_message, sizeof(char) * 100, "8 Magic Wands added to pack                                                                       ");
                     }
                 }
             }
@@ -2692,8 +3037,8 @@ void movement2(int PiCk , int ch , player* hero , room** rooms_of_all_levels , i
                 if(!(*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->weapons[3]){
                     if(rooms_of_all_levels[*ptr_level_num - 1][room_num].type != 4){
                         // not nightmare room
-                        hero->weapons[3]++;
-                        snprintf(address_global_message, sizeof(char) * 100, "Normal Arrow added to pack                                                                       ");
+                        hero->weapons[3]+=20;
+                        snprintf(address_global_message, sizeof(char) * 100, "20 Normal Arrows added to pack                                                                       ");
                     }
                 }
             }
@@ -2703,11 +3048,17 @@ void movement2(int PiCk , int ch , player* hero , room** rooms_of_all_levels , i
                 if(!(*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->weapons[4]){
                     if(rooms_of_all_levels[*ptr_level_num - 1][room_num].type != 4){
                         // not nightmare room
-                        hero->weapons[4]++;
-                        snprintf(address_global_message, sizeof(char) * 100, "Sword added to pack                                                                       ");
+                        if(hero->weapons[4] >= 1){
+                            snprintf(address_global_message, sizeof(char) * 100, "You already have a sword                                                                      ");
+                        }
+                        else{
+                            hero->weapons[4] = 1;
+                            snprintf(address_global_message, sizeof(char) * 100, "Sword added to pack                                                                       ");
+                        }
                     }
                 }
             }
+            
             // Health Spell 
             else if (ccc == 'H' && room_num >= 0 && hero->pick){
                 (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->spells[0] = 0;
@@ -4195,13 +4546,21 @@ void add_enemy2(room** address_rooms_this_level , int n_rooms){
         // 10 : Fire-Breath  (F)
         // 15 : Giant        (G)
         // 20 : Snake        (S)
-        // 30 : Undeed       (U)
+        // 30 : Undead       (U)
         room r1 = (*address_rooms_this_level)[i];
         if (r1.type != 2 && r1.room_number != 2){
             int x_north1 = r1.corner.x;
             int x_south1 = r1.corner.x + r1.length - 1;
             int y_west1 = r1.corner.y;
             int y_east1 = r1.corner.y + r1.width - 1;
+            r1.enemies_remained_health[0] = 5;
+            r1.enemies_remained_health[1] = 10;
+            r1.enemies_remained_health[2] = 15;
+            r1.enemies_remained_health[3] = 20;
+            r1.enemies_remained_health[4] = 30;
+            for (int ajab = 0 ; ajab < 5 ; ajab++){
+                (*address_rooms_this_level)[i].enemies_remained_health[ajab] = r1.enemies_remained_health[ajab];
+            }
             for (int E = 0 ; E < 5 ; E++){
                 r1.enemies[E] = rand() % 2;
                 if(r1.room_number == 1){ // no 'G'iant in room index 0 because of black 'G'old
