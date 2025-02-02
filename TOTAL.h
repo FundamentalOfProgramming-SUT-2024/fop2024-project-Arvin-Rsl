@@ -531,6 +531,8 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
     int undead_move_counter = 0;
     int is_undead_moving = 0;
     int n_t_units_undead_move = 5;
+    int snake_move_counter = 0;
+    int is_snake_moving = 0;
     while(1){
         if(!print_all_Map){
           for (int i = 0 ; i < n_rooms[level_num - 1] ; i++){
@@ -1792,7 +1794,6 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
         // Giant's Movement
         if (is_giant_moving && (my_x_after != my_x_before || my_y_after != my_y_before)){
             int room_index = in_which_room(rooms_of_all_levels[level_num - 1] , n_rooms[level_num - 1] , me);
-            int direction = 0;
             if (my_y_after < rooms_of_all_levels[level_num - 1][room_index].enemies_y[2]
             && valid_move(rooms_of_all_levels[level_num - 1][room_index].enemies_x[2] , rooms_of_all_levels[level_num - 1][room_index].enemies_y[2] - 1)){
                 rooms_of_all_levels[level_num - 1][room_index].enemies_y[2]--;
@@ -1815,6 +1816,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
             giant_move_counter = 0;
             is_giant_moving = 0;
         }
+        
         if(near_snake(me)){
             snprintf(global_message, sizeof(char) * 100, "\U0001F40D Snake is hitting you!                               ");
            
@@ -1825,7 +1827,30 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
                 me.health --; // 1 health loss
                 hits_loop_counter = 0;
             }
+            is_snake_moving = 1;
         }
+         // Snake's Movement
+        if (is_snake_moving && (my_x_after != my_x_before || my_y_after != my_y_before)){
+            int room_index = in_which_room(rooms_of_all_levels[level_num - 1] , n_rooms[level_num - 1] , me);
+            if (my_y_after < rooms_of_all_levels[level_num - 1][room_index].enemies_y[3]
+            && valid_move(rooms_of_all_levels[level_num - 1][room_index].enemies_x[3] , rooms_of_all_levels[level_num - 1][room_index].enemies_y[3] - 1)){
+                rooms_of_all_levels[level_num - 1][room_index].enemies_y[3]--;
+            }
+            else if (my_y_after > rooms_of_all_levels[level_num - 1][room_index].enemies_y[3]
+            && valid_move(rooms_of_all_levels[level_num - 1][room_index].enemies_x[3] , rooms_of_all_levels[level_num - 1][room_index].enemies_y[3] + 1)){
+                rooms_of_all_levels[level_num - 1][room_index].enemies_y[3]++;
+            }
+            else if (my_x_after > rooms_of_all_levels[level_num - 1][room_index].enemies_x[3]
+            && valid_move(rooms_of_all_levels[level_num - 1][room_index].enemies_x[3] + 1, rooms_of_all_levels[level_num - 1][room_index].enemies_y[3])){
+                rooms_of_all_levels[level_num - 1][room_index].enemies_x[3]++;
+            }
+            else if (my_x_after < rooms_of_all_levels[level_num - 1][room_index].enemies_x[3]
+            && valid_move(rooms_of_all_levels[level_num - 1][room_index].enemies_x[3] - 1, rooms_of_all_levels[level_num - 1][room_index].enemies_y[3])){
+                rooms_of_all_levels[level_num - 1][room_index].enemies_x[3]--;
+            }
+            snake_move_counter++;
+        }
+        
         if(near_undeed(me)){ ///// bro :|  it's undead!
             snprintf(global_message, sizeof(char) * 100, "\U0001F9DF Undead is hitting you!                               ");
            
@@ -1841,7 +1866,6 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
         // Undead's Movement
         if (is_undead_moving && (my_x_after != my_x_before || my_y_after != my_y_before)){
             int room_index = in_which_room(rooms_of_all_levels[level_num - 1] , n_rooms[level_num - 1] , me);
-            int direction = 0;
             if (my_y_after < rooms_of_all_levels[level_num - 1][room_index].enemies_y[4]
             && valid_move(rooms_of_all_levels[level_num - 1][room_index].enemies_x[4] , rooms_of_all_levels[level_num - 1][room_index].enemies_y[4] - 1)){
                 rooms_of_all_levels[level_num - 1][room_index].enemies_y[4]--;
@@ -1864,6 +1888,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
             undead_move_counter = 0;
             is_undead_moving = 0;
         }
+        
         // get hungry!
         if (hunger_loop_count < rate_get_hungry){
             hunger_loop_count++;
@@ -1889,7 +1914,6 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
         }
 
         refresh();
-        // refresh();
     }
     endwin();
     // Free memory for corridors
