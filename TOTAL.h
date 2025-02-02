@@ -671,21 +671,129 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
         else if (ch == 'c' || ch == 'C') {
             if(me.food_count > 0){
                 if(me.how_full != 5){ // don't consume if health is full
-                    me.food_count--;
+                
+                    // if (me.current_food != 3){
+                    //     if(me.how_full <= 4){
+                    //         me.how_full++; 
+                    //     }
+                    //     else{
+                    //         me.how_full = 5;  // maximum of health 
+                    //     }
+                    // }
+                    // else{
+                    //     me.how_full--; 
+                    // }
+
+                    switch (me.current_food)
+                    {
+                    case 0:
+                        // normal
+                        if (me.food[0] > 0){
+                            snprintf(global_message, sizeof(char) * 100, "Normal Food consumed \U0001F96A                                            ");
+                            me.food[0] -- ;
+                            me.food_count--;
+                            if (me.how_full < 5){
+                                me.how_full++;
+                            }
+                            else{
+                                me.how_full = 5;
+                            }
+                            break;
+                        }
+                        else{
+                            me.current_food = 3;
+                            if (me.food[3] > 0){
+                                me.food[3] --;
+                                snprintf(global_message, sizeof(char) * 100, "Rotten Food consumed \U0001F922                                           ");
+                                me.health --;
+                                me.food_count--;
+                                me.how_full--;
+                                break;
+                            }
+                            else{
+                                snprintf(global_message, sizeof(char) * 100, "\u2757 Out of Normal Food                                                ");
+                                break;
+                            }
+                        }
+                        break;
+                    case 1:
+                        // ideal
+                        if (me.food[1] > 0){
+                            snprintf(global_message, sizeof(char) * 100, "Ideal Food consumed \U0001F357                                            ");                    
+                            me.food[1] -- ;
+                            me.food_count--;
+                            if (me.how_full < 5){
+                                me.how_full++;
+                            }
+                            else{
+                                me.how_full = 5;
+                            }
+                            break;
+                        }
+                        else{
+                            snprintf(global_message, sizeof(char) * 100, "\u2757 Out of Ideal Food                                                ");
+                            break;
+                        }
+
+                        break;
+                    case 2:
+                        // magic
+                        if (me.food[2] > 0){
+                            snprintf(global_message, sizeof(char) * 100, "Magical Food consumed \U0001F36D                                            ");
+                            me.food[2] -- ;
+                            me.food_count--;
+                            if (me.how_full < 5){
+                                me.how_full++;
+                            }
+                            else{
+                                me.how_full = 5;
+                            }
+                            break;
+                        }
+                        else{
+                            snprintf(global_message, sizeof(char) * 100, "\u2757 Out of Magical Food                                                ");
+                            break;
+                        }
+
+                        break;
+                    case 3:
+                        // rotten
+
+                        if (me.food[3] > 0){
+                            snprintf(global_message, sizeof(char) * 100, "Rotten Food consumed \U0001F922                                           ");
+                            me.food[3] -- ;
+                            me.health --;
+                            me.food_count--;
+                            me.how_full--;
+                            break;
+                        }
+                        else{
+                            me.current_food = 0;
+                            if (me.food[0] > 0){
+                                me.food[0] --;
+                                snprintf(global_message, sizeof(char) * 100, "Normal Food consumed \U0001F96A                                            ");
+                                me.food_count--;
+                                me.how_full++;
+                                break;
+                            }
+                            else{
+                                snprintf(global_message, sizeof(char) * 100, "\u2757 Out of Normal Food                                                ");
+                                break;
+                            }
+                        }
+                        break;
+                    default:
+                        break;
+                    }
+
                 }
                 else{
-                    snprintf(global_message, sizeof(char) * 100, "You are already full \U0001F922                                      ");
+                    snprintf(global_message, sizeof(char) * 100, "\u2755 You are already full                                          ");
                 }
 
-                if(me.how_full <= 4){
-                    me.how_full++; 
-                }
-                else{
-                    me.how_full = 5;  // maximum of health 
-                }
             }
             else{
-                snprintf(global_message, sizeof(char) * 100, "Out of food!                                            ");
+                snprintf(global_message, sizeof(char) * 100, "\u2757 Out of food                                                ");
             }
 
         }
@@ -4213,20 +4321,33 @@ void food_list(player* hero){
 
         CH = wgetch(help_win);
 
-        // int whichWeapon = 0;
-        // ptr_to_hero->current_weapon = whichWeapon;
-        int norm_is_1_rott_is_0[10] = { 1 , 1 , 1 , 1 , 1 , 1 , 1 , 0 , 0 ,0};
-        int random_norm_or_rott = norm_is_1_rott_is_0[rand() % 10];
+        int norm_is_1_rott_is_0[10] = { 1 , 1 , 1 , 1 , 1 , 1 , 0 , 0 , 0 ,0}; // chances: 60% vs 40%
+        int random_norm_or_rott = 1;
         switch (CH)
         {
         case 'n':
         case 'N':
+
+            int n_rott = hero->food[3];
+            int n_norm = hero->food[0];
+            if (n_norm > 0 && n_rott > 0){
+                random_norm_or_rott = norm_is_1_rott_is_0[rand() % 10];
+            }
+            else if (n_rott <= 0){
+                random_norm_or_rott = 1; // norm
+            }
+            else if (n_norm <= 0){
+                random_norm_or_rott = 0; // rott
+            }
+
+
             if (random_norm_or_rott){
                 hero->current_food = 0;
             }
             else{
                 hero->current_food = 3;
             }
+
             break;
         case 'I':
         case 'i':
