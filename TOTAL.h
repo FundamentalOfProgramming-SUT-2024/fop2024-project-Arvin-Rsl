@@ -175,12 +175,14 @@ typedef struct
     char username[100];
     int won; // 1 if reaches treasure room
     int floor_level;
+    int kills;
+    int difficulty;
 
 } player;
 
 typedef struct {
     char username[50];
-    int rank;
+    int rank; // to be calculated, not read
     int total_score;
     int latest_gold;
     int experience;
@@ -227,8 +229,10 @@ void draw_title(const char*);
 void show_score_table(char* , int );
 
 //////// score table:
+int compare_score(const void *, const void *);
+int read_score_table2(ScoreEntry *);
+void show_score_table2(char* , int );
 void show_score_table(char* , int );
-void update_score_table(player );
 int compare_rank(const void *, const void *);
 void update_score_table(player);
 void draw_borders(int);
@@ -296,6 +300,191 @@ int near_undeed (player );
 /////// save game:
 void Pause(room **  , position **  , player  , int* , int*  , int  , int );
 void save_data(player , room **, int *, position **, int *, int , int , int);
+
+
+int compare_score(const void *a, const void *b){
+    return ((ScoreEntry *)b)->total_score - ((ScoreEntry *)a)->total_score; // Descending order
+}
+
+int read_score_table2(ScoreEntry *entries){
+    FILE *file = fopen(Score_Table, "r");
+    if (file == NULL) {
+        perror("Error opening score table file");
+        return 0;
+    }
+
+    int player_count;
+    fscanf(file, "number of players: %d\n", &player_count);
+
+    for (int i = 0; i < player_count; i++) {
+        fscanf(file, "username: %s\ntotal score: %d\nlatest gold count: %d\nexperience: %d\n\n", 
+               entries[i].username, 
+               &entries[i].total_score, 
+               &entries[i].latest_gold, 
+               &entries[i].experience);
+    }
+
+    fclose(file);
+    return player_count;
+}
+
+void show_score_table2(char* my_username, int page) {
+    ScoreEntry entries[100]; 
+    int entry_count = read_score_table2(entries);
+    if (entry_count == 0){
+        return;
+    }
+
+    // sorting entries by total score
+    qsort(entries, entry_count, sizeof(ScoreEntry), compare_score);
+
+    for (int i = 0; i < entry_count; i++) {
+            entries[i].rank = i + 1;
+        }
+
+    initscr();
+    start_color();
+    init_pair(1, COLOR_WHITE, COLOR_BLACK);
+    init_pair(4, COLOR_CYAN, COLOR_BLACK);
+    init_pair(3, COLOR_GREEN, COLOR_BLACK);
+    init_pair(2, COLOR_MAGENTA, COLOR_BLACK);
+    bkgd(COLOR_PAIR(1));
+    keypad(stdscr, TRUE); // enabling keyboard input for the window
+    curs_set(0); 
+
+    
+    int rank_width = 4;
+    int username_width = 20; 
+    int score_width = 10;
+    int gold_width = 14;
+    int games_width = 9;
+    int experience_width = 11;
+    int table_width = rank_width + username_width + score_width + gold_width + games_width + experience_width + 25; 
+    int items_per_page = 10;
+    int total_pages = (entry_count + items_per_page - 1) / items_per_page;
+    int current_page = page;
+
+    while (1) {
+        clear();
+        draw_borders(13);
+
+        int start_y = (COLS - table_width) / 2;
+        int start_x = (LINES - (items_per_page + 8)) / 2;
+
+        mvprintw(start_x, start_y,     "+------+----------------------+-------------+----------------+-----------+---------------+");
+        mvprintw(start_x + 1, start_y, "| Rank | Username             | Total Score | Latest Gold    | Games     | Experience    |");
+        mvprintw(start_x + 2, start_y, "+------+----------------------+-------------+----------------+-----------+---------------+");
+
+        int start_index = (current_page - 1) * items_per_page;
+        int end_index = start_index + items_per_page > entry_count ? entry_count : start_index + items_per_page;
+
+        for (int i = start_index; i < end_index; i++) {
+            int color_pair = 1;
+            const char *label = "";
+
+            // top 3 players ONLY on the first page
+            if (current_page == 1) {
+                if (i - start_index == 0){
+                    color_pair = 3;
+                    label = "\U0001f947 GOAT"; // Gold medal
+                } 
+                else if (i - start_index == 1){
+                    color_pair = 4;
+                    label = "\U0001f948 Runner-Up"; // Silver medal
+                } 
+                else if (i - start_index == 2){
+                    color_pair = 2;
+                    label = "\U0001f949 Achiever"; // Bronze medal
+                }
+            }
+
+            attron(COLOR_PAIR(color_pair));
+            if (strcmp(entries[i].username, my_username) == 0) { // the user him-/her- self
+                // Bold my_username
+                attron(A_BOLD | A_ITALIC);
+                mvprintw(start_x + (i - start_index) + 3, start_y, "| %*d | %-*s |  %*d | %*d | %*d | %*d   | %s",
+                         rank_width, entries[i].rank,
+                         username_width, entries[i].username,
+                         score_width, entries[i].total_score,
+                         gold_width, entries[i].latest_gold,
+                         games_width, entries[i].rank, 
+                         experience_width, entries[i].experience,
+                         label);
+                attroff(A_BOLD | A_ITALIC);
+            } 
+            else { // others
+                mvprintw(start_x + (i - start_index) + 3, start_y, "| %*d | %-*s |  %*d | %*d | %*d | %*d   | %s",
+                         rank_width, entries[i].rank,
+                         username_width, entries[i].username,
+                         score_width, entries[i].total_score,
+                         gold_width, entries[i].latest_gold,
+                         games_width, entries[i].rank, // It should be `games` field
+                         experience_width, entries[i].experience,
+                         label);
+            }
+            attroff(COLOR_PAIR(color_pair));
+        }
+
+        mvprintw(start_x + items_per_page + 3, start_y, "+------+----------------------+-------------+----------------+-----------+---------------+");
+        attron(COLOR_PAIR(13) | A_BOLD);
+        mvprintw(start_x + items_per_page + 5, start_y, "Page %d/%d | Press N for next page, P for previous page, Q to go back to Pregame Menu", current_page, total_pages);
+        attroff(COLOR_PAIR(13) | A_BOLD);
+
+        refresh();
+
+        int ch = getch();
+        if (ch == 'q' || ch == 'Q') {
+            pregame_menu(my_username);
+            break;
+        } 
+        else if (ch == 'n' || ch == 'N') {
+            if (current_page < total_pages) {
+                current_page++;
+            }
+        } 
+        else if (ch == 'p' || ch == 'P') {
+            if (current_page > 1) {
+                current_page--;
+            }
+        }
+    }
+    endwin();
+}
+
+void append_new_winner(const char *file_path, player winner , int total_score, int experience) {
+    FILE *file = fopen(file_path, "r+");
+    if (file == NULL) {
+        printf("Error opening file!\n");
+        return;
+    }
+    char* username = winner.username;
+    int latest_gold_count = winner.gold_count;
+    char line[256];
+    int number_of_players = 0;
+
+    // Read the number of players from the file
+    if (fgets(line, sizeof(line), file) != NULL) {
+        sscanf(line, "number of players: %d", &number_of_players);
+    }
+
+    number_of_players++;
+
+    // Move file pointer back to the beginning of the file
+    rewind(file);
+
+    // Write the new number of players to the file
+    fprintf(file, "number of players: %d\n", number_of_players);
+
+    // Move file pointer to the end of the file
+    fseek(file, 0, SEEK_END);
+
+    // Append the new player's data
+    fprintf(file, "\nusername: %s\ntotal score: %d\nlatest gold count: %d\nexperience: %d\n",
+            username, total_score, latest_gold_count, experience);
+
+    fclose(file);
+}
+
 
 //////////////////// NEW_GAME:
 void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
@@ -458,6 +647,9 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
     me.color = CoLoR; 
     me.pick = 0;  
     me.floor_level = 1;
+    me.kills = 0;
+    me.difficulty  =  difficulty;
+    
     strcpy(me.username , username);
     me.current_weapon = 0; // 0 : Mace (m)
                         // 1 : Dagger (d)
@@ -577,7 +769,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
             rooms_of_all_levels[level_num - 1][in_which_room(rooms_of_all_levels[level_num - 1] , n_rooms[level_num - 1] , me)].hide = 0;
         }
                 
-        // Treasure Room!!
+        // Winning in the Treasure Room!!
         if(current_song != 6 && level_num == 4 && rooms_of_all_levels[level_num - 1][in_which_room(rooms_of_all_levels[level_num - 1] , n_rooms[level_num - 1] , me)].type == 3
            && !rooms_of_all_levels[level_num - 1][in_which_room(rooms_of_all_levels[level_num - 1] , n_rooms[level_num - 1] , me)].enemies[0]
            && !rooms_of_all_levels[level_num - 1][in_which_room(rooms_of_all_levels[level_num - 1] , n_rooms[level_num - 1] , me)].enemies[1]
@@ -589,6 +781,35 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
                 snprintf(global_message, sizeof(char) * 100, "\xF0\x9F\x8E\x89 \xF0\x9F\x8E\x89 \xF0\x9F\x8E\x89                               ");       
                 // (global_message , "\xF0\x9F\x8E\x89");
                 if (strcmp(me.username , "GUEST") != 0) {
+                    char path[1024];
+                    snprintf(path, sizeof(path), "/home/arvin_rsl/Desktop/FOP_Project/Users_Folder/%s/user_data.txt", me.username);
+
+                    FILE *file = fopen(path, "r");
+                    if (file == NULL) {
+                        perror("Error opening file");
+                        return ;
+                    }
+                    char line[256];
+                    long long time_creation;
+                    long long now;
+
+                    // Get the current time in seconds since the Unix epoch
+                    now = (long long)time(NULL);
+                    while (fgets(line, sizeof(line), file)) {
+                        if (strncmp(line, "time: ", 6) == 0) {
+                            sscanf(line + 6, "%lld", &time_creation);
+                            break;
+                        }
+                    }
+                    // int log10_value = (int) log10((double)time_creation);
+                    // int log10_value_now = (int) log10((double)now);
+                    // int exper = 1000* (log10_value_now - log10_value);
+                    int exper = abs(now - time_creation) / 100;
+                    fclose(file);
+                    // I defined :
+                        // score: (int)(me.kills * me.gold_count * me.health / 100) 
+                        // experience: abs(t_now - time_creation) / 100      
+                    append_new_winner(Score_Table , me , (int)(me.kills * me.gold_count * me.health / 100)  , exper);
                     save_data(me , rooms_of_all_levels , n_rooms , corridors_of_all_levels , corr_count , 4 , difficulty , chosen_song);
                 }
         }
@@ -650,7 +871,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
         }
         else if (ch == '/') {
             nodelay(stdscr, FALSE);
-            help(&me , difficulty);  // Show help screen if '/' key is pressed
+            help(&me);  // Show help screen if '/' key is pressed
             nodelay(stdscr, TRUE);
         }
         else if (ch == 'f' || ch == 'F') {
@@ -855,6 +1076,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
 
                         if(alive_before && !alive_now){
                             clear();
+                            me.kills++;
                             snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Deamon was killed!                                      "); 
                         }
                         break;
@@ -880,6 +1102,8 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
 
                         if(alive_before && !alive_now){
                             clear();
+                            me.kills++;
+
                             snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Fire-Breathing Monster was killed!                             "); 
                         }
                         break;
@@ -905,6 +1129,8 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
 
                         if(alive_before && !alive_now){
                             clear();
+                            me.kills++;
+
                             is_giant_moving = 0;
                             snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Giant was killed!                                        "); 
                         }
@@ -931,6 +1157,8 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
 
                         if(alive_before && !alive_now){
                             clear();
+                            me.kills++;
+
                             is_snake_moving = 0;
                             snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Snake was killed!                                            "); 
                         }
@@ -957,6 +1185,8 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
 
                         if(alive_before && !alive_now){
                             clear();
+                            me.kills++;
+
                             is_undead_moving = 0;
                             snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Undead is now very much dead ! :)                                      "); 
                         }
@@ -988,6 +1218,8 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
 
                         if(alive_before && !alive_now){
                             clear();
+                            me.kills++;
+
                             snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Deamon was killed!                                      "); 
                         }
                         break;
@@ -1013,6 +1245,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
 
                         if(alive_before && !alive_now){
                             clear();
+                            me.kills++;
 
                             snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Fire-Breathing Monster was killed!                             "); 
                         }
@@ -1040,6 +1273,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
                         if(alive_before && !alive_now){
                             clear();
                             is_giant_moving = 0;
+                            me.kills++;
 
                             snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Giant was killed!                                        "); 
                         }
@@ -1067,6 +1301,8 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
                         if(alive_before && !alive_now){
                             clear();
                             is_snake_moving = 0;
+                            me.kills++;
+
                             snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Snake was killed!                                            "); 
                         }
                         break;
@@ -1093,6 +1329,8 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
                         if(alive_before && !alive_now){
                             clear();
                             is_undead_moving = 0;
+                            me.kills++;
+
                             snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Undead is now very much dead ! :)                                      "); 
                         }
                         break;
@@ -1180,6 +1418,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
 
                                 if(alive_before && !alive_now){
                                     clear();
+                                    me.kills++;
                                     snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Deamon was killed!                                      "); 
                                 }
                                 break;
@@ -1208,6 +1447,8 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
 
                                 if(alive_before && !alive_now){
                                     clear();
+                                    me.kills++;
+
                                     snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Fire-Breathing Monster was killed!                                  "); 
                                 }
                                 break;
@@ -1237,6 +1478,8 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
                                 if(alive_before && !alive_now){
                                     clear();
                                     is_giant_moving = 0;
+                                    me.kills++;
+
                                     snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Giant was killed!                                          "); 
                                 }
                                 break;
@@ -1266,6 +1509,8 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
                                 if(alive_before && !alive_now){
                                     clear();
                                     is_snake_moving = 0;
+                                    me.kills++;
+
                                     snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Snake was killed!                                          "); 
                                 }
                                 break;
@@ -1294,6 +1539,8 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
                                 if(alive_before && !alive_now){
                                     clear();
                                     is_undead_moving = 0;
+                                    me.kills++;
+
                                     snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Undead is now very much dead ! :)                                      "); 
                                 }
                                 break;
@@ -1394,6 +1641,8 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
 
                                 if(alive_before && !alive_now){
                                     clear();
+                                    me.kills++;
+
                                     snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Deamon was killed!                                      "); 
                                 }
                                 break;
@@ -1422,6 +1671,8 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
 
                                 if(alive_before && !alive_now){
                                     clear();
+                                    me.kills++;
+
                                     snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Fire-Breathing Monster was killed!                                  "); 
                                 }
                                 break;
@@ -1450,6 +1701,8 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
 
                                 if(alive_before && !alive_now){
                                     clear();
+                                    me.kills++;
+
                                     is_giant_moving = 0;
                                     snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Giant was killed!                                          "); 
                                 }
@@ -1479,6 +1732,8 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
 
                                 if(alive_before && !alive_now){
                                     clear();
+                                    me.kills++;
+
                                     is_snake_moving = 0;
                                     snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Snake was killed!                                          "); 
                                 }
@@ -1507,6 +1762,8 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
 
                                 if(alive_before && !alive_now){
                                     clear();
+                                    me.kills++;
+
                                     is_undead_moving = 0;
                                     snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Undead is now very much dead ! :)                                      "); 
                                 }
@@ -1614,6 +1871,8 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
 
                                 if(alive_before && !alive_now){
                                     clear();
+                                    me.kills++;
+
                                     snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Deamon was killed!                                      "); 
                                 }
                                 break;
@@ -1645,6 +1904,8 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
 
                                 if(alive_before && !alive_now){
                                     clear();
+                                    me.kills++;
+
                                     snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Fire-Breathing Monster was killed!                                  "); 
                                 }
                                 break;
@@ -1676,6 +1937,8 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
 
                                 if(alive_before && !alive_now){
                                     clear();
+                                    me.kills++;
+
                                     is_giant_moving = 0;
                                     snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Giant was killed!                                          "); 
                                 }
@@ -1707,6 +1970,8 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
 
                                 if(alive_before && !alive_now){
                                     clear();
+                                    me.kills++;
+
                                     is_snake_moving = 0;
                                     snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Snake was killed!                                          "); 
                                 }
@@ -1738,6 +2003,8 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
 
                                 if(alive_before && !alive_now){
                                     clear();
+                                    me.kills++;
+
                                     is_undead_moving = 0;
                                     snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Undead is now very much dead ! :)                                      "); 
                                 }
@@ -2071,8 +2338,6 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
     free(rooms_of_all_levels);
     
 }
-
-
 
 int near_deamon(player me){
     for(int i = 0 ; i < 8 ; i++){
@@ -2418,11 +2683,13 @@ void create_user_data_file(const char* username, const char* email, const char* 
 
     char path[1024];
 
+    time_t current_time = time(NULL);
+
     snprintf(path, sizeof(path), "/home/arvin_rsl/Desktop/FOP_Project/Users_Folder/%s/user_data.txt", username);
 
     FILE *user_data_fptr = fopen(path, "w");
 
-    fprintf(user_data_fptr, "username: %s\nemail: %s\npassword: %s\n", username, email, password);
+    fprintf(user_data_fptr, "username: %s\nemail: %s\npassword: %s\ntime: %lld\n", username, email, password , (long long)current_time);
 
     fclose(user_data_fptr);
 }
@@ -2707,6 +2974,7 @@ void win(int* ptr_current_song , player* hero){
     if(strcmp( hero->username , "GUEST") != 0 ){
         mvprintw(2 , COLS/2 - strlen("Congratulations! You've conquered the dungeon and emerged victorious!")/2 , "Congratulations! You've conquered the dungeon and emerged victorious!");
         mvprintw(3 , COLS/2 - strlen("\U0001F6E1 Your game has been saved. Press Q to exit.")/2 , "\U0001F6E1 Your game has been saved. Press Q to exit.");
+    
     }
     else{
         mvprintw(2 , COLS/2 - strlen("Congratulations! You've conquered the dungeon and emerged victorious!")/2 , "Congratulations! You've conquered the dungeon and emerged victorious!");
@@ -4689,7 +4957,102 @@ void print_bottom_message(player* hero , int level_num){
 
 
 // the help screen
-void help(player* hero , int diff) {
+void help(player* hero) {
+    int height = 30;
+    int width = 50;
+    int start_x = (LINES - height) / 2;
+    int start_y = (COLS - width) / 2;
+
+    // create a new window for the help screen
+    WINDOW *help_win = newwin(height, width, start_x, start_y);
+
+    init_pair(6, COLOR_GREEN, COLOR_BLACK);
+    // draw borders around the window
+    wattron(help_win, COLOR_PAIR(6));
+    box(help_win, 0, 0);
+    wattron(help_win, COLOR_PAIR(6));
+
+    init_pair(5, COLOR_CYAN, COLOR_BLACK);
+
+    int title_y = (width - 9) / 2; // length of "HELP MENU" = 9
+
+    // Print HELP MENU in cyan color and centered
+    wattron(help_win, COLOR_PAIR(5) | A_BOLD);
+    mvwprintw(help_win, 1, title_y, "HELP MENU");
+    wattroff(help_win, COLOR_PAIR(5) | A_BOLD);
+    char CH = 'p';
+    while(CH == 'p' || CH == 'P'){
+        wattron(help_win, A_BOLD);
+        mvwprintw(help_win, 3, 1, " Viewing Foods: F");
+        mvwprintw(help_win, 4, 1, " Viewing Weapons: I");
+        mvwprintw(help_win, 5, 1, " Viewing Spells: X");
+        mvwprintw(help_win, 7, 1, " Pick Up option: ");
+        wattron(help_win, A_ITALIC);
+        if (hero->pick){
+            mvwprintw(help_win, 7, 1 + 17, "ON ");
+        }
+        else{
+            mvwprintw(help_win, 7, 1 + 17, "OFF");
+        }
+        wattroff(help_win, A_ITALIC);
+
+        wattroff(help_win, A_BOLD);
+        mvwprintw(help_win, 8, 1, " To turn on/off the Pick Up option, enter 'P'");
+        wattron(help_win, A_BOLD);
+
+        int movement_start_x = (height - 16) / 2 + 4; // Vertically center the movement instructions
+        int movement_start_y = (width - 15) / 2;     // Horizontally center the movement instructions
+
+        // Print movement instructions inside the window
+        mvwprintw(help_win, movement_start_x, 1, " Movement:");
+        mvwprintw(help_win, movement_start_x + 1, movement_start_y, "+---+---+---+");
+        mvwprintw(help_win, movement_start_x + 2, movement_start_y, "| 7 | 8 | 9 |");
+        mvwprintw(help_win, movement_start_x + 3, movement_start_y, "+---+---+---+");
+        mvwprintw(help_win, movement_start_x + 4, movement_start_y, "| 4 |   | 6 |");
+        mvwprintw(help_win, movement_start_x + 5, movement_start_y, "+---+---+---+");
+        mvwprintw(help_win, movement_start_x + 6, movement_start_y, "| 1 | 2 | 3 |");
+        mvwprintw(help_win, movement_start_x + 7, movement_start_y, "+---+---+---+");
+
+        // Print alternative movement keys inside the window, centered
+        mvwprintw(help_win, movement_start_x + 9, 1, " Alternative Movement:");
+        mvwprintw(help_win, movement_start_x + 10, movement_start_y, "+---+---+---+");
+        mvwprintw(help_win, movement_start_x + 11, movement_start_y, "| Y | J | U |");
+        mvwprintw(help_win, movement_start_x + 12, movement_start_y, "+---+---+---+");
+        mvwprintw(help_win, movement_start_x + 13, movement_start_y, "| H |   | L |");
+        mvwprintw(help_win, movement_start_x + 14, movement_start_y, "+---+---+---+");
+        mvwprintw(help_win, movement_start_x + 15, movement_start_y, "| B | K | N |");
+        mvwprintw(help_win, movement_start_x + 16, movement_start_y, "+---+---+---+");
+
+        wattroff(help_win, A_BOLD);
+
+        CH = wgetch(help_win);
+
+        // int whichWeapon = 0;
+        // ptr_to_hero->current_weapon = whichWeapon;
+        switch (CH)
+        {
+        case 'p':
+        case 'P':
+            if(hero->pick == 0){
+                hero->pick = 1;
+            }
+            else{
+                hero->pick = 0;
+            }
+        default:
+            break;
+        }
+
+        wrefresh(help_win);
+
+    }
+    // delete the window
+    delwin(help_win);
+    clear();
+
+}
+
+void help2(player* hero ) {
     int height = 38;
     int width = 70;
     int start_x = (LINES - height) / 2;
@@ -4714,12 +5077,12 @@ void help(player* hero , int diff) {
     wattroff(help_win, COLOR_PAIR(5) | A_BOLD);
     char CH = 'p';
 
-    char* TheColor;
-    if(hero->color == 160) strcpy(TheColor , "Red\0");
-    else if (hero->color == 82) strcpy(TheColor , "Green\0");
-    else if (hero->color == 220) strcpy(TheColor , "Yellow\0");
-    else if (hero->color == 205) strcpy(TheColor , "Pink\0");
-    else if (hero->color == 39) strcpy(TheColor , "Blue\0");
+    char* TheColor = "color";
+    if(hero->color == 160) {strcpy(TheColor , "Red\0");}
+    else if (hero->color == 82) {strcpy(TheColor , "Green\0");}
+    else if (hero->color == 220) {strcpy(TheColor , "Yellow\0");}
+    else if (hero->color == 205) {strcpy(TheColor , "Pink\0");}
+    else if (hero->color == 39) {strcpy(TheColor , "Blue\0");}
 
     while(CH == 'p' || CH == 'P'){
         wattron(help_win, A_BOLD);
@@ -4769,7 +5132,7 @@ void help(player* hero , int diff) {
         wattroff(help_win, A_BOLD);
         mvwprintw(help_win, movement_start_x + 19, 1, " \tUsername: %s" , hero->username);
         mvwprintw(help_win, movement_start_x + 20, 1, " \tColor: %s" , TheColor);
-        mvwprintw(help_win, movement_start_x + 21, 1, " \tDifficulty: %d" , diff);
+        mvwprintw(help_win, movement_start_x + 21, 1, " \tDifficulty: %d" , hero->difficulty);
         wattroff(help_win, COLOR_PAIR(hero->color));
 
         CH = wgetch(help_win);
@@ -5127,7 +5490,7 @@ void show_score_table(char* my_username, int page) {
     }
 
     // sorting entries by rank
-    qsort(entries, entry_count, sizeof(ScoreEntry), compare_rank);
+    qsort(entries, entry_count, sizeof(ScoreEntry), compare_score);
 
     initscr();
     start_color();
@@ -5301,7 +5664,7 @@ void pregame_menu(char* my_username , int* ptr_difficulty , int* ptr_color , int
     else if (choice == 2){
         int start_page = 1;
         // Show the score table starting from the first page
-        show_score_table(my_username, start_page);
+        show_score_table2(my_username, start_page);
     }
     else if (choice == 3){
         clear();
