@@ -67,7 +67,7 @@ typedef struct {
               // 4 => Nightmare Room
 /*  Type of Room:    Pillar Char:       Floor Char      Floor & Pillar Color      int type  
     Regular Room          O                 .                   White                 0
-    Battle Room        No Pillar            .                   Red                   1
+    Battle Room        No Pillar            .                   Red                   1      (cancelled)
     Enchant Room          O                 ,                   Magenta               2
     Treasure Room      No Pillar            -                   Yellow                3
     Nightmare Room        O                 ~                   Blue                  4
@@ -88,6 +88,7 @@ typedef struct {
     int picked_foods[3]; // 1 if food is picked (don't print it anymore); 0 otherwise
     int foods_x[3];
     int foods_y[3];
+    int food_types[3]; // 0 = normal // 1 = ideal // 2 = magical // 3 = rotten
 
 /// Golds
     int n_golds;
@@ -138,23 +139,6 @@ typedef struct {
     // 2 : Giant        (G)
     // 3 : Snake        (S)
     // 4 : Undeed       (U)
-    // int Deamon_x;
-    // int Deamon_y;
-    // int Fire_Breath_x;
-    // int Fire_Breath_y;
-    // int Giant_x;
-    // int Giant_y;
-    // int Snake_x;
-    // int Snake_y;
-    // int Undeed_x;
-    // int Undeed_y;
-    // enemy Deamon;
-    // enemy Fire_Breath;
-    // enemy Giant;
-    // enemy Snake;
-    // enemy Undead;
-    // enemy* test;
-    // int test_enemy_ptr;
 
 } room;
 
@@ -523,7 +507,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
     int healing_coeff = 1;
     int rate_heal = 50000;
     int health_loop_count = 0;
-    int rate_get_hungry = 110000;
+    int rate_get_hungry = 230000;
     int hunger_loop_count = 0;
     int giant_move_counter = 0;
     int is_giant_moving = 0;
@@ -1795,23 +1779,32 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
         if (is_giant_moving && (my_x_after != my_x_before || my_y_after != my_y_before)){
             int room_index = in_which_room(rooms_of_all_levels[level_num - 1] , n_rooms[level_num - 1] , me);
             if (my_y_after < rooms_of_all_levels[level_num - 1][room_index].enemies_y[2]
-            && valid_move(rooms_of_all_levels[level_num - 1][room_index].enemies_x[2] , rooms_of_all_levels[level_num - 1][room_index].enemies_y[2] - 1)){
+            && valid_move(rooms_of_all_levels[level_num - 1][room_index].enemies_x[2] , rooms_of_all_levels[level_num - 1][room_index].enemies_y[2] - 1)
+            && (mvinch(rooms_of_all_levels[level_num - 1][room_index].enemies_x[2] , rooms_of_all_levels[level_num - 1][room_index].enemies_y[2] - 1) & A_CHARTEXT != '+')
+            && (mvinch(rooms_of_all_levels[level_num - 1][room_index].enemies_x[2] , rooms_of_all_levels[level_num - 1][room_index].enemies_y[2] - 1) & A_CHARTEXT != '#')){
                 rooms_of_all_levels[level_num - 1][room_index].enemies_y[2]--;
             }
             else if (my_y_after > rooms_of_all_levels[level_num - 1][room_index].enemies_y[2]
-            && valid_move(rooms_of_all_levels[level_num - 1][room_index].enemies_x[2] , rooms_of_all_levels[level_num - 1][room_index].enemies_y[2] + 1)){
+            && valid_move(rooms_of_all_levels[level_num - 1][room_index].enemies_x[2] , rooms_of_all_levels[level_num - 1][room_index].enemies_y[2] + 1)
+            && (mvinch(rooms_of_all_levels[level_num - 1][room_index].enemies_x[2] , rooms_of_all_levels[level_num - 1][room_index].enemies_y[2] + 1) & A_CHARTEXT != '+')
+            && (mvinch(rooms_of_all_levels[level_num - 1][room_index].enemies_x[2] , rooms_of_all_levels[level_num - 1][room_index].enemies_y[2] + 1) & A_CHARTEXT != '#')){
                 rooms_of_all_levels[level_num - 1][room_index].enemies_y[2]++;
             }
             else if (my_x_after > rooms_of_all_levels[level_num - 1][room_index].enemies_x[2]
-            && valid_move(rooms_of_all_levels[level_num - 1][room_index].enemies_x[2] + 1, rooms_of_all_levels[level_num - 1][room_index].enemies_y[2])){
+            && valid_move(rooms_of_all_levels[level_num - 1][room_index].enemies_x[2] + 1, rooms_of_all_levels[level_num - 1][room_index].enemies_y[2])
+            && (mvinch(rooms_of_all_levels[level_num - 1][room_index].enemies_x[2] +1, rooms_of_all_levels[level_num - 1][room_index].enemies_y[2]) & A_CHARTEXT != '+')
+            && (mvinch(rooms_of_all_levels[level_num - 1][room_index].enemies_x[2] +1, rooms_of_all_levels[level_num - 1][room_index].enemies_y[2]) & A_CHARTEXT != '#')){
                 rooms_of_all_levels[level_num - 1][room_index].enemies_x[2]++;
             }
             else if (my_x_after < rooms_of_all_levels[level_num - 1][room_index].enemies_x[2]
-            && valid_move(rooms_of_all_levels[level_num - 1][room_index].enemies_x[2] - 1, rooms_of_all_levels[level_num - 1][room_index].enemies_y[2])){
+            && valid_move(rooms_of_all_levels[level_num - 1][room_index].enemies_x[2] - 1, rooms_of_all_levels[level_num - 1][room_index].enemies_y[2])
+            && (mvinch(rooms_of_all_levels[level_num - 1][room_index].enemies_x[2] -1, rooms_of_all_levels[level_num - 1][room_index].enemies_y[2] ) & A_CHARTEXT != '+')
+            && (mvinch(rooms_of_all_levels[level_num - 1][room_index].enemies_x[2] -1, rooms_of_all_levels[level_num - 1][room_index].enemies_y[2] ) & A_CHARTEXT != '#')){
                 rooms_of_all_levels[level_num - 1][room_index].enemies_x[2]--;
             }
             giant_move_counter++;
         }
+        // Giant Stop Moving!
         if (giant_move_counter >= n_t_units_giant_move){
             giant_move_counter = 0;
             is_giant_moving = 0;
@@ -1884,6 +1877,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
             }
             undead_move_counter++;
         }
+        // Undead Stop Moving!
         if (undead_move_counter >= n_t_units_undead_move){
             undead_move_counter = 0;
             is_undead_moving = 0;
@@ -4040,7 +4034,10 @@ void food_list(player hero){
     wattron(help_win, COLOR_PAIR(5));
     box(help_win, 0, 0);
     wattron(help_win, COLOR_PAIR(5));
-
+    init_color(99, 590 , 400 , 800); // for magic food
+    init_pair(99, 99 , COLOR_BLACK); // for magic food
+    init_color(81, 1000 , 200 , 890); // for ideal food
+    init_pair(81, 81 , COLOR_BLACK); // for ideal food
 
     int title_y = (width - 9) / 2; // length of "FOOD MENU" = 9
 
@@ -4050,10 +4047,18 @@ void food_list(player hero){
     wattroff(help_win, COLOR_PAIR(8) |A_BOLD);
 
     // print instructions inside the window
+    wattron(help_win, COLOR_PAIR(8));
     mvwprintw(help_win, 3, 1, " Normal Food: %d" , hero.food_count);
+    wattroff(help_win, COLOR_PAIR(8));
+    wattron(help_win, COLOR_PAIR(81));
     mvwprintw(help_win, 5, 1, " Ideal Food: %d" , 0);
+    wattroff(help_win, COLOR_PAIR(81));
+    wattron(help_win, COLOR_PAIR(99));
     mvwprintw(help_win, 7, 1, " Magical Food: %d" , 0);
+    wattroff(help_win, COLOR_PAIR(99));
+    wattron(help_win, COLOR_PAIR(8));
     mvwprintw(help_win, 9, 1, " Rotten Food: %d" , 0);
+    wattroff(help_win, COLOR_PAIR(8));
     mvwprintw(help_win, 14, 1, " To consume food, exit this menu and enter 'C'");
 
     
@@ -6225,6 +6230,7 @@ void add_gold(room** address_rooms_this_level , int n_rooms){ // first food, the
 // function to add the regular foods ( 'f' ) to room 
 void add_food(room** address_rooms_this_level , int n_rooms){ // first food, then gold
     srand(time(NULL));
+    int which_food_type[10] = {0 , 0 , 0 , 0 , 1 , 1 , 2 , 2 , 3 , 3};
     for (int i = 0 ; i < n_rooms ; i++){
     
         room r1 = (*address_rooms_this_level)[i];
@@ -6249,7 +6255,7 @@ void add_food(room** address_rooms_this_level , int n_rooms){ // first food, the
             if(!overlap){
                 (*address_rooms_this_level)[i].foods_x[k] = x;
                 (*address_rooms_this_level)[i].foods_y[k] = y;
-
+                (*address_rooms_this_level)[i].food_types[k] = which_food_type[rand() % 10];
                 k++;
             }
 
@@ -6701,8 +6707,14 @@ void print_room_even_if_hidden(room* Room){
         init_pair(33, 70 , COLOR_BLACK); // treasure room
         // init_pair(3 , COLOR_YELLOW , COLOR_BLACK); 
         init_pair(4 , COLOR_BLUE , COLOR_BLACK); 
-        init_color(76, 990 , 570 , 800); // for food
-        init_pair(8, 76 , COLOR_BLACK); // for food
+
+        init_color(76, 990 , 570 , 800); // 8 for normal/rotten food
+        init_pair(8, 76 , COLOR_BLACK); // 8 for  normal/rotten food
+        init_color(109, 590 , 400 , 800); // 109 for magical food
+        init_pair(109, 109 , COLOR_BLACK); // 109 for magical food
+        init_color(81, 1000 , 200 , 890); // 81 for ideal food
+        init_pair(81, 81 , COLOR_BLACK); // 81 for ideal food
+
         init_color(77, 1000 , 1000 , 0); // for gold
         init_pair(15, 77 , COLOR_BLACK); // for gold
         init_color(78, 700, 700, 0); // for black gold
@@ -6739,13 +6751,31 @@ void print_room_even_if_hidden(room* Room){
 
             if (Room->type !=2 ){// Enchant room is empty of these!
                 // food
-                attron(COLOR_PAIR(8));
-                for (int i = 0 ; i < Room->n_foods ; i++){   
+                for (int i = 0 ; i < Room->n_foods ; i++){  
+                    if(Room->food_types[i] == 0 || Room->food_types[i] == 3){
+                        attron(COLOR_PAIR(8)); // normal or rotten
+                    }
+                    else if(Room->food_types[i] == 1){
+                        attron(COLOR_PAIR(81)); // ideal
+                    }
+                    else if(Room->food_types[i] == 2){
+                        attron(COLOR_PAIR(109)); // magical
+                    } 
                     if(Room->picked_foods[i] == 0){
+                        
                         mvprintw(Room->foods_x[i],  Room->foods_y[i] , "f" );
+
+                    }
+                    if(Room->food_types[i] == 0 || Room->food_types[i] == 3){
+                        attroff(COLOR_PAIR(8)); // normal or rotten
+                    }
+                    else if(Room->food_types[i] == 1){
+                        attroff(COLOR_PAIR(81)); // ideal
+                    }
+                    else if(Room->food_types[i] == 2){
+                        attroff(COLOR_PAIR(109)); // magical
                     }
                 }
-                attroff(COLOR_PAIR(8));
 
                 // gold
                 attron(COLOR_PAIR(15));
@@ -6931,8 +6961,12 @@ void print_room(room *Room){
         init_pair(33, 70 , COLOR_BLACK); // treasure room
         // init_pair(3 , COLOR_YELLOW , COLOR_BLACK); 
         init_pair(4 , COLOR_BLUE , COLOR_BLACK); 
-        init_color(76, 990 , 570 , 800); // for food
-        init_pair(8, 76 , COLOR_BLACK); // for food
+        init_color(76, 990 , 570 , 800); // 8 for normal/rotten food
+        init_pair(8, 76 , COLOR_BLACK); // 8 for  normal/rotten food
+        init_color(109, 590 , 400 , 800); // 109 for magical food
+        init_pair(109, 109 , COLOR_BLACK); // 109 for magical food
+        init_color(81, 1000 , 200 , 890); // 81 for ideal food
+        init_pair(81, 81 , COLOR_BLACK); // 81 for ideal food
         init_color(77, 1000 , 1000 , 0); // for gold
         init_pair(15, 77 , COLOR_BLACK); // for gold
         init_color(78, 700, 700, 0); // for black gold
@@ -6971,13 +7005,31 @@ void print_room(room *Room){
 
             if (Room->type !=2 ){// Enchant room is empty of these!
                 // food
-                attron(COLOR_PAIR(8));
-                for (int i = 0 ; i < Room->n_foods ; i++){   
+                for (int i = 0 ; i < Room->n_foods ; i++){  
+                    if(Room->food_types[i] == 0 || Room->food_types[i] == 3){
+                        attron(COLOR_PAIR(8)); // normal or rotten
+                    }
+                    else if(Room->food_types[i] == 1){
+                        attron(COLOR_PAIR(81)); // ideal
+                    }
+                    else if(Room->food_types[i] == 2){
+                        attron(COLOR_PAIR(109)); // magical
+                    } 
                     if(Room->picked_foods[i] == 0){
+                        
                         mvprintw(Room->foods_x[i],  Room->foods_y[i] , "f" );
+
+                    }
+                    if(Room->food_types[i] == 0 || Room->food_types[i] == 3){
+                        attroff(COLOR_PAIR(8)); // normal or rotten
+                    }
+                    else if(Room->food_types[i] == 1){
+                        attroff(COLOR_PAIR(81)); // ideal
+                    }
+                    else if(Room->food_types[i] == 2){
+                        attroff(COLOR_PAIR(109)); // magical
                     }
                 }
-                attroff(COLOR_PAIR(8));
 
                 // gold
                 attron(COLOR_PAIR(15));
