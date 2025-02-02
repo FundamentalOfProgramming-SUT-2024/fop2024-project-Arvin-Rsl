@@ -155,6 +155,7 @@ typedef struct
                  // 1 : ideal
                  // 2 : magical
                  // 3 : rotten
+    int current_food;
     int weapons[5]; // 0 : Mace (m)
                     // 1 : Dagger (d)
                     // 2 : Magic Wand (w)
@@ -376,6 +377,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
     printf("trying to make doors 4 ... \n");
     add_door_and_window(rooms_of_all_levels + 3 , n_rooms[3]);
     printf("done making doors 4 ! :)\n");
+    int current_spell;
 
 
     printf("now go for pillars 1 ... \n");
@@ -449,6 +451,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
     me.food[1] = 0;
     me.food[2] = 0;
     me.food[3] = 0;
+    me.current_food = 0; // normal food (default)
     me.gold_count = 0;
     me.health = 16;
     me.how_full = 5;
@@ -640,7 +643,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
         }
         else if (ch == 'f' || ch == 'F') {
             nodelay(stdscr, FALSE);
-            food_list(me);  // Show food screen if 'f' key is pressed
+            food_list(&me);  // Show food screen if 'f' key is pressed
             nodelay(stdscr, TRUE);
         }
         else if (ch == 'i' || ch == 'I') {
@@ -4156,7 +4159,7 @@ void choose_soundtrack(int choice){
 
 
 // the food list window
-void food_list(player hero){
+void food_list(player* hero){
     int height = 23;
     int width = 52;
     int start_x = (LINES - height) / 2;
@@ -4183,21 +4186,60 @@ void food_list(player hero){
     mvwprintw(help_win, 1, title_y, "FOOD MENU");
     wattroff(help_win, COLOR_PAIR(8) |A_BOLD);
 
-    // print instructions inside the window
-    wattron(help_win, COLOR_PAIR(8));
-    mvwprintw(help_win, 3, 1, " Normal Food: %d" , hero.food[0]);
-    wattroff(help_win, COLOR_PAIR(8));
-    wattron(help_win, COLOR_PAIR(81));
-    mvwprintw(help_win, 5, 1, " Ideal Food: %d" , hero.food[1]);
-    wattroff(help_win, COLOR_PAIR(81));
-    wattron(help_win, COLOR_PAIR(99));
-    mvwprintw(help_win, 7, 1, " Magical Food: %d" , hero.food[2]);
-    wattroff(help_win, COLOR_PAIR(99));
-    wattron(help_win, COLOR_PAIR(8));
-    mvwprintw(help_win, 9, 1, " Rotten Food: %d" , hero.food[3]);
-    wattroff(help_win, COLOR_PAIR(8));
-    mvwprintw(help_win, 14, 1, " To consume food, exit this menu and enter 'C'");
+    char CH = 'n';
+    while (CH == 'n' || CH == 'i'|| CH == 'm' || CH == 'N' || CH == 'I' || CH == 'M'){
+        mvwprintw(help_win, 12, 1, " To consume food, exit this menu and enter 'C'");
+        mvwprintw(help_win, 16, 1, " The current food is bold.");
+        mvwprintw(help_win, 18, 1, " To select food type, enter the food's character.");
+        mvwprintw(help_win, 20, 1, " Default selected food is Normal.");
+        wattron(help_win, COLOR_PAIR(8));
+        if(hero->current_food == 0 || hero->current_food == 3) wattron(help_win , A_BOLD);
+        mvwprintw(help_win, 3, 1, " Normal Food (N): %d" , hero->food[0] + hero->food[3]); // DOESN'T KNOW ROTTEN OR NOT (yet)
+        if(hero->current_food == 0 || hero->current_food == 3) wattroff(help_win , A_BOLD);
+        wattroff(help_win, COLOR_PAIR(8));
+        wattron(help_win, COLOR_PAIR(81));
+        if(hero->current_food == 1) wattron(help_win , A_BOLD);
+        mvwprintw(help_win, 5, 1, " Ideal Food (I): %d" , hero->food[1]);
+        if(hero->current_food == 1) wattroff(help_win , A_BOLD);
+        wattroff(help_win, COLOR_PAIR(81));
+        wattron(help_win, COLOR_PAIR(99));
+        if(hero->current_food == 2) wattron(help_win , A_BOLD);
+        mvwprintw(help_win, 7, 1, " Magical Food (M): %d" , hero->food[2]);
+        if(hero->current_food == 2) wattroff(help_win , A_BOLD);
+        wattroff(help_win, COLOR_PAIR(99));
+        // wattron(help_win, COLOR_PAIR(8));
+        // mvwprintw(help_win, 9, 1, " Rotten Food (R): %d" , hero->food[3]);
+        // wattroff(help_win, COLOR_PAIR(8));
 
+        CH = wgetch(help_win);
+
+        // int whichWeapon = 0;
+        // ptr_to_hero->current_weapon = whichWeapon;
+        int norm_is_1_rott_is_0[10] = { 1 , 1 , 1 , 1 , 1 , 1 , 1 , 0 , 0 ,0};
+        int random_norm_or_rott = norm_is_1_rott_is_0[rand() % 10];
+        switch (CH)
+        {
+        case 'n':
+        case 'N':
+            if (random_norm_or_rott){
+                hero->current_food = 0;
+            }
+            else{
+                hero->current_food = 3;
+            }
+            break;
+        case 'I':
+        case 'i':
+            hero->current_food = 1;
+            break;
+        case 'm':
+        case 'M':
+            hero->current_food = 2;
+            break;
+        default:
+            break;
+        }
+    }
     
     wrefresh(help_win);
 
