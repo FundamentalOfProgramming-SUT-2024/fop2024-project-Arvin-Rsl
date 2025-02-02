@@ -2793,9 +2793,26 @@ void movement2(int PiCk , int ch , player* hero , room** rooms_of_all_levels , i
                 if(rooms_of_all_levels[*ptr_level_num - 1][room_num].type != 4){
                     // not nightmare room
                     hero->food_count++;
+                    if((*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->food_types[which_food_in_room(x_new, y_new , (*(rooms_of_all_levels + *ptr_level_num - 1))[room_num])] == 0){
+                        // normal food
+                        hero->food[0]++;
+                    }
+                    else if((*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->food_types[which_food_in_room(x_new, y_new , (*(rooms_of_all_levels + *ptr_level_num - 1))[room_num])] == 1){
+                        // normal food
+                        hero->food[1]++;
+                    }
+                    else if((*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->food_types[which_food_in_room(x_new, y_new , (*(rooms_of_all_levels + *ptr_level_num - 1))[room_num])] == 2){
+                        // normal food
+                        hero->food[2]++;
+                    }
+                    else if((*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->food_types[which_food_in_room(x_new, y_new , (*(rooms_of_all_levels + *ptr_level_num - 1))[room_num])] == 3){
+                        // normal food
+                        hero->food[3]++;
+                    }
                 }
                 (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->picked_foods[which_food_in_room(x_new, y_new , (*(rooms_of_all_levels + *ptr_level_num - 1))[room_num])] = 1;
             }
+
             // gold
             else if (ccc == 'g' && room_num >= 0){
                 (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->picked_golds[which_gold_in_room(x_new, y_new , (*(rooms_of_all_levels + *ptr_level_num - 1))[room_num])] = 1;
@@ -2937,13 +2954,32 @@ void movement2(int PiCk , int ch , player* hero , room** rooms_of_all_levels , i
 
                 }
             }
+
+            // food
             if (ccc == 'f' && room_num >= 0){
                 if(rooms_of_all_levels[*ptr_level_num - 1][room_num].type != 4){
                     // not nightmare room
                     hero->food_count++;
+                    if((*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->food_types[which_food_in_room(x_new, y_new , (*(rooms_of_all_levels + *ptr_level_num - 1))[room_num])] == 0){
+                        // normal food
+                        hero->food[0]++;
+                    }
+                    else if((*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->food_types[which_food_in_room(x_new, y_new , (*(rooms_of_all_levels + *ptr_level_num - 1))[room_num])] == 1){
+                        // normal food
+                        hero->food[1]++;
+                    }
+                    else if((*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->food_types[which_food_in_room(x_new, y_new , (*(rooms_of_all_levels + *ptr_level_num - 1))[room_num])] == 2){
+                        // normal food
+                        hero->food[2]++;
+                    }
+                    else if((*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->food_types[which_food_in_room(x_new, y_new , (*(rooms_of_all_levels + *ptr_level_num - 1))[room_num])] == 3){
+                        // normal food
+                        hero->food[3]++;
+                    }
                 }
                 (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->picked_foods[which_food_in_room(x_new, y_new , (*(rooms_of_all_levels + *ptr_level_num - 1))[room_num])] = 1;
             }
+            
             else if (ccc == 'g' && room_num >= 0){
                 (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->picked_golds[which_gold_in_room(x_new, y_new , (*(rooms_of_all_levels + *ptr_level_num - 1))[room_num])] = 1;
                 if((*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->picked_golds[which_gold_in_room(x_new, y_new , (*(rooms_of_all_levels + *ptr_level_num - 1))[room_num])] == 1){
@@ -3087,10 +3123,27 @@ void movement2(int PiCk , int ch , player* hero , room** rooms_of_all_levels , i
 
                 }
             }
+            // food
             if (ccc == 'f' && room_num >= 0){
                 if(rooms_of_all_levels[*ptr_level_num - 1][room_num].type != 4){
                     // not nightmare room
                     hero->food_count++;
+                    if((*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->food_types[which_food_in_room(x_new, y_new , (*(rooms_of_all_levels + *ptr_level_num - 1))[room_num])] == 0){
+                        // normal food
+                        hero->food[0]++;
+                    }
+                    else if((*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->food_types[which_food_in_room(x_new, y_new , (*(rooms_of_all_levels + *ptr_level_num - 1))[room_num])] == 1){
+                        // normal food
+                        hero->food[1]++;
+                    }
+                    else if((*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->food_types[which_food_in_room(x_new, y_new , (*(rooms_of_all_levels + *ptr_level_num - 1))[room_num])] == 2){
+                        // normal food
+                        hero->food[2]++;
+                    }
+                    else if((*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->food_types[which_food_in_room(x_new, y_new , (*(rooms_of_all_levels + *ptr_level_num - 1))[room_num])] == 3){
+                        // normal food
+                        hero->food[3]++;
+                    }
                 }
                 (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->picked_foods[which_food_in_room(x_new, y_new , (*(rooms_of_all_levels + *ptr_level_num - 1))[room_num])] = 1;
             }
@@ -3236,10 +3289,27 @@ void movement2(int PiCk , int ch , player* hero , room** rooms_of_all_levels , i
                 }
             }
 
+            // food
             if (ccc == 'f' && room_num >= 0){
                 if(rooms_of_all_levels[*ptr_level_num - 1][room_num].type != 4){
                     // not nightmare room
                     hero->food_count++;
+                    if((*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->food_types[which_food_in_room(x_new, y_new , (*(rooms_of_all_levels + *ptr_level_num - 1))[room_num])] == 0){
+                        // normal food
+                        hero->food[0]++;
+                    }
+                    else if((*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->food_types[which_food_in_room(x_new, y_new , (*(rooms_of_all_levels + *ptr_level_num - 1))[room_num])] == 1){
+                        // normal food
+                        hero->food[1]++;
+                    }
+                    else if((*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->food_types[which_food_in_room(x_new, y_new , (*(rooms_of_all_levels + *ptr_level_num - 1))[room_num])] == 2){
+                        // normal food
+                        hero->food[2]++;
+                    }
+                    else if((*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->food_types[which_food_in_room(x_new, y_new , (*(rooms_of_all_levels + *ptr_level_num - 1))[room_num])] == 3){
+                        // normal food
+                        hero->food[3]++;
+                    }
                 }
                 (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->picked_foods[which_food_in_room(x_new, y_new , (*(rooms_of_all_levels + *ptr_level_num - 1))[room_num])] = 1;
             }
@@ -3385,12 +3455,29 @@ void movement2(int PiCk , int ch , player* hero , room** rooms_of_all_levels , i
                 }
             }
 
+            // food
             if (ccc == 'f' && room_num >= 0){
                 if(rooms_of_all_levels[*ptr_level_num - 1][room_num].type != 4){
                     // not nightmare room
                     hero->food_count++;
+                    if((*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->food_types[which_food_in_room(x_new, y_new , (*(rooms_of_all_levels + *ptr_level_num - 1))[room_num])] == 0){
+                        // normal food
+                        hero->food[0]++;
+                    }
+                    else if((*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->food_types[which_food_in_room(x_new, y_new , (*(rooms_of_all_levels + *ptr_level_num - 1))[room_num])] == 1){
+                        // normal food
+                        hero->food[1]++;
+                    }
+                    else if((*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->food_types[which_food_in_room(x_new, y_new , (*(rooms_of_all_levels + *ptr_level_num - 1))[room_num])] == 2){
+                        // normal food
+                        hero->food[2]++;
+                    }
+                    else if((*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->food_types[which_food_in_room(x_new, y_new , (*(rooms_of_all_levels + *ptr_level_num - 1))[room_num])] == 3){
+                        // normal food
+                        hero->food[3]++;
+                    }
                 }
-                (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->picked_foods[which_food_in_room(x_new, y_new , (*(rooms_of_all_levels + *ptr_level_num - 1))[room_num])] = 1;
+                (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->picked_foods[which_food_in_room(x_new, y_new , (*(rooms_of_all_levels + *ptr_level_num - 1))[room_num])] = 1;
             }
             else if (ccc == 'g' && room_num >= 0){
                 (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num )->picked_golds[which_gold_in_room(x_new, y_new , (*(rooms_of_all_levels + *ptr_level_num - 1))[room_num])] = 1;
@@ -3534,10 +3621,27 @@ void movement2(int PiCk , int ch , player* hero , room** rooms_of_all_levels , i
                 }
             }
 
+            // food
             if (ccc == 'f' && room_num >= 0){
                 if(rooms_of_all_levels[*ptr_level_num - 1][room_num].type != 4){
                     // not nightmare room
                     hero->food_count++;
+                    if((*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->food_types[which_food_in_room(x_new, y_new , (*(rooms_of_all_levels + *ptr_level_num - 1))[room_num])] == 0){
+                        // normal food
+                        hero->food[0]++;
+                    }
+                    else if((*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->food_types[which_food_in_room(x_new, y_new , (*(rooms_of_all_levels + *ptr_level_num - 1))[room_num])] == 1){
+                        // normal food
+                        hero->food[1]++;
+                    }
+                    else if((*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->food_types[which_food_in_room(x_new, y_new , (*(rooms_of_all_levels + *ptr_level_num - 1))[room_num])] == 2){
+                        // normal food
+                        hero->food[2]++;
+                    }
+                    else if((*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->food_types[which_food_in_room(x_new, y_new , (*(rooms_of_all_levels + *ptr_level_num - 1))[room_num])] == 3){
+                        // normal food
+                        hero->food[3]++;
+                    }
                 }
                 (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->picked_foods[which_food_in_room(x_new, y_new , (*(rooms_of_all_levels + *ptr_level_num - 1))[room_num])] = 1;
             }
@@ -3682,11 +3786,27 @@ void movement2(int PiCk , int ch , player* hero , room** rooms_of_all_levels , i
                     trap(hero , address_global_message);
                 }
             }
-
+            // food
             if (ccc == 'f' && room_num >= 0){
                 if(rooms_of_all_levels[*ptr_level_num - 1][room_num].type != 4){
                     // not nightmare room
                     hero->food_count++;
+                    if((*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->food_types[which_food_in_room(x_new, y_new , (*(rooms_of_all_levels + *ptr_level_num - 1))[room_num])] == 0){
+                        // normal food
+                        hero->food[0]++;
+                    }
+                    else if((*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->food_types[which_food_in_room(x_new, y_new , (*(rooms_of_all_levels + *ptr_level_num - 1))[room_num])] == 1){
+                        // normal food
+                        hero->food[1]++;
+                    }
+                    else if((*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->food_types[which_food_in_room(x_new, y_new , (*(rooms_of_all_levels + *ptr_level_num - 1))[room_num])] == 2){
+                        // normal food
+                        hero->food[2]++;
+                    }
+                    else if((*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->food_types[which_food_in_room(x_new, y_new , (*(rooms_of_all_levels + *ptr_level_num - 1))[room_num])] == 3){
+                        // normal food
+                        hero->food[3]++;
+                    }
                 }
                 (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->picked_foods[which_food_in_room(x_new, y_new , (*(rooms_of_all_levels + *ptr_level_num - 1))[room_num])] = 1;
             }
@@ -3831,10 +3951,27 @@ void movement2(int PiCk , int ch , player* hero , room** rooms_of_all_levels , i
                 }
             }
 
+            // food
             if (ccc == 'f' && room_num >= 0){
                 if(rooms_of_all_levels[*ptr_level_num - 1][room_num].type != 4){
                     // not nightmare room
                     hero->food_count++;
+                    if((*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->food_types[which_food_in_room(x_new, y_new , (*(rooms_of_all_levels + *ptr_level_num - 1))[room_num])] == 0){
+                        // normal food
+                        hero->food[0]++;
+                    }
+                    else if((*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->food_types[which_food_in_room(x_new, y_new , (*(rooms_of_all_levels + *ptr_level_num - 1))[room_num])] == 1){
+                        // normal food
+                        hero->food[1]++;
+                    }
+                    else if((*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->food_types[which_food_in_room(x_new, y_new , (*(rooms_of_all_levels + *ptr_level_num - 1))[room_num])] == 2){
+                        // normal food
+                        hero->food[2]++;
+                    }
+                    else if((*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->food_types[which_food_in_room(x_new, y_new , (*(rooms_of_all_levels + *ptr_level_num - 1))[room_num])] == 3){
+                        // normal food
+                        hero->food[3]++;
+                    }
                 }
                 (*(rooms_of_all_levels + *ptr_level_num - 1) + room_num)->picked_foods[which_food_in_room(x_new, y_new , (*(rooms_of_all_levels + *ptr_level_num - 1))[room_num])] = 1;
             }
@@ -4048,16 +4185,16 @@ void food_list(player hero){
 
     // print instructions inside the window
     wattron(help_win, COLOR_PAIR(8));
-    mvwprintw(help_win, 3, 1, " Normal Food: %d" , hero.food_count);
+    mvwprintw(help_win, 3, 1, " Normal Food: %d" , hero.food[0]);
     wattroff(help_win, COLOR_PAIR(8));
     wattron(help_win, COLOR_PAIR(81));
-    mvwprintw(help_win, 5, 1, " Ideal Food: %d" , 0);
+    mvwprintw(help_win, 5, 1, " Ideal Food: %d" , hero.food[1]);
     wattroff(help_win, COLOR_PAIR(81));
     wattron(help_win, COLOR_PAIR(99));
-    mvwprintw(help_win, 7, 1, " Magical Food: %d" , 0);
+    mvwprintw(help_win, 7, 1, " Magical Food: %d" , hero.food[2]);
     wattroff(help_win, COLOR_PAIR(99));
     wattron(help_win, COLOR_PAIR(8));
-    mvwprintw(help_win, 9, 1, " Rotten Food: %d" , 0);
+    mvwprintw(help_win, 9, 1, " Rotten Food: %d" , hero.food[3]);
     wattroff(help_win, COLOR_PAIR(8));
     mvwprintw(help_win, 14, 1, " To consume food, exit this menu and enter 'C'");
 
