@@ -202,7 +202,7 @@ void add_gold();
 void add_black_gold();
 void add_trap();
 void add_weapon();
-void add_enemy();
+// void add_enemy();
 void add_enemy2(room**  , int );
 void enemy_test_ptr();
 void add_spell();
@@ -507,11 +507,14 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
     int spell_loop_counter = 0;
     int time_unit = 8000;
     int n_t_units_spell_active = 15;
+
     int healing_coeff = 1;
     int rate_heal = 50000;
     int health_loop_count = 0;
+
     int rate_get_hungry = 230000;
     int hunger_loop_count = 0;
+
     int giant_move_counter = 0;
     int is_giant_moving = 0;
     int n_t_units_giant_move = 5;
@@ -520,6 +523,10 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
     int n_t_units_undead_move = 5;
     int snake_move_counter = 0;
     int is_snake_moving = 0;
+
+    int Loop_Counter_change_food_with_time = 0;
+    int Rate_change_food_with_time = 400000;
+
     while(1){
         if(!print_all_Map){
           for (int i = 0 ; i < n_rooms[level_num - 1] ; i++){
@@ -571,7 +578,12 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
         }
                 
         // Treasure Room!!
-        if(current_song != 6 && level_num == 4 && rooms_of_all_levels[level_num - 1][in_which_room(rooms_of_all_levels[level_num - 1] , n_rooms[level_num - 1] , me)].type == 3){
+        if(current_song != 6 && level_num == 4 && rooms_of_all_levels[level_num - 1][in_which_room(rooms_of_all_levels[level_num - 1] , n_rooms[level_num - 1] , me)].type == 3
+           && !rooms_of_all_levels[level_num - 1][in_which_room(rooms_of_all_levels[level_num - 1] , n_rooms[level_num - 1] , me)].enemies[0]
+           && !rooms_of_all_levels[level_num - 1][in_which_room(rooms_of_all_levels[level_num - 1] , n_rooms[level_num - 1] , me)].enemies[1]
+           && !rooms_of_all_levels[level_num - 1][in_which_room(rooms_of_all_levels[level_num - 1] , n_rooms[level_num - 1] , me)].enemies[2]
+           && !rooms_of_all_levels[level_num - 1][in_which_room(rooms_of_all_levels[level_num - 1] , n_rooms[level_num - 1] , me)].enemies[3]
+           && !rooms_of_all_levels[level_num - 1][in_which_room(rooms_of_all_levels[level_num - 1] , n_rooms[level_num - 1] , me)].enemies[4]){
                 win(&current_song , &me);
                 me.won = 1;
                 snprintf(global_message, sizeof(char) * 100, "\xF0\x9F\x8E\x89 \xF0\x9F\x8E\x89 \xF0\x9F\x8E\x89                               ");       
@@ -638,7 +650,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
         }
         else if (ch == '/') {
             nodelay(stdscr, FALSE);
-            help(&me);  // Show help screen if '/' key is pressed
+            help(&me , difficulty);  // Show help screen if '/' key is pressed
             nodelay(stdscr, TRUE);
         }
         else if (ch == 'f' || ch == 'F') {
@@ -720,6 +732,8 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
                         // ideal
                         if (me.food[1] > 0){
                             snprintf(global_message, sizeof(char) * 100, "Ideal Food consumed \U0001F357                                            ");                    
+                            damage_coeff = 2;
+                            spell_loop_counter = 0;
                             me.food[1] -- ;
                             me.food_count--;
                             if (me.how_full < 5){
@@ -740,6 +754,8 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
                         // magic
                         if (me.food[2] > 0){
                             snprintf(global_message, sizeof(char) * 100, "Magical Food consumed \U0001F36D                                            ");
+                            speed = 2;
+                            spell_loop_counter = 0;
                             me.food[2] -- ;
                             me.food_count--;
                             if (me.how_full < 5){
@@ -809,7 +825,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
             
             switch (me.current_weapon)
             {
-                int range = 5; // برد پرتاب
+                int range = 5; 
                 int throw_direction = '0';
                 int direction = 0;
                 int x_next = me.pos.x;
@@ -889,7 +905,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
 
                         if(alive_before && !alive_now){
                             clear();
-
+                            is_giant_moving = 0;
                             snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Giant was killed!                                        "); 
                         }
                         break;
@@ -915,7 +931,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
 
                         if(alive_before && !alive_now){
                             clear();
-
+                            is_snake_moving = 0;
                             snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Snake was killed!                                            "); 
                         }
                         break;
@@ -941,7 +957,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
 
                         if(alive_before && !alive_now){
                             clear();
-
+                            is_undead_moving = 0;
                             snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Undead is now very much dead ! :)                                      "); 
                         }
                         break;
@@ -1023,6 +1039,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
 
                         if(alive_before && !alive_now){
                             clear();
+                            is_giant_moving = 0;
 
                             snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Giant was killed!                                        "); 
                         }
@@ -1049,7 +1066,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
 
                         if(alive_before && !alive_now){
                             clear();
-
+                            is_snake_moving = 0;
                             snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Snake was killed!                                            "); 
                         }
                         break;
@@ -1075,7 +1092,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
 
                         if(alive_before && !alive_now){
                             clear();
-
+                            is_undead_moving = 0;
                             snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Undead is now very much dead ! :)                                      "); 
                         }
                         break;
@@ -1219,6 +1236,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
 
                                 if(alive_before && !alive_now){
                                     clear();
+                                    is_giant_moving = 0;
                                     snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Giant was killed!                                          "); 
                                 }
                                 break;
@@ -1247,6 +1265,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
 
                                 if(alive_before && !alive_now){
                                     clear();
+                                    is_snake_moving = 0;
                                     snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Snake was killed!                                          "); 
                                 }
                                 break;
@@ -1274,6 +1293,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
 
                                 if(alive_before && !alive_now){
                                     clear();
+                                    is_undead_moving = 0;
                                     snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Undead is now very much dead ! :)                                      "); 
                                 }
                                 break;
@@ -1430,6 +1450,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
 
                                 if(alive_before && !alive_now){
                                     clear();
+                                    is_giant_moving = 0;
                                     snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Giant was killed!                                          "); 
                                 }
                                 break;
@@ -1458,6 +1479,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
 
                                 if(alive_before && !alive_now){
                                     clear();
+                                    is_snake_moving = 0;
                                     snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Snake was killed!                                          "); 
                                 }
                                 break;
@@ -1485,6 +1507,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
 
                                 if(alive_before && !alive_now){
                                     clear();
+                                    is_undead_moving = 0;
                                     snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Undead is now very much dead ! :)                                      "); 
                                 }
                                 break;
@@ -1542,10 +1565,10 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
                         direction = 2;
                     }
                     else if (throw_direction == '4' || throw_direction == 'h' || throw_direction == 'H'){
-                        direction =3;
+                        direction = 3;
                     }
                     else if (throw_direction == '9' || throw_direction == 'y' || throw_direction == 'Y'){
-                        direction - 4;
+                        direction = 4;
                     }
                     else if (throw_direction == '7' || throw_direction == 'u' || throw_direction == 'U'){
                         direction = 5;
@@ -1569,7 +1592,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
                             if(There == 'D'){
                                 clear();
                                 snprintf(global_message, sizeof(char) * 100, "Magic Wand hit the Deamon                                        "); 
-                            
+                                rooms_of_all_levels[level_num - 1][room_index].can_enemy_move[0] = 0;
                                 int alive_before;
                                 int alive_now;
                                 if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[0] > 0){
@@ -1598,6 +1621,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
                             else if (There == 'F'){
                                 clear();
                                 snprintf(global_message, sizeof(char) * 100, "Magic Wand hit the Fire-Breathin Monster                                        "); 
+                                rooms_of_all_levels[level_num - 1][room_index].can_enemy_move[1] = 0;
                             
                                 int alive_before;
                                 int alive_now;
@@ -1628,6 +1652,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
                             else if (There == 'G' && room_index != 0){
                                 clear();
                                 snprintf(global_message, sizeof(char) * 100, "Magic Wand hit the Giant                                        "); 
+                                rooms_of_all_levels[level_num - 1][room_index].can_enemy_move[2] = 0;
                             
                                 int alive_before;
                                 int alive_now;
@@ -1651,6 +1676,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
 
                                 if(alive_before && !alive_now){
                                     clear();
+                                    is_giant_moving = 0;
                                     snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Giant was killed!                                          "); 
                                 }
                                 break;
@@ -1658,6 +1684,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
                             else if (There == 'S'){
                                 clear();
                                 snprintf(global_message, sizeof(char) * 100, "Magic Wand hit the Snake                                        "); 
+                                rooms_of_all_levels[level_num - 1][room_index].can_enemy_move[3] = 0;
                             
                                 int alive_before;
                                 int alive_now;
@@ -1680,6 +1707,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
 
                                 if(alive_before && !alive_now){
                                     clear();
+                                    is_snake_moving = 0;
                                     snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Snake was killed!                                          "); 
                                 }
                                 break;
@@ -1687,6 +1715,8 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
                             else if (There == 'U'){
                                 clear();
                                 snprintf(global_message, sizeof(char) * 100, "Magic Wand hit the Undead                                        "); 
+                                rooms_of_all_levels[level_num - 1][room_index].can_enemy_move[4] = 0;
+                                
                                 int alive_before;
                                 int alive_now;
                                 if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[4] > 0){
@@ -1708,6 +1738,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
 
                                 if(alive_before && !alive_now){
                                     clear();
+                                    is_undead_moving = 0;
                                     snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Undead is now very much dead ! :)                                      "); 
                                 }
                                 break;
@@ -1889,31 +1920,33 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
         // Giant's Movement
         if (is_giant_moving && (my_x_after != my_x_before || my_y_after != my_y_before)){
             int room_index = in_which_room(rooms_of_all_levels[level_num - 1] , n_rooms[level_num - 1] , me);
-            if (my_y_after < rooms_of_all_levels[level_num - 1][room_index].enemies_y[2]
-            && valid_move(rooms_of_all_levels[level_num - 1][room_index].enemies_x[2] , rooms_of_all_levels[level_num - 1][room_index].enemies_y[2] - 1)
-            && (mvinch(rooms_of_all_levels[level_num - 1][room_index].enemies_x[2] , rooms_of_all_levels[level_num - 1][room_index].enemies_y[2] - 1) & A_CHARTEXT != '+')
-            && (mvinch(rooms_of_all_levels[level_num - 1][room_index].enemies_x[2] , rooms_of_all_levels[level_num - 1][room_index].enemies_y[2] - 1) & A_CHARTEXT != '#')){
-                rooms_of_all_levels[level_num - 1][room_index].enemies_y[2]--;
+            if (rooms_of_all_levels[level_num - 1][room_index].can_enemy_move[2]){
+                if (my_y_after < rooms_of_all_levels[level_num - 1][room_index].enemies_y[2]
+                && valid_move(rooms_of_all_levels[level_num - 1][room_index].enemies_x[2] , rooms_of_all_levels[level_num - 1][room_index].enemies_y[2] - 1)
+                && (mvinch(rooms_of_all_levels[level_num - 1][room_index].enemies_x[2] , rooms_of_all_levels[level_num - 1][room_index].enemies_y[2] - 1) & A_CHARTEXT != '+')
+                && (mvinch(rooms_of_all_levels[level_num - 1][room_index].enemies_x[2] , rooms_of_all_levels[level_num - 1][room_index].enemies_y[2] - 1) & A_CHARTEXT != '#')){
+                    rooms_of_all_levels[level_num - 1][room_index].enemies_y[2]--;
+                }
+                else if (my_y_after > rooms_of_all_levels[level_num - 1][room_index].enemies_y[2]
+                && valid_move(rooms_of_all_levels[level_num - 1][room_index].enemies_x[2] , rooms_of_all_levels[level_num - 1][room_index].enemies_y[2] + 1)
+                && (mvinch(rooms_of_all_levels[level_num - 1][room_index].enemies_x[2] , rooms_of_all_levels[level_num - 1][room_index].enemies_y[2] + 1) & A_CHARTEXT != '+')
+                && (mvinch(rooms_of_all_levels[level_num - 1][room_index].enemies_x[2] , rooms_of_all_levels[level_num - 1][room_index].enemies_y[2] + 1) & A_CHARTEXT != '#')){
+                    rooms_of_all_levels[level_num - 1][room_index].enemies_y[2]++;
+                }
+                else if (my_x_after > rooms_of_all_levels[level_num - 1][room_index].enemies_x[2]
+                && valid_move(rooms_of_all_levels[level_num - 1][room_index].enemies_x[2] + 1, rooms_of_all_levels[level_num - 1][room_index].enemies_y[2])
+                && (mvinch(rooms_of_all_levels[level_num - 1][room_index].enemies_x[2] +1, rooms_of_all_levels[level_num - 1][room_index].enemies_y[2]) & A_CHARTEXT != '+')
+                && (mvinch(rooms_of_all_levels[level_num - 1][room_index].enemies_x[2] +1, rooms_of_all_levels[level_num - 1][room_index].enemies_y[2]) & A_CHARTEXT != '#')){
+                    rooms_of_all_levels[level_num - 1][room_index].enemies_x[2]++;
+                }
+                else if (my_x_after < rooms_of_all_levels[level_num - 1][room_index].enemies_x[2]
+                && valid_move(rooms_of_all_levels[level_num - 1][room_index].enemies_x[2] - 1, rooms_of_all_levels[level_num - 1][room_index].enemies_y[2])
+                && (mvinch(rooms_of_all_levels[level_num - 1][room_index].enemies_x[2] -1, rooms_of_all_levels[level_num - 1][room_index].enemies_y[2] ) & A_CHARTEXT != '+')
+                && (mvinch(rooms_of_all_levels[level_num - 1][room_index].enemies_x[2] -1, rooms_of_all_levels[level_num - 1][room_index].enemies_y[2] ) & A_CHARTEXT != '#')){
+                    rooms_of_all_levels[level_num - 1][room_index].enemies_x[2]--;
+                }
+                giant_move_counter++;
             }
-            else if (my_y_after > rooms_of_all_levels[level_num - 1][room_index].enemies_y[2]
-            && valid_move(rooms_of_all_levels[level_num - 1][room_index].enemies_x[2] , rooms_of_all_levels[level_num - 1][room_index].enemies_y[2] + 1)
-            && (mvinch(rooms_of_all_levels[level_num - 1][room_index].enemies_x[2] , rooms_of_all_levels[level_num - 1][room_index].enemies_y[2] + 1) & A_CHARTEXT != '+')
-            && (mvinch(rooms_of_all_levels[level_num - 1][room_index].enemies_x[2] , rooms_of_all_levels[level_num - 1][room_index].enemies_y[2] + 1) & A_CHARTEXT != '#')){
-                rooms_of_all_levels[level_num - 1][room_index].enemies_y[2]++;
-            }
-            else if (my_x_after > rooms_of_all_levels[level_num - 1][room_index].enemies_x[2]
-            && valid_move(rooms_of_all_levels[level_num - 1][room_index].enemies_x[2] + 1, rooms_of_all_levels[level_num - 1][room_index].enemies_y[2])
-            && (mvinch(rooms_of_all_levels[level_num - 1][room_index].enemies_x[2] +1, rooms_of_all_levels[level_num - 1][room_index].enemies_y[2]) & A_CHARTEXT != '+')
-            && (mvinch(rooms_of_all_levels[level_num - 1][room_index].enemies_x[2] +1, rooms_of_all_levels[level_num - 1][room_index].enemies_y[2]) & A_CHARTEXT != '#')){
-                rooms_of_all_levels[level_num - 1][room_index].enemies_x[2]++;
-            }
-            else if (my_x_after < rooms_of_all_levels[level_num - 1][room_index].enemies_x[2]
-            && valid_move(rooms_of_all_levels[level_num - 1][room_index].enemies_x[2] - 1, rooms_of_all_levels[level_num - 1][room_index].enemies_y[2])
-            && (mvinch(rooms_of_all_levels[level_num - 1][room_index].enemies_x[2] -1, rooms_of_all_levels[level_num - 1][room_index].enemies_y[2] ) & A_CHARTEXT != '+')
-            && (mvinch(rooms_of_all_levels[level_num - 1][room_index].enemies_x[2] -1, rooms_of_all_levels[level_num - 1][room_index].enemies_y[2] ) & A_CHARTEXT != '#')){
-                rooms_of_all_levels[level_num - 1][room_index].enemies_x[2]--;
-            }
-            giant_move_counter++;
         }
         // Giant Stop Moving!
         if (giant_move_counter >= n_t_units_giant_move){
@@ -1936,23 +1969,25 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
          // Snake's Movement
         if (is_snake_moving && (my_x_after != my_x_before || my_y_after != my_y_before)){
             int room_index = in_which_room(rooms_of_all_levels[level_num - 1] , n_rooms[level_num - 1] , me);
-            if (my_y_after < rooms_of_all_levels[level_num - 1][room_index].enemies_y[3]
-            && valid_move(rooms_of_all_levels[level_num - 1][room_index].enemies_x[3] , rooms_of_all_levels[level_num - 1][room_index].enemies_y[3] - 1)){
-                rooms_of_all_levels[level_num - 1][room_index].enemies_y[3]--;
+            if (rooms_of_all_levels[level_num - 1][room_index].can_enemy_move[3]){
+                if (my_y_after < rooms_of_all_levels[level_num - 1][room_index].enemies_y[3]
+                && valid_move(rooms_of_all_levels[level_num - 1][room_index].enemies_x[3] , rooms_of_all_levels[level_num - 1][room_index].enemies_y[3] - 1)){
+                    rooms_of_all_levels[level_num - 1][room_index].enemies_y[3]--;
+                }
+                else if (my_y_after > rooms_of_all_levels[level_num - 1][room_index].enemies_y[3]
+                && valid_move(rooms_of_all_levels[level_num - 1][room_index].enemies_x[3] , rooms_of_all_levels[level_num - 1][room_index].enemies_y[3] + 1)){
+                    rooms_of_all_levels[level_num - 1][room_index].enemies_y[3]++;
+                }
+                else if (my_x_after > rooms_of_all_levels[level_num - 1][room_index].enemies_x[3]
+                && valid_move(rooms_of_all_levels[level_num - 1][room_index].enemies_x[3] + 1, rooms_of_all_levels[level_num - 1][room_index].enemies_y[3])){
+                    rooms_of_all_levels[level_num - 1][room_index].enemies_x[3]++;
+                }
+                else if (my_x_after < rooms_of_all_levels[level_num - 1][room_index].enemies_x[3]
+                && valid_move(rooms_of_all_levels[level_num - 1][room_index].enemies_x[3] - 1, rooms_of_all_levels[level_num - 1][room_index].enemies_y[3])){
+                    rooms_of_all_levels[level_num - 1][room_index].enemies_x[3]--;
+                }
+                snake_move_counter++;
             }
-            else if (my_y_after > rooms_of_all_levels[level_num - 1][room_index].enemies_y[3]
-            && valid_move(rooms_of_all_levels[level_num - 1][room_index].enemies_x[3] , rooms_of_all_levels[level_num - 1][room_index].enemies_y[3] + 1)){
-                rooms_of_all_levels[level_num - 1][room_index].enemies_y[3]++;
-            }
-            else if (my_x_after > rooms_of_all_levels[level_num - 1][room_index].enemies_x[3]
-            && valid_move(rooms_of_all_levels[level_num - 1][room_index].enemies_x[3] + 1, rooms_of_all_levels[level_num - 1][room_index].enemies_y[3])){
-                rooms_of_all_levels[level_num - 1][room_index].enemies_x[3]++;
-            }
-            else if (my_x_after < rooms_of_all_levels[level_num - 1][room_index].enemies_x[3]
-            && valid_move(rooms_of_all_levels[level_num - 1][room_index].enemies_x[3] - 1, rooms_of_all_levels[level_num - 1][room_index].enemies_y[3])){
-                rooms_of_all_levels[level_num - 1][room_index].enemies_x[3]--;
-            }
-            snake_move_counter++;
         }
         
         if(near_undeed(me)){ ///// bro :|  it's undead!
@@ -1970,23 +2005,25 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
         // Undead's Movement
         if (is_undead_moving && (my_x_after != my_x_before || my_y_after != my_y_before)){
             int room_index = in_which_room(rooms_of_all_levels[level_num - 1] , n_rooms[level_num - 1] , me);
-            if (my_y_after < rooms_of_all_levels[level_num - 1][room_index].enemies_y[4]
-            && valid_move(rooms_of_all_levels[level_num - 1][room_index].enemies_x[4] , rooms_of_all_levels[level_num - 1][room_index].enemies_y[4] - 1)){
-                rooms_of_all_levels[level_num - 1][room_index].enemies_y[4]--;
+            if (rooms_of_all_levels[level_num - 1][room_index].can_enemy_move[4]){
+                if (my_y_after < rooms_of_all_levels[level_num - 1][room_index].enemies_y[4]
+                && valid_move(rooms_of_all_levels[level_num - 1][room_index].enemies_x[4] , rooms_of_all_levels[level_num - 1][room_index].enemies_y[4] - 1)){
+                    rooms_of_all_levels[level_num - 1][room_index].enemies_y[4]--;
+                }
+                else if (my_y_after > rooms_of_all_levels[level_num - 1][room_index].enemies_y[4]
+                && valid_move(rooms_of_all_levels[level_num - 1][room_index].enemies_x[4] , rooms_of_all_levels[level_num - 1][room_index].enemies_y[4] + 1)){
+                    rooms_of_all_levels[level_num - 1][room_index].enemies_y[4]++;
+                }
+                else if (my_x_after > rooms_of_all_levels[level_num - 1][room_index].enemies_x[4]
+                && valid_move(rooms_of_all_levels[level_num - 1][room_index].enemies_x[4] + 1, rooms_of_all_levels[level_num - 1][room_index].enemies_y[4])){
+                    rooms_of_all_levels[level_num - 1][room_index].enemies_x[4]++;
+                }
+                else if (my_x_after < rooms_of_all_levels[level_num - 1][room_index].enemies_x[4]
+                && valid_move(rooms_of_all_levels[level_num - 1][room_index].enemies_x[4] - 1, rooms_of_all_levels[level_num - 1][room_index].enemies_y[4])){
+                    rooms_of_all_levels[level_num - 1][room_index].enemies_x[4]--;
+                }
+                undead_move_counter++;
             }
-            else if (my_y_after > rooms_of_all_levels[level_num - 1][room_index].enemies_y[4]
-            && valid_move(rooms_of_all_levels[level_num - 1][room_index].enemies_x[4] , rooms_of_all_levels[level_num - 1][room_index].enemies_y[4] + 1)){
-                rooms_of_all_levels[level_num - 1][room_index].enemies_y[4]++;
-            }
-            else if (my_x_after > rooms_of_all_levels[level_num - 1][room_index].enemies_x[4]
-            && valid_move(rooms_of_all_levels[level_num - 1][room_index].enemies_x[4] + 1, rooms_of_all_levels[level_num - 1][room_index].enemies_y[4])){
-                rooms_of_all_levels[level_num - 1][room_index].enemies_x[4]++;
-            }
-            else if (my_x_after < rooms_of_all_levels[level_num - 1][room_index].enemies_x[4]
-            && valid_move(rooms_of_all_levels[level_num - 1][room_index].enemies_x[4] - 1, rooms_of_all_levels[level_num - 1][room_index].enemies_y[4])){
-                rooms_of_all_levels[level_num - 1][room_index].enemies_x[4]--;
-            }
-            undead_move_counter++;
         }
         // Undead Stop Moving!
         if (undead_move_counter >= n_t_units_undead_move){
@@ -4652,9 +4689,9 @@ void print_bottom_message(player* hero , int level_num){
 
 
 // the help screen
-void help(player* hero) {
-    int height = 30;
-    int width = 50;
+void help(player* hero , int diff) {
+    int height = 38;
+    int width = 70;
     int start_x = (LINES - height) / 2;
     int start_y = (COLS - width) / 2;
 
@@ -4676,6 +4713,14 @@ void help(player* hero) {
     mvwprintw(help_win, 1, title_y, "HELP MENU");
     wattroff(help_win, COLOR_PAIR(5) | A_BOLD);
     char CH = 'p';
+
+    char* TheColor;
+    if(hero->color == 160) strcpy(TheColor , "Red\0");
+    else if (hero->color == 82) strcpy(TheColor , "Green\0");
+    else if (hero->color == 220) strcpy(TheColor , "Yellow\0");
+    else if (hero->color == 205) strcpy(TheColor , "Pink\0");
+    else if (hero->color == 39) strcpy(TheColor , "Blue\0");
+
     while(CH == 'p' || CH == 'P'){
         wattron(help_win, A_BOLD);
 
@@ -4719,8 +4764,13 @@ void help(player* hero) {
         mvwprintw(help_win, movement_start_x + 14, movement_start_y, "+---+---+---+");
         mvwprintw(help_win, movement_start_x + 15, movement_start_y, "| B | K | N |");
         mvwprintw(help_win, movement_start_x + 16, movement_start_y, "+---+---+---+");
-
+        wattron(help_win, COLOR_PAIR(hero->color));
+        mvwprintw(help_win, movement_start_x + 18, 1, " Your Data:");
         wattroff(help_win, A_BOLD);
+        mvwprintw(help_win, movement_start_x + 19, 1, " \tUsername: %s" , hero->username);
+        mvwprintw(help_win, movement_start_x + 20, 1, " \tColor: %s" , TheColor);
+        mvwprintw(help_win, movement_start_x + 21, 1, " \tDifficulty: %d" , diff);
+        wattroff(help_win, COLOR_PAIR(hero->color));
 
         CH = wgetch(help_win);
 
@@ -5001,8 +5051,8 @@ void entrance_menu(){
     else if (choice == 3){
         clear();
         draw_borders(12);
-        mvprintw(LINES / 2, COLS / 2 - 11 , "You have entered as guest");
-        mvprintw(LINES / 2 + 2, COLS / 2 - 11, "Press any key to proceed");
+        mvprintw(LINES / 2, COLS / 2 - strlen("You have entered as guest")/2 , "You have entered as guest");
+        mvprintw(LINES / 2 + 2, COLS / 2 - strlen("Press any key to proceed")/2, "Press any key to proceed");
         refresh();
         getch();
         pregame_menu(my_username , ptr_difficulty , ptr_color , ptr_song);
@@ -5246,7 +5296,7 @@ void pregame_menu(char* my_username , int* ptr_difficulty , int* ptr_color , int
 
     // call the appropriate function based on the choice
     if (choice == 1){
-        settings(my_username , ptr_difficulty , ptr_color);
+        settings(my_username , ptr_difficulty , ptr_color , ptr_song);
     }
     else if (choice == 2){
         int start_page = 1;
@@ -5768,6 +5818,10 @@ void add_enemy2(room** address_rooms_this_level , int n_rooms){
                 r1.enemies[E] = rand() % 2;
                 if(r1.room_number == 1){ // no 'G'iant in room index 0 because of black 'G'old
                     r1.enemies[2] = 0;
+                }
+                if (r1.type == 3){
+                    // treasue room
+                    r1.enemies[E] = 1;
                 }
                 (*address_rooms_this_level)[i].enemies[E] = r1.enemies[E];
             }
@@ -7597,6 +7651,10 @@ void new_map(int difficulty ,
     (*address_rooms_of_all_levels)[level_num - 1][3].stair_x = (*address_rooms_of_all_levels)[level_num - 1][3].corner.x + 1;
     (*address_rooms_of_all_levels)[level_num - 1][3].stair_y = (*address_rooms_of_all_levels)[level_num - 1][3].corner.y + 1;
     
+    if ((*address_rooms_of_all_levels)[3][3].type == 3){
+        (*address_rooms_of_all_levels)[3][3].type = 0;
+        (*address_rooms_of_all_levels)[3][4].type = 3;
+    }
     
 }
 
