@@ -222,6 +222,7 @@ void choose_color();
 void choose_difficulty();
 void show_saved_games();
 void New_Game();
+void Load_Game();
 void print_menu(int , char** , int , int , const char*);
 void entrance_menu();
 void draw_borders(int);
@@ -2396,7 +2397,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
     free(rooms_of_all_levels);
     
 }
-
+ 
 int near_deamon(player me){
     for(int i = 0 ; i < 8 ; i++){
         int X = me.pos.x + x_moves[i];
@@ -5741,7 +5742,8 @@ void pregame_menu(char* my_username , int* ptr_difficulty , int* ptr_color , int
         profile(my_username , ptr_difficulty , ptr_color , ptr_song);
     }
     else if (choice == 5){
-        // show_saved_games();
+        clear();
+        Load_Game(*ptr_difficulty , *ptr_song , *ptr_color , my_username);
     }
     else if (choice == 6){
         entrance_menu();
@@ -8267,6 +8269,1997 @@ void sort_rooms(room* my_rooms, int n_rooms) {
         my_rooms[k].room_number = k + 1;
     }
 }
+
+
+
+//////////////////// LOAD_GAME:
+void Load_Game(int difficulty , int chosen_song, int CoLoR , char* username){
+
+    char global_message[100] = "Welcome to Arvin's Rogue!";
+
+    setlocale(LC_ALL, "");
+    initscr();
+    nodelay(stdscr, TRUE);
+    noecho();
+    cbreak();
+    curs_set(FALSE);
+    start_color(); 
+    srand(time(NULL));  
+    
+    init_pair(160 , 160 , COLOR_BLACK);
+    init_pair(82 , 82 , COLOR_BLACK);
+    init_pair(220 , 220 , COLOR_BLACK);
+    init_pair(205 , 205 , COLOR_BLACK);
+    init_pair(39 , 39 , COLOR_BLACK);
+    init_pair(24 , COLOR_CYAN , COLOR_BLACK);
+    // int difficulty = 1;
+    // int n_rooms1 = number_of_rooms(difficulty);
+    // int n_rooms2 = number_of_rooms(difficulty);
+    // int n_rooms3 = number_of_rooms(difficulty);
+    // int n_rooms4 = number_of_rooms(difficulty);
+    int n_rooms[4];
+    for (int q = 0 ; q < 4 ; q++){
+        n_rooms[q] = number_of_rooms(difficulty);
+    }
+    int level_num = 1; // initializing 
+
+
+      player me;
+    me.food_count = 0;
+    me.food[0] = 0;
+    me.food[1] = 0;
+    me.food[2] = 0;
+    me.food[3] = 0;
+    me.current_food = 0; // normal food (default)
+    me.gold_count = 0;
+    me.health = 16;
+    me.how_full = 5;
+    me.color = CoLoR; 
+    me.pick = 0;  
+    me.floor_level = 1;
+    me.kills = 0;
+    me.difficulty = difficulty;
+    
+    strcpy(me.username , username);
+    me.current_weapon = 0; // 0 : Mace (m)
+                        // 1 : Dagger (d)
+                        // 2 : Magic Wand (w)
+                        // 3 : Normal Arrow (a)
+                        // 4 : Sword (s)
+    me.current_spell = 0;// 0 : Health H
+                         // 1 : Speed $
+                         // 2 : Damage !
+    for (int w = 0 ; w < 5 ; w++){
+        me.weapons[w] = 0;
+    }
+    me.weapons[0] = 1;
+    for (int s = 0 ; s < 3 ; s++){
+        me.spells[s] = 0;
+    }
+
+
+
+    char filename[150];
+    sprintf(filename, "/home/arvin_rsl/Desktop/FOP_Project/Users_Folder/%s/saved_game.txt", me.username);
+
+    FILE *file = fopen(filename, "r");
+    if (file == NULL) {
+        perror("Error opening file");
+        return;
+    }
+
+
+    char line[256];
+
+    while (fgets(line, sizeof(line), file)) {
+        if (strncmp(line, "Gold: ", 6) == 0) {
+            sscanf(line + 6, "%d", &me.gold_count);
+        }
+        else if (strncmp(line, "Health: ", 8) == 0) {
+            sscanf(line + 8, "%d", &me.health);
+        }
+        else if (strncmp(line, "Normal Food: ", 13) == 0) {
+            sscanf(line + 13, "%d", &me.food[0]);
+        }
+        else if (strncmp(line, "Ideal Food: ", 12) == 0) {
+            sscanf(line + 12, "%d", &me.food[1]);
+        }        
+        else if (strncmp(line, "Magical Food: ", 14) == 0) {
+            sscanf(line + 14, "%d", &me.food[2]);
+        }
+        else if (strncmp(line, "Rotten Food: ", 13) == 0) {
+            sscanf(line + 13, "%d", &me.food[3]);
+        }
+        else if (strncmp(line, "X: ", 3) == 0) {
+            sscanf(line + 3, "%d", &me.pos.x);
+        }
+        else if (strncmp(line, "Y: ", 3) == 0) {
+            sscanf(line + 3, "%d", &me.pos.y);
+        }
+        else if (strncmp(line, "Floor Level: ", 13) == 0) {
+            sscanf(line + 13, "%d", &me.floor_level);
+        }
+        else if (strncmp(line, "F1 Room Count: ", 13) == 0) {
+            sscanf(line + 13, "%d", &n_rooms[0]);
+        }
+        else if (strncmp(line, "F2 Room Count: ", 13) == 0) {
+            sscanf(line + 13, "%d", &n_rooms[1]);
+        }
+        else if (strncmp(line, "F3 Room Count: ", 13) == 0) {
+            sscanf(line + 13, "%d", &n_rooms[2]);
+        }
+        else if (strncmp(line, "F4 Room Count: ", 13) == 0) {
+            sscanf(line + 13, "%d", &n_rooms[3]);
+            break;
+        }
+        else{
+            continue;
+        }
+    }
+
+
+
+    // int read_level_num = 0;
+    // while (fgets(line, sizeof(line), file)) {
+    //     if (strncmp(line, "Level Num: ", 11) == 0) {
+    //         sscanf(line + 11, "%d", &read_level_num);
+    //         break;
+    //     }
+    // }
+    
+    fclose(file);
+
+    room ** rooms_of_all_levels = (room**) malloc (4 * sizeof(room*));
+    for (int i = 0 ; i < 4 ; i++){
+        rooms_of_all_levels[i] = (room*) malloc(n_rooms[i] * sizeof(room));
+    }
+
+    // no need to read corridor positions from file!
+
+    position ** corridors_of_all_levels = (position**)malloc(4 * sizeof(position*));
+    for (int i = 0 ; i < 4 ; i++){
+        corridors_of_all_levels[i] = (position*)malloc(MAX_CORR * sizeof(position));
+
+        if (corridors_of_all_levels[i] == NULL) {
+            endwin();
+            printf("Memory allocation FAILED for corridors_of_all_levels[%d]!\n", i);
+            return ;
+        }
+    }
+    int corr_count[4] = {0};
+
+    printf("trying to make rooms 1 ... \n");
+    new_map(difficulty, n_rooms[0], &corridors_of_all_levels, 1, &rooms_of_all_levels);
+    printf("done making rooms 1 ! :)\n");
+
+    printf("trying to make rooms 2 ... \n");
+    new_map(difficulty, n_rooms[1], &corridors_of_all_levels, 2, &rooms_of_all_levels);
+    printf("done making rooms 2 ! :)\n");
+
+    printf("trying to make rooms 3 ... \n");
+    new_map(difficulty, n_rooms[2] , &corridors_of_all_levels, 3, &rooms_of_all_levels);
+    printf("done making rooms 3 ! :)\n");
+    
+    printf("trying to make rooms 4 ... \n");
+    new_map(difficulty, n_rooms[3], &corridors_of_all_levels, 4, &rooms_of_all_levels);
+    printf("done making rooms 4 ! :)\n");
+
+
+    printf("trying to make doors 1 ... \n");
+    add_door_and_window(rooms_of_all_levels + 0 , n_rooms[0]);
+    printf("done making doors 1! :)\n");
+
+    printf("trying to make doors 2 ... \n");
+    add_door_and_window(rooms_of_all_levels + 1 , n_rooms[1]);
+    printf("done making doors 2 ! :)\n");
+
+    printf("trying to make doors 3 ... \n");
+    add_door_and_window(rooms_of_all_levels + 2 , n_rooms[2]);
+    printf("done making doors 3 ! :)\n");
+
+    printf("trying to make doors 4 ... \n");
+    add_door_and_window(rooms_of_all_levels + 3 , n_rooms[3]);
+    printf("done making doors 4 ! :)\n");
+    int current_spell;
+
+
+    printf("now go for pillars 1 ... \n");
+    add_pillars(rooms_of_all_levels + 0 , n_rooms[0]);
+    printf("done with pillars 1 ... \n");
+
+    printf("now go for pillars 2 ... \n");
+    add_pillars(rooms_of_all_levels + 1 , n_rooms[1]);
+    printf("done with pillars 2 ... \n");
+
+    printf("now go for pillars 3 ... \n");
+    add_pillars(rooms_of_all_levels + 2 , n_rooms[2]);
+    printf("done with pillars 3 ... \n");
+
+    printf("now go for pillars 4 ... \n");
+    add_pillars(rooms_of_all_levels + 3 , n_rooms[3]);
+    printf("done with pillars 4 ... \n");
+    
+    printf("adding foods/golds/traps ... \n");
+
+    add_food(rooms_of_all_levels + 0 , n_rooms[0]);
+    add_gold(rooms_of_all_levels + 0 , n_rooms[0]);
+    add_trap(rooms_of_all_levels + 0 , n_rooms[0]);
+    add_black_gold(rooms_of_all_levels + 0 , n_rooms[0]);
+    add_weapon(rooms_of_all_levels + 0 , n_rooms[0]);
+    add_spell(rooms_of_all_levels + 0 , n_rooms[0]);
+    add_enemy2(rooms_of_all_levels + 0 , n_rooms[0]);
+
+
+    add_food(rooms_of_all_levels + 1 , n_rooms[1]);
+    add_gold(rooms_of_all_levels + 1 , n_rooms[1]);
+    add_trap(rooms_of_all_levels + 1 , n_rooms[1]);
+    add_black_gold(rooms_of_all_levels + 0 , n_rooms[1]);
+    add_weapon(rooms_of_all_levels + 1 , n_rooms[1]);
+    add_spell(rooms_of_all_levels + 1 , n_rooms[1]);
+    add_enemy2(rooms_of_all_levels + 1 , n_rooms[1]);
+
+
+    add_food(rooms_of_all_levels + 2 , n_rooms[2]);
+    add_gold(rooms_of_all_levels + 2 , n_rooms[2]);
+    add_trap(rooms_of_all_levels + 2 , n_rooms[2]);
+    add_black_gold(rooms_of_all_levels + 0 , n_rooms[2]);
+    add_weapon(rooms_of_all_levels + 2 , n_rooms[2]);
+    add_spell(rooms_of_all_levels + 2 , n_rooms[2]);
+    add_enemy2(rooms_of_all_levels + 2 , n_rooms[2]);
+
+    add_food(rooms_of_all_levels + 3 , n_rooms[3]);
+    add_gold(rooms_of_all_levels + 3 , n_rooms[3]);
+    add_trap(rooms_of_all_levels + 3 , n_rooms[3]);
+    add_black_gold(rooms_of_all_levels + 0 , n_rooms[3]);
+    add_weapon(rooms_of_all_levels + 3 , n_rooms[3]);
+    add_spell(rooms_of_all_levels + 3 , n_rooms[3]);
+    add_enemy2(rooms_of_all_levels + 3 , n_rooms[3]);
+    // enemy_test_ptr(rooms_of_all_levels + 3 , n_rooms[3]);
+
+    printf("done adding foods/golds/traps! \n");
+    printf("building corridors of levels \n");
+
+    build_corr2(n_rooms[0] , &corridors_of_all_levels , rooms_of_all_levels , 1 , corr_count + 0);
+    build_corr2(n_rooms[1] , &corridors_of_all_levels , rooms_of_all_levels , 2 , corr_count + 1);
+    build_corr2(n_rooms[2] , &corridors_of_all_levels , rooms_of_all_levels , 3 , corr_count + 2);
+    build_corr2(n_rooms[3] , &corridors_of_all_levels , rooms_of_all_levels , 4 , corr_count + 3);
+    
+    printf("done building corridors of levels! \n");
+
+  
+    me.pos.x =  rooms_of_all_levels[level_num - 1][1].corner.x  + rooms_of_all_levels[level_num - 1][1].length/2;
+    me.pos.y =  rooms_of_all_levels[level_num - 1][1].corner.y  + rooms_of_all_levels[level_num - 1][1].width/2;
+    
+
+    // Set getch() to be non-blocking
+    nodelay(stdscr, TRUE);
+
+    // Initialize audio
+    init_audio();
+    // int chosen_song = 3; // from settings
+    int current_song = chosen_song; // Start with song1
+
+    // Example: user chooses a soundtrack
+    choose_soundtrack(current_song);
+    int PiCk = 1;
+    int print_all_Map = 0;
+
+    // For calculating hits and damage, we work with a loop counter
+    int hits_loop_counter = 0;
+    int rate_hits;
+    if(difficulty == 1){
+        rate_hits = 17000;
+    }
+    else if(difficulty == 2){
+        rate_hits = 11000;
+    }
+    else if(difficulty == 3){
+        rate_hits = 9000;
+    }
+
+    int damage_coeff = 1;
+    int speed = 1; // doubles if we use speed spell  OR  temporary fast move is on
+    int temp_fast_move_loop_count = 0;
+    int n_t_units_fast_active = 3;
+    int spell_loop_counter = 0;
+    int time_unit = 8000;
+    int n_t_units_spell_active = 15;
+
+    int healing_coeff = 1;
+    int rate_heal = 50000;
+    int health_loop_count = 0;
+
+    int rate_get_hungry = 230000;
+    int hunger_loop_count = 0;
+
+    int giant_move_counter = 0;
+    int is_giant_moving = 0;
+    int n_t_units_giant_move = 5;
+    int undead_move_counter = 0;
+    int is_undead_moving = 0;
+    int n_t_units_undead_move = 5;
+    int snake_move_counter = 0;
+    int is_snake_moving = 0;
+
+    int Loop_Counter_change_food_with_time = 0;
+    int Rate_change_food_with_time = 500000;
+
+
+    while(1){
+        if(!print_all_Map){
+          for (int i = 0 ; i < n_rooms[level_num - 1] ; i++){
+                print_room(rooms_of_all_levels[level_num - 1] + i);
+            }
+        }
+        else{
+            for (int i = 0 ; i < n_rooms[level_num - 1] ; i++){
+                print_room_even_if_hidden(rooms_of_all_levels[level_num - 1] + i);
+            }
+        }
+        
+        // no corr char left unprinted:
+        for (int ro = 0 ; ro < n_rooms[level_num - 1] ; ro++){
+            room ey_baba = rooms_of_all_levels[level_num - 1][ro];
+            for(int door = 0 ; door < 2; door++){
+                int X = ey_baba.doors_x[door];
+                int Y = ey_baba.doors_y[door];
+                char there;
+                int x_c = X;
+                int y_c = Y;
+                if(Y == ey_baba.corner.y){
+                    there = mvinch(X , Y - 1) & A_CHARTEXT;
+                    y_c = Y - 1;
+                }
+                else if (X == ey_baba.corner.x + ey_baba.length - 1){
+                    there = mvinch(X+1 , Y) & A_CHARTEXT;
+                    x_c = X + 1;
+                }
+                else if (X == ey_baba.corner.x){
+                    there = mvinch(X-1 , Y) & A_CHARTEXT;
+                    x_c = X - 1;
+                }
+                // there = mvinch(X , Y - 1) & A_CHARTEXT;
+                if( !(there == '_' || there == '|' || there == '.' || there == '~' || there == '-' || there == ',' || there == '#'|| there == 'O' || there == 'f') ){
+                    init_pair(36, COLOR_YELLOW, COLOR_BLACK);
+                    if(x_c > 2){
+                        attron(COLOR_PAIR(36));
+                        mvprintw(x_c , y_c , "#");
+                        attroff(COLOR_PAIR(36));
+                    }
+                }
+            }
+        }
+        
+        // room exploration
+        if(rooms_of_all_levels[level_num - 1][in_which_room(rooms_of_all_levels[level_num - 1] , n_rooms[level_num - 1] , me)].hide == 1){
+            rooms_of_all_levels[level_num - 1][in_which_room(rooms_of_all_levels[level_num - 1] , n_rooms[level_num - 1] , me)].hide = 0;
+        }
+                
+        // Winning in the Treasure Room!!
+        if(current_song != 6 && level_num == 4 && rooms_of_all_levels[level_num - 1][in_which_room(rooms_of_all_levels[level_num - 1] , n_rooms[level_num - 1] , me)].type == 3
+           && !rooms_of_all_levels[level_num - 1][in_which_room(rooms_of_all_levels[level_num - 1] , n_rooms[level_num - 1] , me)].enemies[0]
+           && !rooms_of_all_levels[level_num - 1][in_which_room(rooms_of_all_levels[level_num - 1] , n_rooms[level_num - 1] , me)].enemies[1]
+           && !rooms_of_all_levels[level_num - 1][in_which_room(rooms_of_all_levels[level_num - 1] , n_rooms[level_num - 1] , me)].enemies[2]
+           && !rooms_of_all_levels[level_num - 1][in_which_room(rooms_of_all_levels[level_num - 1] , n_rooms[level_num - 1] , me)].enemies[3]
+           && !rooms_of_all_levels[level_num - 1][in_which_room(rooms_of_all_levels[level_num - 1] , n_rooms[level_num - 1] , me)].enemies[4]){
+                win(&current_song , &me);
+                chosen_song = 6;
+                me.won = 1;
+                snprintf(global_message, sizeof(char) * 100, "\xF0\x9F\x8E\x89 \xF0\x9F\x8E\x89 \xF0\x9F\x8E\x89                               ");       
+                // (global_message , "\xF0\x9F\x8E\x89");
+                if (strcmp(me.username , "GUEST") != 0) {
+                    char path[1024];
+                    snprintf(path, sizeof(path), "/home/arvin_rsl/Desktop/FOP_Project/Users_Folder/%s/user_data.txt", me.username);
+
+                    FILE *file = fopen(path, "r");
+                    if (file == NULL) {
+                        perror("Error opening file");
+                        return ;
+                    }
+                    char line[256];
+                    long long time_creation;
+                    long long now;
+
+                    // Get the current time in seconds since the Unix epoch
+                    now = (long long)time(NULL);
+                    while (fgets(line, sizeof(line), file)) {
+                        if (strncmp(line, "time: ", 6) == 0) {
+                            sscanf(line + 6, "%lld", &time_creation);
+                            break;
+                        }
+                    }
+                    // int log10_value = (int) log10((double)time_creation);
+                    // int log10_value_now = (int) log10((double)now);
+                    // int exper = 1000* (log10_value_now - log10_value);
+                    int exper = abs(now - time_creation) / 100;
+                    fclose(file);
+                    // I defined :
+                        // score: (int)(me.kills * me.gold_count * me.health / 100) 
+                        // experience: abs(t_now - time_creation) / 100      
+                    append_new_winner(Score_Table , me , (int)(me.kills * me.gold_count * me.health / 100)  , exper);
+                    save_data(me , rooms_of_all_levels , n_rooms , corridors_of_all_levels , corr_count , 4 , difficulty , chosen_song);
+                }
+        }
+
+        // Death!!
+        else if(me.health <= 0){
+            death();
+            snprintf(global_message, sizeof(char) * 100, "\xF0\x9F\x92\x80 \xF0\x9F\x92\x80 \xF0\x9F\x92\x80                                   ");       
+
+        }
+        // Nightmare Room song
+        else if(current_song != 5 && rooms_of_all_levels[level_num - 1][in_which_room(rooms_of_all_levels[level_num - 1] , n_rooms[level_num - 1] , me)].type == 4){
+            // Stop current soundtrack
+            stop_soundtrack();
+            current_song = 5;
+            init_audio();
+            choose_soundtrack(current_song);
+        }
+        // Enchant Room song
+        else if(current_song!=4 && rooms_of_all_levels[level_num - 1][in_which_room(rooms_of_all_levels[level_num - 1] , n_rooms[level_num - 1] , me)].type == 2){
+            // Enchant Room!!
+            stop_soundtrack();
+            current_song = 4;
+            init_audio();
+            choose_soundtrack(current_song);
+        }
+        // Regular room song
+        if(current_song != chosen_song
+            && rooms_of_all_levels[level_num - 1][in_which_room(rooms_of_all_levels[level_num - 1] , n_rooms[level_num - 1] , me)].type != 2
+            && rooms_of_all_levels[level_num - 1][in_which_room(rooms_of_all_levels[level_num - 1] , n_rooms[level_num - 1] , me)].type != 3
+            && rooms_of_all_levels[level_num - 1][in_which_room(rooms_of_all_levels[level_num - 1] , n_rooms[level_num - 1] , me)].type != 4){
+            stop_soundtrack();
+            current_song = chosen_song;
+            init_audio();
+            choose_soundtrack(current_song);
+        }
+        
+        print_corridors(corridors_of_all_levels[level_num - 1] , *(corr_count + level_num - 1));
+
+        print_top_message(global_message);
+        
+        print_bottom_message(&me , level_num);
+
+        attron(COLOR_PAIR(me.color) );
+        mvprintw(me.pos.x , me.pos.y , "%c" , 'A');
+        int ch = getch();
+        if (ch == 'q' || ch == 'Q') {
+            stop_soundtrack();
+            break;  
+        }
+        else if (ch == 's') {
+            // Stop current soundtrack
+            stop_soundtrack();
+
+            // Switch to the next song (don't switch)
+            current_song = 3;
+            init_audio();
+            choose_soundtrack(current_song);
+        }
+        else if (ch == '/') {
+            nodelay(stdscr, FALSE);
+            help(&me);  // Show help screen if '/' key is pressed
+            nodelay(stdscr, TRUE);
+        }
+        else if (ch == 'f' || ch == 'F') {
+            nodelay(stdscr, FALSE);
+            food_list(&me);  // Show food screen if 'f' key is pressed
+            nodelay(stdscr, TRUE);
+        }
+        else if (ch == 'i' || ch == 'I') {
+            nodelay(stdscr, FALSE);
+            weapon_list(&me);  // Show weapon screen if 'i' key is pressed
+            nodelay(stdscr, TRUE);
+        }
+        else if (ch == 'x' || ch == 'X') {
+            nodelay(stdscr, FALSE);
+            spell_list(&me);  // Show spell screen if 'x' key is pressed
+            nodelay(stdscr, TRUE);
+        }
+        else if (ch == 'P' || ch == 'p') {
+            Pause(rooms_of_all_levels , corridors_of_all_levels , me , n_rooms , corr_count , difficulty , chosen_song);
+        }
+        else if (ch == 'm' || ch == 'M') {
+            if(print_all_Map){
+                clear();
+                print_all_Map = 0;
+            }
+            else{
+                print_all_Map = 1;
+            }
+        }
+        else if (ch == 'c' || ch == 'C') {
+            if(me.food_count > 0){
+                if(me.how_full != 5){ // don't consume if health is full
+                
+                    // if (me.current_food != 3){
+                    //     if(me.how_full <= 4){
+                    //         me.how_full++; 
+                    //     }
+                    //     else{
+                    //         me.how_full = 5;  // maximum of health 
+                    //     }
+                    // }
+                    // else{
+                    //     me.how_full--; 
+                    // }
+
+                    switch (me.current_food)
+                    {
+                    case 0:
+                        // normal
+                        if (me.food[0] > 0){
+                            snprintf(global_message, sizeof(char) * 100, "Normal Food consumed \U0001F96A                                            ");
+                            me.food[0] -- ;
+                            me.food_count--;
+                            if (me.how_full < 5){
+                                me.how_full++;
+                            }
+                            else{
+                                me.how_full = 5;
+                            }
+                            break;
+                        }
+                        else{
+                            me.current_food = 3;
+                            if (me.food[3] > 0){
+                                me.food[3] --;
+                                snprintf(global_message, sizeof(char) * 100, "Rotten Food consumed \U0001F922                                           ");
+                                me.health --;
+                                me.food_count--;
+                                me.how_full--;
+                                break;
+                            }
+                            else{
+                                snprintf(global_message, sizeof(char) * 100, "\u2757 Out of Normal Food                                                ");
+                                break;
+                            }
+                        }
+                        break;
+                    case 1:
+                        // ideal
+                        if (me.food[1] > 0){
+                            snprintf(global_message, sizeof(char) * 100, "Ideal Food consumed \U0001F357                                            ");                    
+                            damage_coeff = 2;
+                            spell_loop_counter = 0;
+                            me.food[1] -- ;
+                            me.food_count--;
+                            if (me.how_full < 5){
+                                me.how_full++;
+                            }
+                            else{
+                                me.how_full = 5;
+                            }
+                            break;
+                        }
+                        else{
+                            snprintf(global_message, sizeof(char) * 100, "\u2757 Out of Ideal Food                                                ");
+                            break;
+                        }
+
+                        break;
+                    case 2:
+                        // magic
+                        if (me.food[2] > 0){
+                            snprintf(global_message, sizeof(char) * 100, "Magical Food consumed \U0001F36D                                            ");
+                            speed = 2;
+                            spell_loop_counter = 0;
+                            me.food[2] -- ;
+                            me.food_count--;
+                            if (me.how_full < 5){
+                                me.how_full++;
+                            }
+                            else{
+                                me.how_full = 5;
+                            }
+                            break;
+                        }
+                        else{
+                            snprintf(global_message, sizeof(char) * 100, "\u2757 Out of Magical Food                                                ");
+                            break;
+                        }
+
+                        break;
+                    case 3:
+                        // rotten
+
+                        if (me.food[3] > 0){
+                            snprintf(global_message, sizeof(char) * 100, "Rotten Food consumed \U0001F922                                           ");
+                            me.food[3] -- ;
+                            me.health --;
+                            me.food_count--;
+                            me.how_full--;
+                            break;
+                        }
+                        else{
+                            me.current_food = 0;
+                            if (me.food[0] > 0){
+                                me.food[0] --;
+                                snprintf(global_message, sizeof(char) * 100, "Normal Food consumed \U0001F96A                                            ");
+                                me.food_count--;
+                                me.how_full++;
+                                break;
+                            }
+                            else{
+                                snprintf(global_message, sizeof(char) * 100, "\u2757 Out of Normal Food                                                ");
+                                break;
+                            }
+                        }
+                        break;
+                    default:
+                        break;
+                    }
+
+                }
+                else{
+                    snprintf(global_message, sizeof(char) * 100, "\u2755 You are already full                                          ");
+                }
+
+            }
+            else{
+                snprintf(global_message, sizeof(char) * 100, "\u2757 Out of food                                                ");
+            }
+
+        }
+        else if (ch == ' ') {
+            // attack with current weapon in hand
+
+            int room_index = in_which_room(rooms_of_all_levels[level_num - 1] , n_rooms[level_num - 1] , me);
+                // 0 : Mace (m)
+                // 1 : Dagger (d)
+                // 2 : Magic Wand (w)
+                // 3 : Normal Arrow (a)
+                // 4 : Sword (s)
+            
+            switch (me.current_weapon)
+            {
+                int range = 5; 
+                int throw_direction = '0';
+                int direction = 0;
+                int x_next = me.pos.x;
+                int y_next = me.pos.y;
+                /// Close range
+                case 0:
+                    // mace
+                    int Damage_Mace = damage_coeff * 5;
+                    if(near_deamon(me)){
+                        int alive_before;
+                        int alive_now;
+                        if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[0] > 0){
+                            alive_before = 1;
+                        }
+                        else{
+                            alive_before =0;
+                        }
+
+                        rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[0] -= Damage_Mace;
+
+                        if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[0] > 0){
+                            alive_now = 1;
+                        }
+                        else{
+                            alive_now =0;
+                        }
+
+                        if(alive_before && !alive_now){
+                            clear();
+                            me.kills++;
+                            snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Deamon was killed!                                      "); 
+                        }
+                        break;
+                    }
+                    else if(near_fire_breathing_monster(me)){
+                        int alive_before;
+                        int alive_now;
+                        if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[1] > 0){
+                            alive_before = 1;
+                        }
+                        else{
+                            alive_before =0;
+                        }
+
+                        rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[1] -= Damage_Mace;
+
+                        if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[1] > 0){
+                            alive_now = 1;
+                        }
+                        else{
+                            alive_now =0;
+                        }
+
+                        if(alive_before && !alive_now){
+                            clear();
+                            me.kills++;
+
+                            snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Fire-Breathing Monster was killed!                             "); 
+                        }
+                        break;
+                    }
+                    else if(near_giant(rooms_of_all_levels[level_num - 1] , n_rooms[level_num - 1] , me)){
+                        int alive_before;
+                        int alive_now;
+                        if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[2] > 0){
+                            alive_before = 1;
+                        }
+                        else{
+                            alive_before =0;
+                        }
+
+                        rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[2] -= Damage_Mace;
+
+                        if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[2] > 0){
+                            alive_now = 1;
+                        }
+                        else{
+                            alive_now =0;
+                        }
+
+                        if(alive_before && !alive_now){
+                            clear();
+                            me.kills++;
+
+                            is_giant_moving = 0;
+                            snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Giant was killed!                                        "); 
+                        }
+                        break;
+                    }
+                    else if(near_snake(me)){
+                        int alive_before;
+                        int alive_now;
+                        if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[3] > 0){
+                            alive_before = 1;
+                        }
+                        else{
+                            alive_before =0;
+                        }
+
+                        rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[3] -= Damage_Mace;
+
+                        if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[3] > 0){
+                            alive_now = 1;
+                        }
+                        else{
+                            alive_now =0;
+                        }
+
+                        if(alive_before && !alive_now){
+                            clear();
+                            me.kills++;
+
+                            is_snake_moving = 0;
+                            snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Snake was killed!                                            "); 
+                        }
+                        break;
+                    }
+                    else if(near_undeed(me)){
+                        int alive_before;
+                        int alive_now;
+                        if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[4] > 0){
+                            alive_before = 1;
+                        }
+                        else{
+                            alive_before =0;
+                        }
+
+                        rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[4] -= Damage_Mace;
+
+                        if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[4] > 0){
+                            alive_now = 1;
+                        }
+                        else{
+                            alive_now =0;
+                        }
+
+                        if(alive_before && !alive_now){
+                            clear();
+                            me.kills++;
+
+                            is_undead_moving = 0;
+                            snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Undead is now very much dead ! :)                                      "); 
+                        }
+                        break;
+                    }
+                    break;
+
+                case 4:
+                    // sword
+                    int Damage_Sword = damage_coeff * 10;
+                    if(near_deamon(me)){
+                        int alive_before;
+                        int alive_now;
+                        if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[0] > 0){
+                            alive_before = 1;
+                        }
+                        else{
+                            alive_before =0;
+                        }
+
+                        rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[0] -= Damage_Sword;
+
+                        if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[0] > 0){
+                            alive_now = 1;
+                        }
+                        else{
+                            alive_now =0;
+                        }
+
+                        if(alive_before && !alive_now){
+                            clear();
+                            me.kills++;
+
+                            snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Deamon was killed!                                      "); 
+                        }
+                        break;
+                    }
+                    else if(near_fire_breathing_monster(me)){
+                        int alive_before;
+                        int alive_now;
+                        if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[1] > 0){
+                            alive_before = 1;
+                        }
+                        else{
+                            alive_before =0;
+                        }
+
+                        rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[1] -= Damage_Sword;
+
+                        if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[1] > 0){
+                            alive_now = 1;
+                        }
+                        else{
+                            alive_now =0;
+                        }
+
+                        if(alive_before && !alive_now){
+                            clear();
+                            me.kills++;
+
+                            snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Fire-Breathing Monster was killed!                             "); 
+                        }
+                        break;
+                    }
+                    else if(near_giant(rooms_of_all_levels[level_num - 1] , n_rooms[level_num - 1] , me)){
+                        int alive_before;
+                        int alive_now;
+                        if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[2] > 0){
+                            alive_before = 1;
+                        }
+                        else{
+                            alive_before =0;
+                        }
+
+                        rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[2] -= Damage_Sword;
+
+                        if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[2] > 0){
+                            alive_now = 1;
+                        }
+                        else{
+                            alive_now =0;
+                        }
+
+                        if(alive_before && !alive_now){
+                            clear();
+                            is_giant_moving = 0;
+                            me.kills++;
+
+                            snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Giant was killed!                                        "); 
+                        }
+                        break;
+                    }
+                    else if(near_snake(me)){
+                        int alive_before;
+                        int alive_now;
+                        if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[3] > 0){
+                            alive_before = 1;
+                        }
+                        else{
+                            alive_before =0;
+                        }
+
+                        rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[3] -= Damage_Sword;
+
+                        if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[3] > 0){
+                            alive_now = 1;
+                        }
+                        else{
+                            alive_now =0;
+                        }
+
+                        if(alive_before && !alive_now){
+                            clear();
+                            is_snake_moving = 0;
+                            me.kills++;
+
+                            snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Snake was killed!                                            "); 
+                        }
+                        break;
+                    }
+                    else if(near_undeed(me)){
+                        int alive_before;
+                        int alive_now;
+                        if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[4] > 0){
+                            alive_before = 1;
+                        }
+                        else{
+                            alive_before =0;
+                        }
+
+                        rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[4] -= Damage_Sword;
+
+                        if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[4] > 0){
+                            alive_now = 1;
+                        }
+                        else{
+                            alive_now =0;
+                        }
+
+                        if(alive_before && !alive_now){
+                            clear();
+                            is_undead_moving = 0;
+                            me.kills++;
+
+                            snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Undead is now very much dead ! :)                                      "); 
+                        }
+                        break;
+                    }
+                    break;
+                
+                /// Far range
+        
+                case 1:
+                    // dagger
+                    int Damage_Dagger = damage_coeff * 12;
+                    range = 5;
+                    throw_direction = '0';
+                    while (! (throw_direction == '8' || throw_direction == 'j' || throw_direction == 'J'
+                        || throw_direction == '2' || throw_direction == 'k' || throw_direction == 'K'
+                        || throw_direction == '6' || throw_direction == 'l' || throw_direction == 'L'
+                        || throw_direction == '4' || throw_direction == 'h' || throw_direction == 'H'
+                        || throw_direction == '9' || throw_direction == 'y' || throw_direction == 'Y'
+                        || throw_direction == '7' || throw_direction == 'u' || throw_direction == 'U'
+                        || throw_direction == '3' || throw_direction == 'n' || throw_direction == 'N'
+                        || throw_direction == '1' || throw_direction == 'b' || throw_direction == 'B') ){
+                            throw_direction = getch();
+                    }
+
+                    direction = 0;
+                    x_next = me.pos.x;
+                    y_next = me.pos.y;
+                    // int x_moves[] = {-1 , +1 , +0 , +0 , -1 , -1 , +1 , +1}; // up , down , right , left , up-right , up-left , down-right , down-left
+                    // int y_moves[] = {+0 , +0 , +1 , -1 , +1 , -1 , +1 , -1};
+                    if (throw_direction == '8' || throw_direction == 'j' || throw_direction == 'J'){
+                        direction = 0;
+                    }
+                    else if (throw_direction == '2' || throw_direction == 'k' || throw_direction == 'K'){
+                        direction = 1;
+                    }
+                    else if (throw_direction == '6' || throw_direction == 'l' || throw_direction == 'L'){
+                        direction = 2;
+                    }
+                    else if (throw_direction == '4' || throw_direction == 'h' || throw_direction == 'H'){
+                        direction =3;
+                    }
+                    else if (throw_direction == '9' || throw_direction == 'y' || throw_direction == 'Y'){
+                        direction = 4;
+                    }
+                    else if (throw_direction == '7' || throw_direction == 'u' || throw_direction == 'U'){
+                        direction = 5;
+                    }
+                    else if (throw_direction == '3' || throw_direction == 'n' || throw_direction == 'N'){
+                        direction = 6;
+                    }
+                    else if (throw_direction == '1' || throw_direction == 'b' || throw_direction == 'B'){
+                        direction = 7;
+                    }
+                    
+                    for(int go = 0 ; go < range ; go++){
+                        x_next += x_moves[direction];
+                        y_next += y_moves[direction];
+                        char There = mvinch(x_next , y_next) & A_CHARTEXT;
+                        if (valid_move(x_next , y_next) && There != 'G' && There != '+' && There != '<'){
+                            continue;
+                        }
+                        else{
+
+                            if(There == 'D'){
+                                clear();
+                                snprintf(global_message, sizeof(char) * 100, "Dagger hit the Deamon                                        "); 
+                            
+                                int alive_before;
+                                int alive_now;
+                                if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[0] > 0){
+                                    alive_before = 1;
+                                }
+                                else{
+                                    alive_before =0;
+                                }
+
+                                rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[0] -= Damage_Dagger;
+
+                                if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[0] > 0){
+                                    alive_now = 1;
+                                }
+                                else{
+                                    alive_now =0;
+                                }
+
+                                if(alive_before && !alive_now){
+                                    clear();
+                                    me.kills++;
+                                    snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Deamon was killed!                                      "); 
+                                }
+                                break;
+                            }
+                            else if (There == 'F'){
+                                clear();
+                                snprintf(global_message, sizeof(char) * 100, "Dagger hit the Fire-Breathin Monster                                        "); 
+                            
+                                int alive_before;
+                                int alive_now;
+                                if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[1] > 0){
+                                    alive_before = 1;
+                                }
+                                else{
+                                    alive_before =0;
+                                }
+
+                                rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[1] -= Damage_Dagger;
+
+                                if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[1] > 0){
+                                    alive_now = 1;
+                                }
+                                else{
+                                    alive_now =0;
+                                }
+
+                                if(alive_before && !alive_now){
+                                    clear();
+                                    me.kills++;
+
+                                    snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Fire-Breathing Monster was killed!                                  "); 
+                                }
+                                break;
+                            }
+                            else if (There == 'G' && room_index != 0){
+                                clear();
+                                snprintf(global_message, sizeof(char) * 100, "Dagger hit the Giant                                        "); 
+                            
+                                int alive_before;
+                                int alive_now;
+                                if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[2] > 0){
+                                    alive_before = 1;
+                                }
+                                else{
+                                    alive_before =0;
+                                }
+
+                                rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[2] -= Damage_Dagger;
+
+                                if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[2] > 0){
+                                    alive_now = 1;
+                                }
+                                else{
+                                    alive_now =0;
+                                }
+
+                                if(alive_before && !alive_now){
+                                    clear();
+                                    is_giant_moving = 0;
+                                    me.kills++;
+
+                                    snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Giant was killed!                                          "); 
+                                }
+                                break;
+                            }
+                            else if (There == 'S'){
+                                clear();
+                                snprintf(global_message, sizeof(char) * 100, "Dagger hit the Snake                                        "); 
+                            
+                                int alive_before;
+                                int alive_now;
+                                if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[3] > 0){
+                                    alive_before = 1;
+                                }
+                                else{
+                                    alive_before =0;
+                                }
+
+                                rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[3] -= Damage_Dagger;
+
+                                if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[3] > 0){
+                                    alive_now = 1;
+                                }
+                                else{
+                                    alive_now =0;
+                                }
+
+                                if(alive_before && !alive_now){
+                                    clear();
+                                    is_snake_moving = 0;
+                                    me.kills++;
+
+                                    snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Snake was killed!                                          "); 
+                                }
+                                break;
+                            }
+                            else if (There == 'U'){
+                                clear();
+                                snprintf(global_message, sizeof(char) * 100, "Dagger hit the Undead                                        "); 
+                                int alive_before;
+                                int alive_now;
+                                if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[4] > 0){
+                                    alive_before = 1;
+                                }
+                                else{
+                                    alive_before =0;
+                                }
+
+                                rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[4] -= Damage_Dagger;
+
+                                if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[4] > 0){
+                                    alive_now = 1;
+                                }
+                                else{
+                                    alive_now =0;
+                                }
+
+                                if(alive_before && !alive_now){
+                                    clear();
+                                    is_undead_moving = 0;
+                                    me.kills++;
+
+                                    snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Undead is now very much dead ! :)                                      "); 
+                                }
+                                break;
+                            }
+                            else{
+                                clear();
+                                snprintf(global_message, sizeof(char) * 100, "Dagger didn't hit anything!                                    "); 
+                                break;
+                            }
+                        }
+                    }
+                    if (me.weapons[1] <= 0){
+                        clear();
+                        snprintf(global_message, sizeof(char) * 100, "\xE2\x9D\x97 You are out of Daggers                                       "); 
+                    }
+                    else{
+                        me.weapons[1]--;
+                    }
+
+                    break;
+
+                case 3:
+                    // arrow
+                    int Damage_Arrow = damage_coeff * 5;
+                    range = 5; // برد پرتاب
+                    throw_direction = '0';
+                    while (! (throw_direction == '8' || throw_direction == 'j' || throw_direction == 'J'
+                        || throw_direction == '2' || throw_direction == 'k' || throw_direction == 'K'
+                        || throw_direction == '6' || throw_direction == 'l' || throw_direction == 'L'
+                        || throw_direction == '4' || throw_direction == 'h' || throw_direction == 'H'
+                        || throw_direction == '9' || throw_direction == 'y' || throw_direction == 'Y'
+                        || throw_direction == '7' || throw_direction == 'u' || throw_direction == 'U'
+                        || throw_direction == '3' || throw_direction == 'n' || throw_direction == 'N'
+                        || throw_direction == '1' || throw_direction == 'b' || throw_direction == 'B') ){
+                            throw_direction = getch();
+                    }
+
+                    direction = 0;
+                    x_next = me.pos.x;
+                    y_next = me.pos.y;
+                    // int x_moves[] = {-1 , +1 , +0 , +0 , -1 , -1 , +1 , +1}; // up , down , right , left , up-right , up-left , down-right , down-left
+                    // int y_moves[] = {+0 , +0 , +1 , -1 , +1 , -1 , +1 , -1};
+                    if (throw_direction == '8' || throw_direction == 'j' || throw_direction == 'J'){
+                        direction = 0;
+                    }
+                    else if (throw_direction == '2' || throw_direction == 'k' || throw_direction == 'K'){
+                        direction = 1;
+                    }
+                    else if (throw_direction == '6' || throw_direction == 'l' || throw_direction == 'L'){
+                        direction = 2;
+                    }
+                    else if (throw_direction == '4' || throw_direction == 'h' || throw_direction == 'H'){
+                        direction =3;
+                    }
+                    else if (throw_direction == '9' || throw_direction == 'y' || throw_direction == 'Y'){
+                        direction = 4;
+                    }
+                    else if (throw_direction == '7' || throw_direction == 'u' || throw_direction == 'U'){
+                        direction = 5;
+                    }
+                    else if (throw_direction == '3' || throw_direction == 'n' || throw_direction == 'N'){
+                        direction = 6;
+                    }
+                    else if (throw_direction == '1' || throw_direction == 'b' || throw_direction == 'B'){
+                        direction = 7;
+                    }
+                    
+                    for(int go = 0 ; go < range ; go++){
+                        x_next += x_moves[direction];
+                        y_next += y_moves[direction];
+                        char There = mvinch(x_next , y_next) & A_CHARTEXT;
+                        if (valid_move(x_next , y_next) && There != 'G' && There != '+' && There != '<'){
+                            continue;
+                        }
+                        else{
+
+                            if(There == 'D'){
+                                clear();
+                                snprintf(global_message, sizeof(char) * 100, "Arrow hit the Deamon                                        "); 
+                            
+                                int alive_before;
+                                int alive_now;
+                                if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[0] > 0){
+                                    alive_before = 1;
+                                }
+                                else{
+                                    alive_before =0;
+                                }
+
+                                rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[0] -= Damage_Arrow;
+
+                                if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[0] > 0){
+                                    alive_now = 1;
+                                }
+                                else{
+                                    alive_now =0;
+                                }
+
+                                if(alive_before && !alive_now){
+                                    clear();
+                                    me.kills++;
+
+                                    snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Deamon was killed!                                      "); 
+                                }
+                                break;
+                            }
+                            else if (There == 'F'){
+                                clear();
+                                snprintf(global_message, sizeof(char) * 100, "Arrow hit the Fire-Breathin Monster                                        "); 
+                            
+                                int alive_before;
+                                int alive_now;
+                                if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[1] > 0){
+                                    alive_before = 1;
+                                }
+                                else{
+                                    alive_before =0;
+                                }
+
+                                rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[1] -= Damage_Arrow;
+
+                                if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[1] > 0){
+                                    alive_now = 1;
+                                }
+                                else{
+                                    alive_now =0;
+                                }
+
+                                if(alive_before && !alive_now){
+                                    clear();
+                                    me.kills++;
+
+                                    snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Fire-Breathing Monster was killed!                                  "); 
+                                }
+                                break;
+                            }
+                            else if (There == 'G' && room_index != 0){
+                                clear();
+                                snprintf(global_message, sizeof(char) * 100, "Arrow hit the Giant                                        "); 
+                            
+                                int alive_before;
+                                int alive_now;
+                                if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[2] > 0){
+                                    alive_before = 1;
+                                }
+                                else{
+                                    alive_before =0;
+                                }
+
+                                rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[2] -= Damage_Arrow;
+
+                                if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[2] > 0){
+                                    alive_now = 1;
+                                }
+                                else{
+                                    alive_now =0;
+                                }
+
+                                if(alive_before && !alive_now){
+                                    clear();
+                                    me.kills++;
+
+                                    is_giant_moving = 0;
+                                    snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Giant was killed!                                          "); 
+                                }
+                                break;
+                            }
+                            else if (There == 'S'){
+                                clear();
+                                snprintf(global_message, sizeof(char) * 100, "Arrow hit the Snake                                        "); 
+                            
+                                int alive_before;
+                                int alive_now;
+                                if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[3] > 0){
+                                    alive_before = 1;
+                                }
+                                else{
+                                    alive_before =0;
+                                }
+
+                                rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[3] -= Damage_Arrow;
+
+                                if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[3] > 0){
+                                    alive_now = 1;
+                                }
+                                else{
+                                    alive_now =0;
+                                }
+
+                                if(alive_before && !alive_now){
+                                    clear();
+                                    me.kills++;
+
+                                    is_snake_moving = 0;
+                                    snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Snake was killed!                                          "); 
+                                }
+                                break;
+                            }
+                            else if (There == 'U'){
+                                clear();
+                                snprintf(global_message, sizeof(char) * 100, "Arrow hit the Undead                                        "); 
+                                int alive_before;
+                                int alive_now;
+                                if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[4] > 0){
+                                    alive_before = 1;
+                                }
+                                else{
+                                    alive_before =0;
+                                }
+
+                                rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[4] -= Damage_Arrow;
+
+                                if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[4] > 0){
+                                    alive_now = 1;
+                                }
+                                else{
+                                    alive_now =0;
+                                }
+
+                                if(alive_before && !alive_now){
+                                    clear();
+                                    me.kills++;
+
+                                    is_undead_moving = 0;
+                                    snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Undead is now very much dead ! :)                                      "); 
+                                }
+                                break;
+                            }
+                            else if(There == '.' || There == '~' || There == '-' ||There == ',' || There == '+' || There == '<') {
+                                clear();
+                                snprintf(global_message, sizeof(char) * 100, "Arrow didn't hit anything!                                    "); 
+                                break;
+                            }
+                            else{
+                                clear();
+                                snprintf(global_message, sizeof(char) * 100, "Arrow didn't hit anything!                                    "); 
+                                break;
+                            }
+                        }
+                    }
+                    if (me.weapons[3] <= 0){
+                        clear();
+                        snprintf(global_message, sizeof(char) * 100, "\xE2\x9D\x97 You are out of Arrows                                        "); 
+                    }
+                    else{
+                        me.weapons[3]--;
+                    }
+                    break;
+
+                case 2:
+                    // wand
+                    int Wand_Damage = damage_coeff * 15;
+                    range = 10; // برد پرتاب
+                    throw_direction = '0';
+                    while (! (throw_direction == '8' || throw_direction == 'j' || throw_direction == 'J'
+                        || throw_direction == '2' || throw_direction == 'k' || throw_direction == 'K'
+                        || throw_direction == '6' || throw_direction == 'l' || throw_direction == 'L'
+                        || throw_direction == '4' || throw_direction == 'h' || throw_direction == 'H'
+                        || throw_direction == '9' || throw_direction == 'y' || throw_direction == 'Y'
+                        || throw_direction == '7' || throw_direction == 'u' || throw_direction == 'U'
+                        || throw_direction == '3' || throw_direction == 'n' || throw_direction == 'N'
+                        || throw_direction == '1' || throw_direction == 'b' || throw_direction == 'B') ){
+                            throw_direction = getch();
+                    }
+                    
+
+                    direction = 0;
+                    x_next = me.pos.x;
+                    y_next = me.pos.y;
+                    // int x_moves[] = {-1 , +1 , +0 , +0 , -1 , -1 , +1 , +1}; // up , down , right , left , up-right , up-left , down-right , down-left
+                    // int y_moves[] = {+0 , +0 , +1 , -1 , +1 , -1 , +1 , -1};
+                    if (throw_direction == '8' || throw_direction == 'j' || throw_direction == 'J'){
+                        direction = 0;
+                    }
+                    else if (throw_direction == '2' || throw_direction == 'k' || throw_direction == 'K'){
+                        direction = 1;
+                    }
+                    else if (throw_direction == '6' || throw_direction == 'l' || throw_direction == 'L'){
+                        direction = 2;
+                    }
+                    else if (throw_direction == '4' || throw_direction == 'h' || throw_direction == 'H'){
+                        direction = 3;
+                    }
+                    else if (throw_direction == '9' || throw_direction == 'y' || throw_direction == 'Y'){
+                        direction = 4;
+                    }
+                    else if (throw_direction == '7' || throw_direction == 'u' || throw_direction == 'U'){
+                        direction = 5;
+                    }
+                    else if (throw_direction == '3' || throw_direction == 'n' || throw_direction == 'N'){
+                        direction = 6;
+                    }
+                    else if (throw_direction == '1' || throw_direction == 'b' || throw_direction == 'B'){
+                        direction = 7;
+                    }
+                    
+                    for(int go = 0 ; go < range ; go++){
+                        x_next += x_moves[direction];
+                        y_next += y_moves[direction];
+                        char There = mvinch(x_next , y_next) & A_CHARTEXT;
+                        if (valid_move(x_next , y_next) && There != 'G' && There != '+' && There != '<'){
+                            continue;
+                        }
+                        else{
+
+                            if(There == 'D'){
+                                clear();
+                                snprintf(global_message, sizeof(char) * 100, "Magic Wand hit the Deamon                                        "); 
+                                rooms_of_all_levels[level_num - 1][room_index].can_enemy_move[0] = 0;
+                                int alive_before;
+                                int alive_now;
+                                if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[0] > 0){
+                                    alive_before = 1;
+                                }
+                                else{
+                                    alive_before =0;
+                                }
+
+                                rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[0] -= Wand_Damage;
+                                rooms_of_all_levels[level_num - 1][room_index].can_enemy_move[0] = 0;
+
+                                if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[0] > 0){
+                                    alive_now = 1;
+                                }
+                                else{
+                                    alive_now =0;
+                                }
+
+                                if(alive_before && !alive_now){
+                                    clear();
+                                    me.kills++;
+
+                                    snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Deamon was killed!                                      "); 
+                                }
+                                break;
+                            }
+                            else if (There == 'F'){
+                                clear();
+                                snprintf(global_message, sizeof(char) * 100, "Magic Wand hit the Fire-Breathin Monster                                        "); 
+                                rooms_of_all_levels[level_num - 1][room_index].can_enemy_move[1] = 0;
+                            
+                                int alive_before;
+                                int alive_now;
+                                if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[1] > 0){
+                                    alive_before = 1;
+                                }
+                                else{
+                                    alive_before =0;
+                                }
+
+                                rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[1] -= Wand_Damage;
+                                rooms_of_all_levels[level_num - 1][room_index].can_enemy_move[1] = 0;
+
+
+                                if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[1] > 0){
+                                    alive_now = 1;
+                                }
+                                else{
+                                    alive_now =0;
+                                }
+
+                                if(alive_before && !alive_now){
+                                    clear();
+                                    me.kills++;
+
+                                    snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Fire-Breathing Monster was killed!                                  "); 
+                                }
+                                break;
+                            }
+                            else if (There == 'G' && room_index != 0){
+                                clear();
+                                snprintf(global_message, sizeof(char) * 100, "Magic Wand hit the Giant                                        "); 
+                                rooms_of_all_levels[level_num - 1][room_index].can_enemy_move[2] = 0;
+                            
+                                int alive_before;
+                                int alive_now;
+                                if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[2] > 0){
+                                    alive_before = 1;
+                                }
+                                else{
+                                    alive_before =0;
+                                }
+
+                                rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[2] -= Wand_Damage;
+                                rooms_of_all_levels[level_num - 1][room_index].can_enemy_move[2] = 0;
+
+
+                                if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[2] > 0){
+                                    alive_now = 1;
+                                }
+                                else{
+                                    alive_now =0;
+                                }
+
+                                if(alive_before && !alive_now){
+                                    clear();
+                                    me.kills++;
+
+                                    is_giant_moving = 0;
+                                    snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Giant was killed!                                          "); 
+                                }
+                                break;
+                            }
+                            else if (There == 'S'){
+                                clear();
+                                snprintf(global_message, sizeof(char) * 100, "Magic Wand hit the Snake                                        "); 
+                                rooms_of_all_levels[level_num - 1][room_index].can_enemy_move[3] = 0;
+                            
+                                int alive_before;
+                                int alive_now;
+                                if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[3] > 0){
+                                    alive_before = 1;
+                                }
+                                else{
+                                    alive_before =0;
+                                }
+
+                                rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[3] -= Wand_Damage;
+                                rooms_of_all_levels[level_num - 1][room_index].can_enemy_move[3] = 0;
+
+                                if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[3] > 0){
+                                    alive_now = 1;
+                                }
+                                else{
+                                    alive_now =0;
+                                }
+
+                                if(alive_before && !alive_now){
+                                    clear();
+                                    me.kills++;
+
+                                    is_snake_moving = 0;
+                                    snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Snake was killed!                                          "); 
+                                }
+                                break;
+                            }
+                            else if (There == 'U'){
+                                clear();
+                                snprintf(global_message, sizeof(char) * 100, "Magic Wand hit the Undead                                        "); 
+                                rooms_of_all_levels[level_num - 1][room_index].can_enemy_move[4] = 0;
+                                
+                                int alive_before;
+                                int alive_now;
+                                if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[4] > 0){
+                                    alive_before = 1;
+                                }
+                                else{
+                                    alive_before =0;
+                                }
+
+                                rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[4] -= Wand_Damage;
+                                rooms_of_all_levels[level_num - 1][room_index].can_enemy_move[4] = 0;
+
+                                if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[4] > 0){
+                                    alive_now = 1;
+                                }
+                                else{
+                                    alive_now =0;
+                                }
+
+                                if(alive_before && !alive_now){
+                                    clear();
+                                    me.kills++;
+
+                                    is_undead_moving = 0;
+                                    snprintf(global_message, sizeof(char) * 100, "\U0001F4AA Undead is now very much dead ! :)                                      "); 
+                                }
+                                break;
+                            }
+                            else if(There == '.' || There == '~' || There == '-' ||There == ',' || There == '+' || There == '<') {
+                                clear();
+                                snprintf(global_message, sizeof(char) * 100, "Magic Wand didn't hit anything!                                    "); 
+                                break;
+                            }
+                            else{
+                                clear();
+                                snprintf(global_message, sizeof(char) * 100, "Magic Wand didn't hit anything!                                    "); 
+                                break;
+                            }
+                        }
+                    }
+                    if (me.weapons[2] <= 0){
+                        clear();
+                        snprintf(global_message, sizeof(char) * 100, "\xE2\x9D\x97 You are out of Magic Wands                                   "); 
+                    }
+                    else{
+                        me.weapons[2]--;
+                    }
+                    break;
+                
+                default:
+                    break;
+            }
+
+            for (int enem = 0 ; enem < 5 ; enem++){
+                if(rooms_of_all_levels[level_num - 1][room_index].enemies_remained_health[enem] <= 0){
+                    rooms_of_all_levels[level_num - 1][room_index].enemies[enem] = 0; // vanish
+                }
+            }
+
+        }
+        else if (ch == 'Z' || ch == 'z') {
+            // using spells
+            // 0 : Health → H
+            // 1 : Speed   → $
+            // 2 : Damage  → !
+            switch (me.current_spell)
+            {
+                case 0:
+                    // health
+                    if (me.spells[0] > 0){
+                        me.spells[0]--;
+                        clear();
+                        snprintf(global_message, sizeof(char) * 100, "\U0001F9EA Health spell activated! You now heal 2x faster \U0001F33F                "); 
+                        healing_coeff = 2;
+                        //////////////////////////////////////////////////////////////////////////
+                    }
+                    else{
+                        me.spells[0] = 0;
+                        clear();
+                        snprintf(global_message, sizeof(char) * 100, "\xE2\x9D\x97 You are out of Health spells                              ");  
+                    }
+                    break;
+                case 1:
+                    // speed
+                    if (me.spells[1] > 0){
+                        me.spells[1]--;
+                        speed = 2;
+                        clear();
+                        snprintf(global_message, sizeof(char) * 100, "\U0001F9EA Speed spell activated! You are now 2x faster \u26A1                      "); 
+                        spell_loop_counter = 0;
+                        // damage_coeff = 2;
+                        //////////////////////////////////////////////////////////////////////////
+                    }
+                    else{
+                        me.spells[1] = 0;
+                        clear();
+                        snprintf(global_message, sizeof(char) * 100, "\xE2\x9D\x97 You are out of Speed spells                              ");  
+                    }
+
+                    break;
+                case 2:
+                    // damage
+                    if (me.spells[2] > 0){
+                        me.spells[2]--;
+                        clear();
+                        snprintf(global_message, sizeof(char) * 100, "\U0001F9EA  Damage spell activated! Your hits are now 2x stronger \U0001F4A5                  "); 
+                        damage_coeff = 2;
+                        spell_loop_counter = 0;
+                    }
+                    else{
+                        me.spells[2] = 0;
+                        clear();
+                        snprintf(global_message, sizeof(char) * 100, "\xE2\x9D\x97 You are out of Damage spells                              ");  
+                    }
+
+                    break;
+                default:
+                    break;
+            }
+        }
+        else if (ch == 'v' || ch == 'V') {
+            speed = 2;
+            temp_fast_move_loop_count = 0;
+            snprintf(global_message, sizeof(char) * 100, "\U0001F3C3 Temporary Fast Move activated! You now run 2x faster        "); 
+
+        }
+        
+        // spell time limit :))
+        if ((speed != 1 || damage_coeff != 1 || healing_coeff != 1)&& spell_loop_counter/time_unit < n_t_units_spell_active){
+            spell_loop_counter++;
+            attron(COLOR_PAIR(160));
+            mvprintw(LINES - 1 , COLS - 1 - strlen("00:00") , "00:%d " , n_t_units_spell_active - spell_loop_counter/time_unit);
+            attroff(COLOR_PAIR(160));
+        }
+        else if ((speed != 1 || damage_coeff != 1 || healing_coeff != 1)){
+            clear();
+            spell_loop_counter = 0;
+            speed = 1;
+            damage_coeff = 1;
+            healing_coeff = 1;
+        }
+
+
+        // temp fast move time limit :))
+        if ((speed != 1 ) && temp_fast_move_loop_count/time_unit < n_t_units_fast_active){
+            temp_fast_move_loop_count++;
+            attron(COLOR_PAIR(160));
+            mvprintw(LINES - 1 , COLS - 1 - strlen("00:00") , "00:%d " , n_t_units_fast_active - temp_fast_move_loop_count/time_unit);
+            attroff(COLOR_PAIR(160));
+        }
+        else if ((speed != 1)){
+            clear();
+            temp_fast_move_loop_count = 0;
+            speed = 1;
+            snprintf(global_message, sizeof(char) * 100, "\U0001F6B6 Temporary Fast Move timed out!                             "); 
+
+        }
+
+
+
+        int my_x_before = me.pos.x;
+        int my_y_before = me.pos.y;
+        movement2(PiCk , ch , &me , rooms_of_all_levels, n_rooms[level_num - 1] , global_message , &level_num , speed);
+        int my_x_after = me.pos.x;
+        int my_y_after = me.pos.y;
+
+        attroff(COLOR_PAIR(me.color));
+        // print_corridors(corridors_of_all_levels[level_num - 1] , *(corr_count + level_num - 1));
+        attron(COLOR_PAIR(me.color));
+        mvprintw(me.pos.x , me.pos.y , "%c" , 'A');
+        attroff(COLOR_PAIR(me.color) );
+
+        if (mvinch(0,0) & A_CHARTEXT != ' '){
+            mvprintw(0,0, "%c" , ' ');
+        }
+        // if (mvinch(1,0) & A_CHARTEXT & A_BOLD != ' '){
+        //     mvprintw(1,1, "%c" , ' ');
+        // }
+
+        // print # instead of A if A is not in player's position
+        for(int X = 2 ; X < LINES - 1; X++){
+            for (int Y = 0 ; Y < COLS ; Y++){
+                char there = mvinch(X , Y) & A_CHARTEXT;
+                if(there == 'A' && !(X == me.pos.x && Y == me.pos.y)){
+                    init_pair(36, COLOR_YELLOW, COLOR_BLACK);
+                    attron(COLOR_PAIR(36));
+                    mvprintw(X , Y , "%c" , '#');
+                    attroff(COLOR_PAIR(36));
+                }
+            }
+        }
+
+        if(near_deamon(me)){
+            snprintf(global_message, sizeof(char) * 100, "\U0001F47F Deamon is hitting you!                          ");
+           
+            if(hits_loop_counter <= rate_hits){ // 10,000 loops
+                hits_loop_counter++;
+            }
+            else{
+                me.health--; // 1 health loss
+                hits_loop_counter = 0;
+            }
+        }
+        if(near_fire_breathing_monster(me)){
+            snprintf(global_message, sizeof(char) * 100, "\U0001F409 Fire-Breathing Monster is hitting you!                  ");
+           
+            if(hits_loop_counter <= rate_hits){ // 10,000 loops
+                hits_loop_counter++;
+            }
+            else{
+                me.health-=2; // 2 health loss
+                hits_loop_counter = 0;
+            }
+        }
+        if(near_giant(rooms_of_all_levels[level_num - 1] , n_rooms[level_num - 1] , me)){
+            snprintf(global_message, sizeof(char) * 100, "\U0001F479 Giant is hitting you!                               ");
+           
+            if(hits_loop_counter <= rate_hits){ // 10,000 loops
+                hits_loop_counter++;
+            }
+            else{
+                me.health-=3; // 3 health loss
+                hits_loop_counter = 0;
+            }
+            is_giant_moving = 1;
+        }
+        // Giant's Movement
+        if (is_giant_moving && (my_x_after != my_x_before || my_y_after != my_y_before)){
+            int room_index = in_which_room(rooms_of_all_levels[level_num - 1] , n_rooms[level_num - 1] , me);
+            if (rooms_of_all_levels[level_num - 1][room_index].can_enemy_move[2]){
+                if (my_y_after < rooms_of_all_levels[level_num - 1][room_index].enemies_y[2]
+                && valid_move(rooms_of_all_levels[level_num - 1][room_index].enemies_x[2] , rooms_of_all_levels[level_num - 1][room_index].enemies_y[2] - 1)
+                && (mvinch(rooms_of_all_levels[level_num - 1][room_index].enemies_x[2] , rooms_of_all_levels[level_num - 1][room_index].enemies_y[2] - 1) & A_CHARTEXT != '+')
+                && (mvinch(rooms_of_all_levels[level_num - 1][room_index].enemies_x[2] , rooms_of_all_levels[level_num - 1][room_index].enemies_y[2] - 1) & A_CHARTEXT != '#')){
+                    rooms_of_all_levels[level_num - 1][room_index].enemies_y[2]--;
+                }
+                else if (my_y_after > rooms_of_all_levels[level_num - 1][room_index].enemies_y[2]
+                && valid_move(rooms_of_all_levels[level_num - 1][room_index].enemies_x[2] , rooms_of_all_levels[level_num - 1][room_index].enemies_y[2] + 1)
+                && (mvinch(rooms_of_all_levels[level_num - 1][room_index].enemies_x[2] , rooms_of_all_levels[level_num - 1][room_index].enemies_y[2] + 1) & A_CHARTEXT != '+')
+                && (mvinch(rooms_of_all_levels[level_num - 1][room_index].enemies_x[2] , rooms_of_all_levels[level_num - 1][room_index].enemies_y[2] + 1) & A_CHARTEXT != '#')){
+                    rooms_of_all_levels[level_num - 1][room_index].enemies_y[2]++;
+                }
+                else if (my_x_after > rooms_of_all_levels[level_num - 1][room_index].enemies_x[2]
+                && valid_move(rooms_of_all_levels[level_num - 1][room_index].enemies_x[2] + 1, rooms_of_all_levels[level_num - 1][room_index].enemies_y[2])
+                && (mvinch(rooms_of_all_levels[level_num - 1][room_index].enemies_x[2] +1, rooms_of_all_levels[level_num - 1][room_index].enemies_y[2]) & A_CHARTEXT != '+')
+                && (mvinch(rooms_of_all_levels[level_num - 1][room_index].enemies_x[2] +1, rooms_of_all_levels[level_num - 1][room_index].enemies_y[2]) & A_CHARTEXT != '#')){
+                    rooms_of_all_levels[level_num - 1][room_index].enemies_x[2]++;
+                }
+                else if (my_x_after < rooms_of_all_levels[level_num - 1][room_index].enemies_x[2]
+                && valid_move(rooms_of_all_levels[level_num - 1][room_index].enemies_x[2] - 1, rooms_of_all_levels[level_num - 1][room_index].enemies_y[2])
+                && (mvinch(rooms_of_all_levels[level_num - 1][room_index].enemies_x[2] -1, rooms_of_all_levels[level_num - 1][room_index].enemies_y[2] ) & A_CHARTEXT != '+')
+                && (mvinch(rooms_of_all_levels[level_num - 1][room_index].enemies_x[2] -1, rooms_of_all_levels[level_num - 1][room_index].enemies_y[2] ) & A_CHARTEXT != '#')){
+                    rooms_of_all_levels[level_num - 1][room_index].enemies_x[2]--;
+                }
+                giant_move_counter++;
+            }
+        }
+        // Giant Stop Moving!
+        if (giant_move_counter >= n_t_units_giant_move){
+            giant_move_counter = 0;
+            is_giant_moving = 0;
+        }
+        
+        if(near_snake(me)){
+            snprintf(global_message, sizeof(char) * 100, "\U0001F40D Snake is hitting you!                               ");
+           
+            if(hits_loop_counter <= rate_hits){ // 10,000 loops
+                hits_loop_counter++;
+            }
+            else{
+                me.health --; // 1 health loss
+                hits_loop_counter = 0;
+            }
+            is_snake_moving = 1;
+        }
+         // Snake's Movement
+        if (is_snake_moving && (my_x_after != my_x_before || my_y_after != my_y_before)){
+            int room_index = in_which_room(rooms_of_all_levels[level_num - 1] , n_rooms[level_num - 1] , me);
+            if (rooms_of_all_levels[level_num - 1][room_index].can_enemy_move[3]){
+                if (my_y_after < rooms_of_all_levels[level_num - 1][room_index].enemies_y[3]
+                && valid_move(rooms_of_all_levels[level_num - 1][room_index].enemies_x[3] , rooms_of_all_levels[level_num - 1][room_index].enemies_y[3] - 1)){
+                    rooms_of_all_levels[level_num - 1][room_index].enemies_y[3]--;
+                }
+                else if (my_y_after > rooms_of_all_levels[level_num - 1][room_index].enemies_y[3]
+                && valid_move(rooms_of_all_levels[level_num - 1][room_index].enemies_x[3] , rooms_of_all_levels[level_num - 1][room_index].enemies_y[3] + 1)){
+                    rooms_of_all_levels[level_num - 1][room_index].enemies_y[3]++;
+                }
+                else if (my_x_after > rooms_of_all_levels[level_num - 1][room_index].enemies_x[3]
+                && valid_move(rooms_of_all_levels[level_num - 1][room_index].enemies_x[3] + 1, rooms_of_all_levels[level_num - 1][room_index].enemies_y[3])){
+                    rooms_of_all_levels[level_num - 1][room_index].enemies_x[3]++;
+                }
+                else if (my_x_after < rooms_of_all_levels[level_num - 1][room_index].enemies_x[3]
+                && valid_move(rooms_of_all_levels[level_num - 1][room_index].enemies_x[3] - 1, rooms_of_all_levels[level_num - 1][room_index].enemies_y[3])){
+                    rooms_of_all_levels[level_num - 1][room_index].enemies_x[3]--;
+                }
+                snake_move_counter++;
+            }
+        }
+        
+        if(near_undeed(me)){ ///// bro :|  it's undead!
+            snprintf(global_message, sizeof(char) * 100, "\U0001F9DF Undead is hitting you!                               ");
+           
+            if(hits_loop_counter <= rate_hits){ // 10,000 loops
+                hits_loop_counter++;
+            }
+            else{
+                me.health -= 5; // 1 health loss
+                hits_loop_counter = 0;
+            }
+            is_undead_moving = 1;
+        }
+        // Undead's Movement
+        if (is_undead_moving && (my_x_after != my_x_before || my_y_after != my_y_before)){
+            int room_index = in_which_room(rooms_of_all_levels[level_num - 1] , n_rooms[level_num - 1] , me);
+            if (rooms_of_all_levels[level_num - 1][room_index].can_enemy_move[4]){
+                if (my_y_after < rooms_of_all_levels[level_num - 1][room_index].enemies_y[4]
+                && valid_move(rooms_of_all_levels[level_num - 1][room_index].enemies_x[4] , rooms_of_all_levels[level_num - 1][room_index].enemies_y[4] - 1)){
+                    rooms_of_all_levels[level_num - 1][room_index].enemies_y[4]--;
+                }
+                else if (my_y_after > rooms_of_all_levels[level_num - 1][room_index].enemies_y[4]
+                && valid_move(rooms_of_all_levels[level_num - 1][room_index].enemies_x[4] , rooms_of_all_levels[level_num - 1][room_index].enemies_y[4] + 1)){
+                    rooms_of_all_levels[level_num - 1][room_index].enemies_y[4]++;
+                }
+                else if (my_x_after > rooms_of_all_levels[level_num - 1][room_index].enemies_x[4]
+                && valid_move(rooms_of_all_levels[level_num - 1][room_index].enemies_x[4] + 1, rooms_of_all_levels[level_num - 1][room_index].enemies_y[4])){
+                    rooms_of_all_levels[level_num - 1][room_index].enemies_x[4]++;
+                }
+                else if (my_x_after < rooms_of_all_levels[level_num - 1][room_index].enemies_x[4]
+                && valid_move(rooms_of_all_levels[level_num - 1][room_index].enemies_x[4] - 1, rooms_of_all_levels[level_num - 1][room_index].enemies_y[4])){
+                    rooms_of_all_levels[level_num - 1][room_index].enemies_x[4]--;
+                }
+                undead_move_counter++;
+            }
+        }
+        // Undead Stop Moving!
+        if (undead_move_counter >= n_t_units_undead_move){
+            undead_move_counter = 0;
+            is_undead_moving = 0;
+        }
+        
+        // get hungry!
+        if (hunger_loop_count < rate_get_hungry){
+            hunger_loop_count++;
+        }
+        else{
+            hunger_loop_count = 0;
+            if(me.how_full > 0){
+                me.how_full--;
+            }
+            clear();
+        }
+
+        // get healed!
+        if (me.how_full == 5){
+            if(health_loop_count < rate_heal/healing_coeff){
+                health_loop_count++;
+            }
+            else{
+                health_loop_count = 0;
+                me.health++;
+                clear();
+            }
+        }
+
+
+        // foods change
+        if (Loop_Counter_change_food_with_time < Rate_change_food_with_time){
+            Loop_Counter_change_food_with_time++;
+        }
+        else{
+                 // 0 : regular
+                 // 1 : ideal
+                 // 2 : magical
+                 // 3 : rotten
+            Loop_Counter_change_food_with_time = 0;
+
+            if (me.food[0] > 0){
+                me.food[3] += me.food[0];
+                me.food[0] = 0;
+            }
+            if (me.food[1] > 0){
+                me.food[0] += me.food[1];
+                me.food[1] = 0;
+            }
+            if (me.food[2] > 0){
+                me.food[0] += me.food[2];
+                me.food[2] = 0;
+            }
+            snprintf(global_message, sizeof(char) * 100, "\U0001F940 Your foods are turning rotten!                                                       ");
+        }
+
+
+        refresh();
+    }
+    endwin();
+    // Free memory for corridors
+    for (int i = 0; i < 4; i++) {
+        free(corridors_of_all_levels[i]);
+    }
+    free(corridors_of_all_levels);
+
+    // Free memory for rooms
+    for (int i = 0; i < 4; i++) {
+        free(rooms_of_all_levels[i]);
+    }
+    free(rooms_of_all_levels);
+    
+}
+ 
+
+
 
 
 #endif
