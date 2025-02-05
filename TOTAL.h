@@ -6243,6 +6243,9 @@ void add_enemy2(room** address_rooms_this_level , int n_rooms){
             }
             for (int E = 0 ; E < 5 ; E++){
                 r1.enemies[E] = rand() % 2;
+                if (r1.type == 1){
+                    r1.enemies[E] = 1; // all enemies in battle room
+                }
                 if(r1.room_number == 1){ // no 'G'iant in room index 0 because of black 'G'old
                     r1.enemies[2] = 0;
                 }
@@ -6570,7 +6573,7 @@ void add_weapon(room** address_rooms_this_level , int n_rooms){
     for (int i = 0 ; i < n_rooms ; i++){
     
         room r1 = (*address_rooms_this_level)[i];
-        if (r1.type != 2){
+        if (r1.type != 2 && r1.type != 1){
             int x_north1 = r1.corner.x;
             int x_south1 = r1.corner.x + r1.length - 1;
             int y_west1 = r1.corner.y;
@@ -7015,6 +7018,7 @@ void add_food(room** address_rooms_this_level , int n_rooms){ // first food, the
     for (int i = 0 ; i < n_rooms ; i++){
     
         room r1 = (*address_rooms_this_level)[i];
+
         int x_north1 = r1.corner.x;
         int x_south1 = r1.corner.x + r1.length - 1;
         int y_west1 = r1.corner.y;
@@ -7482,7 +7486,8 @@ void print_room_even_if_hidden(room* Room){
         // printf floor
         start_color();
         init_pair(0 , COLOR_WHITE , COLOR_BLACK); // regular
-        init_pair(1 , COLOR_WHITE , COLOR_BLACK); // battle
+        init_pair(1 , COLOR_WHITE , COLOR_BLACK); 
+        init_pair(35, 161 , COLOR_BLACK); // battle
         init_pair(2 , 53 , COLOR_BLACK); // enchant
         init_color(70, 1000 , 1000 , 0); // treasure room
         init_pair(33, 70 , COLOR_BLACK); // treasure room
@@ -7504,6 +7509,9 @@ void print_room_even_if_hidden(room* Room){
         if(Room->type == 3){
             attron(COLOR_PAIR(33));
         }
+        else if (Room->type == 1){
+            attron(COLOR_PAIR(35));
+        }
         else{
             attron(COLOR_PAIR(Room->type));
         }
@@ -7519,6 +7527,9 @@ void print_room_even_if_hidden(room* Room){
         }
         if(Room->type == 3){
             attroff(COLOR_PAIR(33));
+        }
+        else if (Room->type == 1){
+            attroff(COLOR_PAIR(35));
         }
         else{
             attroff(COLOR_PAIR(Room->type));
@@ -7736,7 +7747,8 @@ void print_room(room *Room){
         // printf floor
         start_color();
         init_pair(0 , COLOR_WHITE , COLOR_BLACK); // regular
-        init_pair(1 , COLOR_WHITE , COLOR_BLACK); // battle
+        init_pair(35, 161 , COLOR_BLACK); // battle
+        init_pair(1 , COLOR_WHITE , COLOR_BLACK); 
         init_pair(2 , 53 , COLOR_BLACK); // enchant
         init_color(70, 1000 , 1000 , 0); // treasure room
         init_pair(33, 70 , COLOR_BLACK); // treasure room
@@ -7757,6 +7769,9 @@ void print_room(room *Room){
         if(Room->type == 3){
             attron(COLOR_PAIR(33));
         }
+        else if (Room->type == 1){
+            attron(COLOR_PAIR(35));
+        }
         else{
             attron(COLOR_PAIR(Room->type));
         }
@@ -7772,6 +7787,9 @@ void print_room(room *Room){
         }
         if(Room->type == 3){
             attroff(COLOR_PAIR(33));
+        }
+        else if (Room->type == 1){
+            attroff(COLOR_PAIR(35));
         }
         else{
             attroff(COLOR_PAIR(Room->type));
@@ -7968,7 +7986,7 @@ void new_map(int difficulty ,
              int level_num,
              room*** address_rooms_of_all_levels
              ){
-    int room_types[10] = {0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 2 , 4};
+    int room_types[14] = {0, 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 2 , 2 , 4 , 4 , 1};
 
     int max_length , max_width;
     switch (difficulty)
@@ -8001,7 +8019,8 @@ void new_map(int difficulty ,
             ROOM.type = 3;
         }
         else{
-            ROOM.type = room_types[rand() % 10];
+            // int room_types[14] = {0, 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 2 , 2 , 4 , 4 , 1};
+            ROOM.type = room_types[rand() % 14];
         }
         ROOM.length = rand() % (max_length - 6) + 7;
         ROOM.width = rand() % (max_width - 6) + 7;
@@ -8011,8 +8030,14 @@ void new_map(int difficulty ,
         else if(2 == difficulty || 1 == difficulty){
             ROOM.n_foods = rand() % 4;
         }
+        if (ROOM.type == 1){
+            ROOM.n_foods = 0;
+        }
 
         ROOM.n_golds = rand() % 3;
+        if (ROOM.type == 1){
+            ROOM.n_golds = 0;
+        }
 
         // no food/gold has been picked yet
         for (int F = 0 ; F < ROOM.n_foods ; F++){
