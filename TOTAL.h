@@ -78,6 +78,9 @@ typedef struct {
     int doors_x[2];
     int doors_y[2];
 
+    int window_x;
+    int window_y;
+
 /// Pillars  
     // int n_pillars; /// always 3 pillars
     int pillars_x[3];
@@ -7510,6 +7513,10 @@ void add_door_and_window(room** address_rooms_this_level , int n_rooms){
             (*address_rooms_this_level)[i].doors_y[0] = y1;
             (*address_rooms_this_level)[i + 1].doors_x[1] = x2;
             (*address_rooms_this_level)[i + 1].doors_y[1] = y2;
+
+            (*address_rooms_this_level)[i].window_x = x1 + 2;
+            (*address_rooms_this_level)[i].window_y = y1;
+
         // } while(y2 <= y1);
     }
 
@@ -8009,6 +8016,10 @@ void print_room(room *Room){
             for (int i = 0 ; i < 2 ; i++){
                 mvprintw(Room->doors_x[i],  Room->doors_y[i] , "+");
             }  
+        }
+
+        if (Room->window_x < Room->corner.x + Room->length && Room->window_x > Room->corner.x ){
+            mvprintw(Room->window_x,  Room->window_y , "=");
         }
 
         // // enemies
