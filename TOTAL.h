@@ -648,7 +648,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
     me.pick = 0;  
     me.floor_level = 1;
     me.kills = 0;
-    me.difficulty  =  difficulty;
+    me.difficulty = difficulty;
     
     strcpy(me.username , username);
     me.current_weapon = 0; // 0 : Mace (m)
@@ -695,7 +695,9 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
     }
 
     int damage_coeff = 1;
-    int speed = 1; // doubles if we use speed spell
+    int speed = 1; // doubles if we use speed spell  OR  temporary fast move is on
+    int temp_fast_move_loop_count = 0;
+    int n_t_units_fast_active = 3;
     int spell_loop_counter = 0;
     int time_unit = 8000;
     int n_t_units_spell_active = 15;
@@ -717,7 +719,8 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
     int is_snake_moving = 0;
 
     int Loop_Counter_change_food_with_time = 0;
-    int Rate_change_food_with_time = 400000;
+    int Rate_change_food_with_time = 500000;
+
 
     while(1){
         if(!print_all_Map){
@@ -777,6 +780,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
            && !rooms_of_all_levels[level_num - 1][in_which_room(rooms_of_all_levels[level_num - 1] , n_rooms[level_num - 1] , me)].enemies[3]
            && !rooms_of_all_levels[level_num - 1][in_which_room(rooms_of_all_levels[level_num - 1] , n_rooms[level_num - 1] , me)].enemies[4]){
                 win(&current_song , &me);
+                chosen_song = 6;
                 me.won = 1;
                 snprintf(global_message, sizeof(char) * 100, "\xF0\x9F\x8E\x89 \xF0\x9F\x8E\x89 \xF0\x9F\x8E\x89                               ");       
                 // (global_message , "\xF0\x9F\x8E\x89");
@@ -2102,7 +2106,13 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
                     break;
             }
         }
+        else if (ch == 'v' || ch == 'V') {
+            speed = 2;
+            temp_fast_move_loop_count = 0;
+            snprintf(global_message, sizeof(char) * 100, "\U0001F3C3 Temporary Fast Move activated! You now run 2x faster        "); 
 
+        }
+        
         // spell time limit :))
         if ((speed != 1 || damage_coeff != 1 || healing_coeff != 1)&& spell_loop_counter/time_unit < n_t_units_spell_active){
             spell_loop_counter++;
@@ -2117,6 +2127,24 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
             damage_coeff = 1;
             healing_coeff = 1;
         }
+
+
+        // temp fast move time limit :))
+        if ((speed != 1 ) && temp_fast_move_loop_count/time_unit < n_t_units_fast_active){
+            temp_fast_move_loop_count++;
+            attron(COLOR_PAIR(160));
+            mvprintw(LINES - 1 , COLS - 1 - strlen("00:00") , "00:%d " , n_t_units_fast_active - temp_fast_move_loop_count/time_unit);
+            attroff(COLOR_PAIR(160));
+        }
+        else if ((speed != 1)){
+            clear();
+            temp_fast_move_loop_count = 0;
+            speed = 1;
+            snprintf(global_message, sizeof(char) * 100, "\U0001F6B6 Temporary Fast Move timed out!                             "); 
+
+        }
+
+
 
         int my_x_before = me.pos.x;
         int my_y_before = me.pos.y;
@@ -2322,6 +2350,34 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
             }
         }
 
+
+        // foods change
+        if (Loop_Counter_change_food_with_time < Rate_change_food_with_time){
+            Loop_Counter_change_food_with_time++;
+        }
+        else{
+                 // 0 : regular
+                 // 1 : ideal
+                 // 2 : magical
+                 // 3 : rotten
+            Loop_Counter_change_food_with_time = 0;
+
+            if (me.food[0] > 0){
+                me.food[3] += me.food[0];
+                me.food[0] = 0;
+            }
+            if (me.food[1] > 0){
+                me.food[0] += me.food[1];
+                me.food[1] = 0;
+            }
+            if (me.food[2] > 0){
+                me.food[0] += me.food[2];
+                me.food[2] = 0;
+            }
+            snprintf(global_message, sizeof(char) * 100, "\U0001F940 Your foods are turning rotten!                                                       ");
+        }
+
+
         refresh();
     }
     endwin();
@@ -2436,9 +2492,13 @@ void save_data(player me, room **rooms_of_all_levels, int n_rooms[4], position *
 
     // Save rooms and corridors data
     fprintf(file, "\n# Rooms\n");
+    fprintf(file, "F1 Room Count: %d\n" , n_rooms[0]);
+    fprintf(file, "F2 Room Count: %d\n" , n_rooms[1]);
+    fprintf(file, "F3 Room Count: %d\n" , n_rooms[2]);
+    fprintf(file, "F4 Room Count: %d\n" , n_rooms[3]);
     for (int i = 0; i < level_count; i++) {
         fprintf(file, "\nLevel Num: %d\n", i + 1);
-        fprintf(file, "Number of Rooms: %d\n", n_rooms[i]);
+
         for (int j = 0; j < n_rooms[i]; j++) {
             room r = rooms_of_all_levels[i][j];
             fprintf(file, "\nRoom Number: %d\n", r.room_number);
@@ -2500,9 +2560,12 @@ void save_data(player me, room **rooms_of_all_levels, int n_rooms[4], position *
     }
         
     fprintf(file, "\n# Corridors\n");
+    fprintf(file, "F1 Corr Count: %d\n" , corr_count[0]);
+    fprintf(file, "F2 Corr Count: %d\n" , corr_count[1]);
+    fprintf(file, "F3 Corr Count: %d\n" , corr_count[2]);
+    fprintf(file, "F4 Corr Count: %d\n" , corr_count[3]);
     for (int i = 0; i < level_count; i++) {
         fprintf(file, "\nLevel Num: %d\n", i + 1);
-        fprintf(file, "Corr_Count: %d\n", corr_count[i]);
         for (int j = 0; j < corr_count[i]; j++) {
             fprintf(file, "(%d,%d)\n", corridors_of_all_levels[i][j].x, corridors_of_all_levels[i][j].y);
         }
@@ -4986,18 +5049,19 @@ void help(player* hero) {
         mvwprintw(help_win, 3, 1, " Viewing Foods: F");
         mvwprintw(help_win, 4, 1, " Viewing Weapons: I");
         mvwprintw(help_win, 5, 1, " Viewing Spells: X");
-        mvwprintw(help_win, 7, 1, " Pick Up option: ");
+        mvwprintw(help_win, 6, 1, " Temporary Fast Move: V");
+        mvwprintw(help_win, 8, 1, " Pick Up option: ");
         wattron(help_win, A_ITALIC);
         if (hero->pick){
-            mvwprintw(help_win, 7, 1 + 17, "ON ");
+            mvwprintw(help_win, 8, 1 + 17, "ON ");
         }
         else{
-            mvwprintw(help_win, 7, 1 + 17, "OFF");
+            mvwprintw(help_win, 8, 1 + 17, "OFF");
         }
         wattroff(help_win, A_ITALIC);
 
         wattroff(help_win, A_BOLD);
-        mvwprintw(help_win, 8, 1, " To turn on/off the Pick Up option, enter 'P'");
+        mvwprintw(help_win, 9, 1, " To turn on/off the Pick Up option, enter 'P'");
         wattron(help_win, A_BOLD);
 
         int movement_start_x = (height - 16) / 2 + 4; // Vertically center the movement instructions
