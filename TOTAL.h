@@ -227,6 +227,7 @@ void entrance_menu();
 void draw_borders(int);
 void draw_title(const char*);
 void show_score_table(char* , int );
+void profile(char* ,  int*  , int*  , int* );
 
 //////// score table:
 int compare_score(const void *, const void *);
@@ -237,6 +238,7 @@ int compare_rank(const void *, const void *);
 void update_score_table(player);
 void draw_borders(int);
 void pregame_menu();
+
 
 //////// entrance menu:
 void draw_title(const char*);
@@ -5681,18 +5683,18 @@ void pregame_menu(char* my_username , int* ptr_difficulty , int* ptr_color , int
     int highlight = 1;
     int choice = 0;
     int c;
-    char *choices[] = {"Settings", "Score Table", "New Game" , "Continue Saved Game" , "Back to Entrance Menu"}; 
+    char *choices[] = {"Settings", "Score Table","New Game" , "Profile" , "Continue Saved Game" , "Back to Entrance Menu"}; 
     setlocale(LC_ALL, "");
 
     while (1){
         clear();
         // draw_title("Pregame Menu");
-        print_menu(highlight , choices , 5 , 10 , "Pregame Menu");
+        print_menu(highlight , choices , 6 , 10 , "Pregame Menu");
         c = getch();
         switch(c){
             case KEY_UP:
                 if (highlight == 1){
-                    highlight = 5;
+                    highlight = 6;
                     break;
                 }
                 else{
@@ -5700,7 +5702,7 @@ void pregame_menu(char* my_username , int* ptr_difficulty , int* ptr_color , int
                     break;
                 }
             case KEY_DOWN:
-                if (highlight == 5){
+                if (highlight == 6){
                     highlight = 1;
                     break;
                 }
@@ -5735,13 +5737,93 @@ void pregame_menu(char* my_username , int* ptr_difficulty , int* ptr_color , int
         New_Game(*ptr_difficulty , *ptr_song , *ptr_color , my_username);
     }
     else if (choice == 4){
-        // show_saved_games();
+        // profile
+        profile(my_username , ptr_difficulty , ptr_color , ptr_song);
     }
     else if (choice == 5){
+        // show_saved_games();
+    }
+    else if (choice == 6){
         entrance_menu();
     }
     endwin(); 
 }
+
+
+void profile(char* username ,  int* ptr_difficulty , int* ptr_color , int* ptr_song){
+    init_pair(35, 161 , COLOR_BLACK); // battle
+    
+    init_color(70, 1000 , 1000 , 0); // treasure room
+    init_pair(33, 70 , COLOR_BLACK); // treasure room
+    if (strcmp(username , "GUEST") != 0) {
+        char path[1024];
+        char email[100];
+        char password[100];
+        snprintf(path, sizeof(path), "/home/arvin_rsl/Desktop/FOP_Project/Users_Folder/%s/user_data.txt", username);
+
+        FILE *file = fopen(path, "r");
+        if (file == NULL) {
+            perror("Error opening file");
+            return ;
+        }
+        char line[256];
+        long long time_creation;
+        long long now;
+
+        // Get the current time in seconds since the Unix epoch
+        now = (long long)time(NULL);
+
+        while (fgets(line, sizeof(line), file)) {
+            if (strncmp(line, "email: ", 7) == 0) {
+                sscanf(line + 7, "%s", email);
+            }
+            if (strncmp(line, "password: ", 10) == 0) {
+                sscanf(line + 10, "%s", password);
+            }
+            else if (strncmp(line, "time: ", 6) == 0) {
+                sscanf(line + 6, "%lld", &time_creation);
+                break;
+            }
+        }
+        int exper = abs(now - time_creation) / 100;
+        fclose(file);
+        int quittt = 'h';
+        clear();
+        while (quittt != 'q' && quittt != 'Q'){
+            attron(COLOR_PAIR(33) | A_BOLD);
+            mvprintw (LINES/2 -6 , COLS/2 - 25 , "User Data:");
+            attroff(COLOR_PAIR(33) | A_BOLD);
+            mvprintw (LINES/2 -3 , COLS/2 - 20 , "Username: %s" , username);
+            mvprintw (LINES/2 -1 , COLS/2 - 20 , "Email: %s" , email);
+            mvprintw (LINES/2 +1 , COLS/2 - 20 , "Password: %s" , password);
+            mvprintw (LINES/2 +3 , COLS/2 - 20 , "Experience: %d" , exper);
+            mvprintw (LINES/2 +7 , COLS/2 - strlen("Press Q to go back")/2 , "Press Q to go back");
+            refresh();
+            quittt = getch();
+        }   
+        if (quittt == 'Q' || quittt == 'q'){
+            pregame_menu(username , ptr_difficulty , ptr_color , ptr_song);
+        }
+
+    }
+    else{
+        int quittt = 'h';
+        clear();
+
+        while (quittt != 'q' && quittt != 'Q'){
+            attron(COLOR_PAIR(35) | A_BOLD);
+            mvprintw (LINES/2  , COLS/2 - strlen("You have entered as guest!")/2 , "You have entered as guest!");
+            attroff(COLOR_PAIR(35) | A_BOLD);
+            mvprintw (LINES/2 +7 , COLS/2 - strlen("Press Q to go back")/2 , "Press Q to go back");
+            refresh();
+            quittt = getch();
+        }   
+        if (quittt == 'Q' || quittt == 'q'){
+            pregame_menu(username , ptr_difficulty , ptr_color , ptr_song);
+        }
+    }
+}
+
 
 // show the options in Settings (Level Of Difficulty , Songs , Hero's Color)
 void settings(char* my_username , int* ptr_difficulty , int* ptr_color , int* ptr_song){
