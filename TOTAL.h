@@ -700,10 +700,14 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
         rate_hits = 9000;
     }
 
+
+    player dummy;
+
     int damage_coeff = 1;
     int speed = 1; // doubles if we use speed spell  OR  temporary fast move is on
     int temp_fast_move_loop_count = 0;
     int n_t_units_fast_active = 3;
+    int permission_temp_fast = 0;
     int spell_loop_counter = 0;
     int time_unit = 8000;
     int n_t_units_spell_active = 15;
@@ -727,8 +731,24 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
     int Loop_Counter_change_food_with_time = 0;
     int Rate_change_food_with_time = 500000;
 
-
     while(1){
+
+        if((mvinch(me.pos.x , me.pos.y + 1) & A_CHARTEXT) == '='){
+            snprintf(global_message, sizeof(char) * 100, "\xF0\x9F\xAA\x9F Take a look outside!                                "); 
+            int win_y = me.pos.y + 2 ;
+            while (win_y < COLS - 1 ) {
+                if ((mvinch(me.pos.x , win_y) &A_CHARTEXT) == '|' || (mvinch(me.pos.x , win_y) &A_CHARTEXT) == '_' || (mvinch(me.pos.x , win_y) &A_CHARTEXT) == '+'){
+                    dummy.pos.x = me.pos.x;
+                    dummy.pos.y = win_y+1;
+                    int seen_room_index = in_which_room(rooms_of_all_levels[level_num - 1] , n_rooms[level_num - 1] , dummy);
+                    (rooms_of_all_levels[level_num - 1] + seen_room_index)->hide = 0;
+                    refresh();
+                    break;
+                }
+                win_y++;
+            }
+        }
+
         if(!print_all_Map){
           for (int i = 0 ; i < n_rooms[level_num - 1] ; i++){
                 print_room(rooms_of_all_levels[level_num - 1] + i);
@@ -2114,6 +2134,7 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
         }
         else if (ch == 'v' || ch == 'V') {
             speed = 2;
+            permission_temp_fast = 1;
             temp_fast_move_loop_count = 0;
             snprintf(global_message, sizeof(char) * 100, "\U0001F3C3 Temporary Fast Move activated! You now run 2x faster        "); 
 
@@ -2134,24 +2155,25 @@ void New_Game(int difficulty , int chosen_song, int CoLoR , char* username){
             healing_coeff = 1;
         }
 
-
-        // temp fast move time limit :))
-        if ((speed != 1 ) && temp_fast_move_loop_count/time_unit < n_t_units_fast_active){
-            temp_fast_move_loop_count++;
-            attron(COLOR_PAIR(160));
-            mvprintw(LINES - 1 , COLS - 1 - strlen("00:00") , "00:%d " , n_t_units_fast_active - temp_fast_move_loop_count/time_unit);
-            attroff(COLOR_PAIR(160));
+        // temp fast move (3 t_units)
+        if (permission_temp_fast){
+            // temp fast move time limit :))
+            if ((speed != 1 ) && temp_fast_move_loop_count/time_unit < n_t_units_fast_active){
+                temp_fast_move_loop_count++;
+                attron(COLOR_PAIR(160));
+                mvprintw(LINES - 1 , COLS - 1 - strlen("00:00") , "00:%d " , n_t_units_fast_active - temp_fast_move_loop_count/time_unit);
+                attroff(COLOR_PAIR(160));
+            }
+            else if ((speed != 1)){
+                clear();
+                temp_fast_move_loop_count = 0;
+                speed = 1;
+                snprintf(global_message, sizeof(char) * 100, "\U0001F6B6 Temporary Fast Move timed out!                             "); 
+                permission_temp_fast = 0;
+            }
         }
-        else if ((speed != 1)){
-            clear();
-            temp_fast_move_loop_count = 0;
-            speed = 1;
-            snprintf(global_message, sizeof(char) * 100, "\U0001F6B6 Temporary Fast Move timed out!                             "); 
 
-        }
-
-
-
+    
         int my_x_before = me.pos.x;
         int my_y_before = me.pos.y;
         movement2(PiCk , ch , &me , rooms_of_all_levels, n_rooms[level_num - 1] , global_message , &level_num , speed);
@@ -2490,11 +2512,10 @@ void save_data(player me, room **rooms_of_all_levels, int n_rooms[4], position *
     fprintf(file, "Spell Damage: %d\n", me.spells[2]);
     fprintf(file, "X: %d\n", me.pos.x);
     fprintf(file, "Y: %d\n", me.pos.y);
-    // Assuming Floor Level, Difficulty, Color, and Song are part of player structure
-    fprintf(file, "Floor Level: %d\n", me.floor_level); // Example logic
-    fprintf(file, "Difficulty: %d\n", diff); // Example logic
+    fprintf(file, "Floor Level: %d\n", me.floor_level); 
+    fprintf(file, "Difficulty: %d\n", diff); 
     fprintf(file, "Color: %d\n", me.color);
-    fprintf(file, "Song: %d\n", song); // Example logic
+    fprintf(file, "Song: %d\n", song); 
 
     // Save rooms and corridors data
     fprintf(file, "\n# Rooms\n");
@@ -7779,6 +7800,14 @@ void print_room_even_if_hidden(room* Room){
             }  
         }
 
+
+        if (Room->window_x < Room->corner.x + Room->length -1 
+            && Room->window_x > Room->corner.x 
+            && Room->window_y == Room->corner.y + Room->width - 1){
+            mvprintw(Room->window_x,  Room->window_y , "=");
+        }
+
+
 }
 
 void print_room(room *Room){ 
@@ -8018,7 +8047,9 @@ void print_room(room *Room){
             }  
         }
 
-        if (Room->window_x < Room->corner.x + Room->length && Room->window_x > Room->corner.x ){
+        if (Room->window_x < Room->corner.x + Room->length -1 
+            && Room->window_x > Room->corner.x 
+            && Room->window_y == Room->corner.y + Room->width - 1){
             mvprintw(Room->window_x,  Room->window_y , "=");
         }
 
